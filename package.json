@@ -1,0 +1,17 @@
+{
+  "name": "aria-at-harness",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "geckodriver": "^2.0.0",
+    "selenium-webdriver": "^4.0.0-beta.4"
+  }
+}
