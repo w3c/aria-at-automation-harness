@@ -14,7 +14,9 @@ export async function* iterateEmitter(emitter, nextEvent, completeEvent, errorEv
   let error = null;
   let resolve = () => {};
   const onnext = function (value) {
-    values.push(value);
+    if (open) {
+      values.push(value);
+    }
     resolve();
   };
   const oncomplete = function () {
@@ -36,7 +38,7 @@ export async function* iterateEmitter(emitter, nextEvent, completeEvent, errorEv
     if (errorEvent) {
       emitter.on(errorEvent, onerror);
     }
-    while (open) {
+    while (open || values.length > 0) {
       let next;
       while ((next = values.shift())) {
         yield next;

@@ -2,24 +2,15 @@
  * @module shared
  */
 
-import { Readable } from 'stream';
-
-export async function writeJSONToStream(tasks, stream) {
-  for await (const task of tasks) {
-    await new Promise(resolve =>
-      Readable.from(JSON.stringify(task)).pipe(stream).on('end', resolve)
-    );
-  }
-}
-
 export async function* seperateJSONChunks(iterContent) {
   let chunk = '';
   for await (const blob of iterContent) {
     chunk += blob;
-    const split = splitJson(chunk);
-    if (split.json) {
+    let split = splitJson(chunk);
+    while (split.json) {
       chunk = split.remaining;
       yield split.json;
+      split = splitJson(chunk);
     }
   }
 }

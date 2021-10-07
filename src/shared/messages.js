@@ -4,6 +4,8 @@
  * @module shared
  */
 
+import { EventEmitter } from 'events';
+
 /**
  * @param {Object<T, (function(*): string)>} messages
  * @returns {{log: AriaATCIShared.Log<T>, emitter: EventEmitter}}

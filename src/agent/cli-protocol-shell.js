@@ -2,6 +2,8 @@
  * @module agent
  */
 
+import { Readable } from 'stream';
+
 import { parseJSONChunks, seperateJSONChunks } from '../shared/json-chunks';
 import { iterateEmitter } from '../shared/iterate-emitter';
 
@@ -31,7 +33,7 @@ export function shellReportMiddleware(argv) {
   const { stdout } = argv;
   argv.reportResult = async function (result) {
     await new Promise(resolve =>
-      Readable.from(JSON.stringify(result)).pipe(stdout).on('end', resolve)
+      Readable.from(JSON.stringify(result)).on('end', resolve).pipe(stdout, { end: false })
     );
   };
 }
