@@ -1,9 +1,9 @@
 {
-  "name": "aria-at-ci",
+  "name": "aria-at-harness",
   "version": "0.0.0",
   "private": true,
   "bin": {
-    "aria-at-ci-agent": "./bin/agent"
+    "aria-at-harness-agent": "./bin/agent"
   },
   "devDependencies": {
     "aria-at": "github:w3c/aria-at",
@@ -19,7 +19,7 @@
   "engines": {
     "node": ">=12.0.0"
   },
-  "homepage": "https://github.com/mzgoddard/aria-at-ci",
+  "homepage": "https://github.com/mzgoddard/aria-at-harness",
   "scripts": {
     "build": "npm run build:agent && npm run build:docs",
     "build:agent": "esbuild ./src/agent --bundle --platform=node --external:yargs --sourcemap=inline --outfile=lib/agent.js",
