@@ -1,0 +1,33 @@
+{
+  "name": "aria-at-ci",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "aria-at-ci-agent": "./bin/agent"
+  },
+  "devDependencies": {
+    "aria-at": "github:w3c/aria-at",
+    "esbuild": "^0.13.3",
+    "husky": ">=6",
+    "jsdoc": "^3.6.7",
+    "lint-staged": ">=10",
+    "prettier": "^2.4.1"
+  },
+  "dependencies": {
+    "yargs": "^17.2.1"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "homepage": "https://github.com/mzgoddard/aria-at-ci",
+  "scripts": {
+    "build": "npm run build:agent && npm run build:docs",
+    "build:agent": "esbuild ./src/agent --bundle --platform=node --external:yargs --sourcemap=inline --outfile=lib/agent.js",
+    "build:docs": "jsdoc src/**/*.js -d docs",
+    "test": "echo NO TESTS",
+    "postinstall": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
+  }
+}
