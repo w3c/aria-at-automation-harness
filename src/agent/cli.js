@@ -12,11 +12,11 @@ import { main } from './main';
 import { forkMiddleware } from './cli-protocol-fork';
 import { shellMiddleware } from './cli-protocol-shell';
 
-export function createParser({ signals, postMessage, stdin, stdout, stderr }) {
+export function createParser({ signals, send, stdin, stdout, stderr }) {
   return yargs
     .middleware(argv => {
       argv.signals = signals;
-      argv.postMessage = postMessage;
+      argv.send = send;
       argv.stdin = stdin;
       argv.stdout = stdout;
       argv.stderr = stderr;
@@ -50,7 +50,7 @@ function runnerMiddleware(argv) {
  * Build and assign main loop arguments based on passed protocol and other arguments.
  * @param {object} argv
  * @param {string} argv.protocol
- * @param {function(*): void} argv.postMessage
+ * @param {function(*): void} argv.send
  * @param {EventEmitter} argv.signals
  * @param {ReadableStream} argv.stdin
  * @param {WritableStream} argv.stdout
@@ -65,7 +65,7 @@ function protocolMiddleware(argv) {
       shellMiddleware(argv);
       break;
     case 'fork':
-      if (typeof argv.postMessage !== 'function') {
+      if (typeof argv.send !== 'function') {
         throw new Error(
           `'fork' protocol may only be used when launched by a nodejs child_process.fork call.`
         );

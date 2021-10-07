@@ -16,9 +16,9 @@ export function forkLoggerMiddleware(argv) {
   const logger = createLogger();
   argv.log = logger.log;
 
-  const { postMessage } = argv;
+  const { send } = argv;
   logger.emitter.on('message', message =>
-    postMessage({
+    send({
       type: 'log',
       data: message,
     })
@@ -37,8 +37,8 @@ export function forkTestsMiddleware(argv) {
 }
 
 export function forkReportMiddleware(argv) {
-  const { postMessage } = argv;
+  const { send } = argv;
   argv.reportResult = async function (result) {
-    postMessage({ type: 'result', data: result });
+    send({ type: 'result', data: result });
   };
 }

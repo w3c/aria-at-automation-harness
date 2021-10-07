@@ -9,7 +9,7 @@ export function runCli(argv = process.argv) {
   return parse({
     argv,
     signals: process,
-    postMessage: process.postMessage ? process.postMessage.bind(process) : null,
+    send: process.send ? process.send.bind(process) : null,
     stdin,
     stdout,
     stderr,
