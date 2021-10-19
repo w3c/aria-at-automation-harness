@@ -2,15 +2,15 @@
  * @module shared
  */
 
-export async function* seperateJSONChunks(iterContent) {
+export async function* separateJSONChunks(iterContent) {
   let chunk = '';
   for await (const blob of iterContent) {
     chunk += blob;
-    let split = splitJson(chunk);
+    let split = splitJSON(chunk);
     while (split.json) {
       chunk = split.remaining;
       yield split.json;
-      split = splitJson(chunk);
+      split = splitJSON(chunk);
     }
   }
 }
@@ -22,9 +22,19 @@ export async function* parseJSONChunks(iterJSON) {
 }
 
 /**
+ * Split the input text string into a contained JSON string chunk and the
+ * remaining string content after that.
+ *
+ * JSON chunks that can be detected start and end with braces, curly `{}` or
+ * square `[]`, or double quotes. Anything before a detectable JSON chunk, such
+ * as whitespace, boolean, null, and number literals, will be ignored. Valid
+ * JSON values such as boolean, null, and number literals cannot be detected
+ * since there is ambiguity in how to differentiate between two literals. While
+ * JSON objects, arrays, and strings are clear beginnings and endings.
+ *
  * @param {string} text
  */
-function splitJson(text) {
+function splitJSON(text) {
   let start = -1;
   let level = 0;
   const token = /[{}[\]"]/g;

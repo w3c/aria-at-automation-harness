@@ -39,8 +39,8 @@ export async function* iterateEmitter(emitter, nextEvent, completeEvent, errorEv
       emitter.on(errorEvent, onerror);
     }
     while (open || values.length > 0) {
-      let next;
-      while ((next = values.shift())) {
+      for (let next; values.length > 0; ) {
+        next = values.shift();
         yield next;
       }
       await new Promise(_resolve => {

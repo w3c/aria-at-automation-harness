@@ -8,16 +8,16 @@
   "devDependencies": {
     "aria-at": "github:w3c/aria-at",
     "esbuild": "^0.13.3",
-    "husky": ">=6",
+    "husky": "^7.0.2",
     "jsdoc": "^3.6.7",
-    "lint-staged": ">=10",
+    "lint-staged": "^11.2.3",
     "prettier": "^2.4.1"
   },
   "dependencies": {
     "yargs": "^17.2.1"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.0.0"
   },
   "homepage": "https://github.com/mzgoddard/aria-at-harness",
   "scripts": {
