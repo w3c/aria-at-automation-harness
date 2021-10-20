@@ -2,11 +2,11 @@
  * @module agent
  */
 
-import { parse } from './cli';
+import { parse } from './cli.js';
 
-export function runCli(argv = process.argv) {
+export async function runCli(argv = process.argv) {
   const { stdin, stdout, stderr } = process;
-  return parse({
+  return await parse({
     argv,
     signals: process,
     send: process.send ? process.send.bind(process) : null,

@@ -2,12 +2,12 @@
   "name": "aria-at-harness",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "bin": {
-    "aria-at-harness-agent": "./bin/agent"
+    "aria-at-harness-agent": "./bin/agent.js"
   },
   "devDependencies": {
     "aria-at": "github:w3c/aria-at",
-    "esbuild": "^0.13.3",
     "husky": "^7.0.2",
     "jsdoc": "^3.6.7",
     "lint-staged": "^11.2.3",
@@ -21,10 +21,9 @@
   },
   "homepage": "https://github.com/mzgoddard/aria-at-harness",
   "scripts": {
-    "build": "npm run build:agent && npm run build:docs",
-    "build:agent": "esbuild ./src/agent --bundle --platform=node --external:yargs --sourcemap=inline --outfile=lib/agent.js",
+    "build": "npm run build:docs",
     "build:docs": "jsdoc src/**/*.js -d docs",
-    "test": "echo NO TESTS",
+    "test": "npm run build",
     "postinstall": "husky install"
   },
   "lint-staged": {

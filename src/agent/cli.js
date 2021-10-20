@@ -7,13 +7,13 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import { MockTestRunner } from './mock-test-runner';
-import { main } from './main';
-import { forkMiddleware } from './cli-protocol-fork';
-import { shellMiddleware } from './cli-protocol-shell';
+import { MockTestRunner } from './mock-test-runner.js';
+import { main } from './main.js';
+import { forkMiddleware } from './cli-protocol-fork.js';
+import { shellMiddleware } from './cli-protocol-shell.js';
 
-export function createParser({ signals, send, stdin, stdout, stderr }) {
-  return yargs
+export async function createParser({ signals, send, stdin, stdout, stderr }) {
+  return (await yargs())
     .middleware(argv => {
       argv.signals = signals;
       argv.send = send;
@@ -79,6 +79,6 @@ function protocolMiddleware(argv) {
   }
 }
 
-export function parse({ argv = [], ...parserConfiguration } = {}) {
-  return createParser(parserConfiguration).parse(hideBin(argv));
+export async function parse({ argv = [], ...parserConfiguration } = {}) {
+  return (await createParser(parserConfiguration)).parse(hideBin(argv));
 }

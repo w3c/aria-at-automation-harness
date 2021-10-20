@@ -4,10 +4,10 @@
 
 import { Readable } from 'stream';
 
-import { parseJSONChunks, seperateJSONChunks } from '../shared/json-chunks';
-import { iterateEmitter } from '../shared/iterate-emitter';
+import { parseJSONChunks, separateJSONChunks } from '../shared/json-chunks.js';
+import { iterateEmitter } from '../shared/iterate-emitter.js';
 
-import { createLogger } from './messages';
+import { createLogger } from './messages.js';
 
 export function shellMiddleware(argv) {
   shellLoggerMiddleware(argv);
@@ -26,7 +26,7 @@ export function shellLoggerMiddleware(argv) {
 
 export function shellTestsMiddleware(argv) {
   const { stdin } = argv;
-  argv.tests = parseJSONChunks(seperateJSONChunks(iterateEmitter(stdin, 'data', 'end', 'error')));
+  argv.tests = parseJSONChunks(separateJSONChunks(iterateEmitter(stdin, 'data', 'end', 'error')));
 }
 
 export function shellReportMiddleware(argv) {

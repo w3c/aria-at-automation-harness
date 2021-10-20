@@ -2,9 +2,9 @@
  * @module agent
  */
 
-import { iterateEmitter } from '../shared/iterate-emitter';
+import { iterateEmitter } from '../shared/iterate-emitter.js';
 
-import { createLogger } from './messages';
+import { createLogger } from './messages.js';
 
 export function forkMiddleware(argv) {
   forkLoggerMiddleware(argv);

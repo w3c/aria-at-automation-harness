@@ -4,7 +4,7 @@
  * @module agent
  */
 
-import { Message } from './messages';
+import { Message } from './messages.js';
 
 /**
  * Run agent's main application loop, waiting for tests, running them, and reporting results.
