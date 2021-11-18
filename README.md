@@ -7,8 +7,48 @@ A command-line utility for executing test plans from [w3c/aria-at](https://githu
 ## Tools
 
 - `aria-at-harness-agent` - run tests individually read from an input stream
-- `aria-at-harness-host` - (coming soon) run a test plan, a collection of reference files and test files, read from a client
+- `aria-at-harness-host` - run a test plan, a collection of reference files and test files, read from a client
 - `aria-at-harness-client` - (coming soon) read a test plan from disk, run it in a host, report result to aria-at-app
+
+## `aria-at-harness-agent`
+
+```
+$ bin/agent.js --help
+agent.js
+
+Run tests from input
+
+Options:
+  --help                Show help                                      [boolean]
+  --version             Show version number                            [boolean]
+  --quiet               Disable all logging
+  --debug               Enable all logging
+  --verbose             Enable a subset of logging messages
+  --reference-base-url  Url to append reference page listed in tests to
+                                     [string] [default: "http://localhost:8000"]
+```
+
+## `aria-at-harness-host`
+
+```
+$ bin/host.js --help
+host.js [files..]
+
+Run test plans
+
+Positionals:
+  files  Files in a test plan
+
+Options:
+  --help         Show help                                             [boolean]
+  --version      Show version number                                   [boolean]
+  --quiet        Disable all logging
+  --debug        Enable all logging
+  --verbose      Enable a subset of logging messages
+  --workingdir   Directory "files" are relative to       [string] [default: "."]
+  --tests-match  Files matching pattern in a test plan will be tested
+                                          [string] [default: "{,**/}test*.json"]
+```
 
 ---
 

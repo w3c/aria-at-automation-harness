@@ -1,27 +1,31 @@
-/// <reference path="./types.js" />
+/// <reference path="../shared/types.js" />
+/// <reference path="types.js" />
 
 /**
  * @module agent
  */
 
-import { createLogger as _createLogger } from '../shared/messages.js';
+import { _createLogger } from '../shared/messages.js';
 
 /** @enum {AriaATCIAgent.Message} */
-export const Message = {
+export const AgentMessage = {
   /** @type {'start'} */
   START: 'start',
   /** @type {'uncaughtError'} */
   UNCAUGHT_ERROR: 'uncaughtError',
   /** @type {'willStop'} */
   WILL_STOP: 'willStop',
+  /** @type {'OPEN_PAGE'} */
+  OPEN_PAGE: 'openPage',
 };
 
-export const TEMPLATES = {
-  [Message.START]: () => `Starting test agent.`,
-  [Message.UNCAUGHT_ERROR]: ({ error }) => `Uncaught error: ${error.message}`,
-  [Message.WILL_STOP]: () => `Stopping test agent.`,
+export const AGENT_TEMPLATES = {
+  [AgentMessage.START]: () => `Starting...`,
+  [AgentMessage.UNCAUGHT_ERROR]: ({ error }) => `Uncaught error: ${error.message}`,
+  [AgentMessage.WILL_STOP]: () => `Stopping...`,
+  [AgentMessage.OPEN_PAGE]: ({ url }) => `Open page: '${url}'.`,
 };
 
-export function createLogger(messages = TEMPLATES) {
+export function createAgentLogger(messages = AGENT_TEMPLATES) {
   return _createLogger(messages);
 }

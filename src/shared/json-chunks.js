@@ -33,12 +33,14 @@ export async function* parseJSONChunks(iterJSON) {
  * JSON objects, arrays, and strings are clear beginnings and endings.
  *
  * @param {string} text
+ * @returns {{json: (string | undefined), remaining: string}}
  */
-function splitJSON(text) {
+export function splitJSON(text) {
   let start = -1;
+  let end = -1;
   let level = 0;
   const token = /[{}[\]"]/g;
-  const restOfString = /(?:\\.|[^"\\])*"/g;
+  const restOfString = /(?:\\.|[^"\\])*"/gsy;
   for (let tokenMatch = token.exec(text); tokenMatch !== null; tokenMatch = token.exec(text)) {
     switch (tokenMatch[0]) {
       case '{':
@@ -52,25 +54,38 @@ function splitJSON(text) {
       case ']':
         level -= 1;
         if (level === 0) {
-          const end = tokenMatch.index + 1;
-          return {
-            start,
-            end,
-            json: text.substring(start, end),
-            remaining: text.substring(end),
-          };
+          end = tokenMatch.index + 1;
+          // Fast forward to the end of the text to exit the for loop.
+          token.lastIndex = text.length;
         }
         break;
       case '"':
         restOfString.lastIndex = token.lastIndex;
         const restOfStringMatch = restOfString.exec(text);
         if (restOfStringMatch) {
-          token.lastIndex = restOfString.lastIndex;
+          if (level === 0) {
+            start = tokenMatch.index;
+            end = restOfString.lastIndex;
+            // Fast forward to the end of the text to exit the for loop.
+            token.lastIndex = text.length;
+          } else {
+            token.lastIndex = restOfString.lastIndex;
+          }
         } else {
+          // Fast forward to the end of the text to exit the for loop.
           token.lastIndex = text.length;
         }
         break;
     }
+  }
+
+  if (end > -1) {
+    return {
+      start,
+      end,
+      json: text.substring(start, end),
+      remaining: text.substring(end),
+    };
   }
   return {
     remaining: text,

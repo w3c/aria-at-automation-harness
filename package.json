@@ -4,26 +4,32 @@
   "private": true,
   "type": "module",
   "bin": {
-    "aria-at-harness-agent": "./bin/agent.js"
+    "aria-at-harness-agent": "./bin/agent.js",
+    "aria-at-harness-host": "./bin/host.js"
   },
   "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-transform-modules-commonjs": "^7.15.4",
     "aria-at": "github:w3c/aria-at",
+    "ava": "^3.15.0",
     "husky": "^7.0.2",
     "jsdoc": "^3.6.7",
     "lint-staged": "^11.2.3",
     "prettier": "^2.4.1"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "yargs": "^17.2.1"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=12.0.0"
   },
-  "homepage": "https://github.com/mzgoddard/aria-at-harness",
+  "homepage": "https://github.com/bocoup/aria-at-harness",
   "scripts": {
     "build": "npm run build:docs",
     "build:docs": "jsdoc src/**/*.js -d docs",
-    "test": "npm run build",
+    "test": "npm run build && npm run test:unit",
+    "test:unit": "ava",
     "postinstall": "husky install"
   },
   "lint-staged": {
