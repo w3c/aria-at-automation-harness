@@ -1,15 +1,23 @@
+/// <reference path="types.js" />
+
 /**
- * @param {W} asyncWork
- * @returns {{cancel: function(): Promise<R>}}
- * @template {function({cancelable: function(AsyncIterable<T>): AsyncIterable<T>}): Promise<R>} W
- * @template T
- * @template R
+ * @module shared
  */
-export function createJob(asyncWork) {
+
+/**
+ * Start parallelized work that can be canceled at a later time.
+ *
+ * @param {W} asyncWork
+ * @returns {R}
+ * @template T
+ * @template {AriaATCIShared.JobWork<T>} W
+ * @template {AriaATCIShared.Job<T>} R
+ */
+export function startJob(asyncWork) {
   let completed = null;
   let cancel = null;
   let canceled = false;
-  const cancelToken = new Promise((resolve, reject) => {
+  const cancelToken = new Promise(resolve => {
     cancel = () => {
       canceled = true;
       resolve({ done: true });
@@ -34,7 +42,10 @@ export function createJob(asyncWork) {
             async next() {
               return await Promise.race([
                 (async () => {
-                  // If this promise never resolves, we can truly cancel this iterable.
+                  // If this promise never resolves, this wrapped iterable may
+                  // not be cancelable. Depending on how its implemented there
+                  // isn't an interface from here to stop what it is trying to
+                  // do.
                   const next = await iterator.next();
                   if (canceled) {
                     if (iterator.return) {
@@ -47,17 +58,17 @@ export function createJob(asyncWork) {
                 cancelToken,
               ]);
             },
-            async throw(...args) {
+            async throw(error) {
               if (iterator.throw) {
-                return await iterator.throw(...args);
+                return await iterator.throw(error);
               }
-              return { done: true };
+              throw error;
             },
-            async return(...args) {
+            async return(value) {
               if (iterator.return) {
-                return await iterator.return(...args);
+                return await iterator.return(value);
               }
-              return { done: true };
+              return { value, done: true };
             },
           };
         },

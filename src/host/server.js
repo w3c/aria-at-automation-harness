@@ -25,12 +25,11 @@ export class Server {
       port: -1,
       pathname: '',
     });
-    this.port = -1;
 
     this.ready = (async () => {
       this._server = await new Promise((resolve, reject) => {
         const server = this._app.listen(0, () => resolve(server));
-        server.on('error', error => reject(error));
+        server.on('error', reject);
       });
 
       const address = this._server.address();
@@ -39,8 +38,15 @@ export class Server {
       }
 
       this.port = address.port;
-      this.baseUrl.port = this.port;
     })();
+  }
+
+  get port() {
+    return this.baseUrl.port;
+  }
+
+  set port(value) {
+    this.baseUrl.port = value;
   }
 
   /**
@@ -97,7 +103,7 @@ class ServerDirectory {
     this.id = id;
     /** @type {AriaATCIShared.BaseURL} */
     this.baseUrl = baseUrl;
-    /** @type {FileRecord.NamedRecord} */
+    /** @type {FileRecord.NamedRecord[]} */
     this._files = files;
   }
 
@@ -111,6 +117,13 @@ class ServerDirectory {
 }
 
 class BaseUrl {
+  /**
+   * @param {object} url
+   * @param {string} url.protocol
+   * @param {string} url.hostname
+   * @param {number} url.port
+   * @param {string} url.pathname
+   */
   constructor({ protocol, hostname, port, pathname }) {
     this.protocol = protocol;
     this.hostname = hostname;

@@ -8,9 +8,6 @@
     "aria-at-harness-host": "./bin/host.js"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.8",
-    "@babel/plugin-transform-modules-commonjs": "^7.15.4",
-    "aria-at": "github:w3c/aria-at",
     "ava": "^3.15.0",
     "husky": "^7.0.2",
     "jsdoc": "^3.6.7",
@@ -27,7 +24,7 @@
   "homepage": "https://github.com/bocoup/aria-at-harness",
   "scripts": {
     "build": "npm run build:docs",
-    "build:docs": "jsdoc src/**/*.js -d docs",
+    "build:docs": "jsdoc src -r -d docs",
     "test": "npm run test:unit",
     "test:unit": "ava",
     "postinstall": "husky install"

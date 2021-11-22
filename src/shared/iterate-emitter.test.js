@@ -1,7 +1,5 @@
 import { EventEmitter } from 'events';
 
-// import { describe, it, expect } from '@jest/globals';
-
 import test from 'ava';
 
 import { iterateEmitter } from './iterate-emitter.js';

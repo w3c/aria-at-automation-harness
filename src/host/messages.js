@@ -4,7 +4,7 @@
  * @module host
  */
 
-import { _createLogger } from '../shared/messages.js';
+import { createSharedLogger } from '../shared/messages.js';
 
 /** @enum {AriaATCIHost.Message} */
 export const HostMessage = {
@@ -67,5 +67,5 @@ export const HOST_TEMPLATES = {
  * @returns {{log: AriaATCIHost.Log, emitter: EventEmitter}}
  */
 export function createHostLogger(messages = HOST_TEMPLATES) {
-  return _createLogger(messages);
+  return createSharedLogger(messages);
 }

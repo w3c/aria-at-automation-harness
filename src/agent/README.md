@@ -2,28 +2,21 @@
 
 This directory implements the systems used by the `bin/agent.js` command line tool.
 
-The agent tool can be invoked to perform tests from json files by piping them into agent. The result will be emitted out to the command's output stream.
+At this time invoking this command must be done from a nodejs process with child_process.fork. A developer tool may be provided soon to read a single test file run `agent` and write the result to console output.
 
 ```sh
-$ cat at/test-1-jaws.collected.json | bin/agent.js >result.json
-Starting...
-Stopping...
-```
+$ bin/agent.js
+agent.js
 
-Many tests can be piped in series to run each in serial order as they are received. Running tests in series, the output will be a stream of result json in the same order the tests are read from input.
+Run tests from input
 
-```sh
-$ cat at/test-*-jaws.collected.json | bin/agent.js >results.jsonstream
-Starting...
-Stopping...
-```
-
-Developing `bin/agent.js` you may want to use the mock test runner. Calling `agent.js` with `--mock` will enable the mock test runner.
-
-```sh
-$ cat at/test-*-jaws.collected.json | bin/agent.js --mock >results.jsonstream
+Options:
 ...
+
+Error: Currently, this command may only be used when launched by a nodejs child_process.fork call.
 ```
+
+Developing with `bin/agent.js` you may want to use the mock test runner. Calling `agent.js` with `--mock` will enable the mock test runner. The mock test runner will be removed in the near future and replaced with the ability to create a mock server that can be more tailored to individual mock use cases.
 
 ## main command
 
@@ -41,11 +34,11 @@ Options:
   --verbose             Enable a subset of logging messages
   --reference-base-url  Url to append reference page listed in tests to
                                      [string] [default: "http://localhost:8000"]
-  --mock
-  --protocol            Read tests from shell input or from parent nodejs proces
-                        s messages
-                          [string] [choices: "fork", "shell"] [default: "shell"]
+  --mock                                                               [boolean]
+  --mock-open-page                                  [choices: "request", "skip"]
 ```
+
+Currently this command must be executed by a parent node process as a node fork child process.
 
 ### `--verbose` options
 

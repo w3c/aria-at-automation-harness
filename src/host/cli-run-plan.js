@@ -2,16 +2,16 @@ import path from 'path';
 import { Readable } from 'stream';
 
 import yargs from 'yargs';
+import { pickAgentCliOptions } from '../agent/cli.js';
+import { AgentMessage } from '../agent/messages.js';
 
-import * as agentCli from '../agent/cli.js';
-
-import { Agent } from './agent.js';
+import { AgentController as Agent } from './agent.js';
 import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { Server } from './server.js';
 
-export const command = '$0 [files..]';
+export const command = 'run-plan [plan-files..]';
 
 export const describe = 'Run test plans';
 
@@ -20,7 +20,7 @@ export const describe = 'Run test plans';
  */
 export const builder = (args = yargs) =>
   args
-    .positional('files', { describe: 'Files in a test plan' })
+    .positional('plan-files', { describe: 'Files in a test plan' })
     .options({
       quiet: {
         conflicts: ['debug', 'verbose'],
@@ -40,9 +40,9 @@ export const builder = (args = yargs) =>
           for (const name of verbosity) {
             if (!messageValues.includes(name)) {
               throw new Error(
-                `--verbose '${arg}' contains unknown ids. It must be a comma separated list including: ${Object.values(
-                  HostMessage
-                ).join(', ')}`
+                `--verbose '${arg}' contains unknown ids. It must be a comma separated list including: ${messageValues.join(
+                  ', '
+                )}`
               );
             }
           }
@@ -52,45 +52,71 @@ export const builder = (args = yargs) =>
         describe: 'Enable a subset of logging messages',
         nargs: 1,
       },
-      workingdir: {
-        describe: 'Directory "files" are relative to',
-        default: '.',
-        nargs: 1,
-        type: 'string',
-      },
-      ['tests-match']: {
+      'tests-match': {
         describe: 'Files matching pattern in a test plan will be tested',
         default: '{,**/}test*.json',
         nargs: 1,
         type: 'string',
       },
-      ['agent-arg']: {
-        async coerce(arg) {
-          if (!arg) {
-            return {};
-          }
-          let options = {};
-          const agentOptionsParser = agentCli.buildAgentCliOptions(await yargs());
-          for (const item of arg) {
-            options = { ...options, ...(await agentOptionsParser.parse(item)) };
-          }
-          return agentCli.pickAgentCliOptions(options);
-        },
-        hidden: true,
+      'plan-workingdir': {
+        describe: 'Directory "plan-files" are relative to',
+        default: '.',
         nargs: 1,
-        type: 'array',
+        type: 'string',
       },
-      ['agent-protocol']: {
-        choices: ['fork', 'shell', 'api', 'auto'],
+      'plan-protocol': {
+        choices: ['fork', 'api', 'auto'],
         default: 'auto',
         hidden: true,
       },
-      ['plan-protocol']: {
-        choices: ['fork', 'shell', 'api', 'stream', 'auto'],
-        default: 'auto',
+      'agent-protocol': {
+        choices: ['fork', 'api', 'auto'],
+        default: 'fork',
+        hidden: true,
+      },
+      'agent-quiet': {
+        conflicts: ['agent-debug', 'agent-verbose'],
+        describe: 'Disable all logging',
+        hidden: true,
+      },
+      'agent-debug': {
+        conflicts: ['agent-quiet', 'agent-verbose'],
+        describe: 'Enable all logging',
+        hidden: true,
+      },
+      'agent-verbose': {
+        coerce(arg) {
+          if (!arg) {
+            return;
+          }
+          const messageValues = Object.values(AgentMessage);
+          const verbosity = arg.split(',');
+          for (const name of verbosity) {
+            if (!messageValues.includes(name)) {
+              throw new Error(
+                `--verbose must be a comma separated list including: ${Object.values(
+                  AgentMessage
+                ).join(', ')}`
+              );
+            }
+          }
+          return verbosity;
+        },
+        conflicts: ['agent-debug', 'agent-quiet'],
+        describe: 'Enable a subset of logging messages',
+        nargs: 1,
+        hidden: true,
+      },
+      'agent-mock': {
+        type: 'boolean',
+        hidden: true,
+      },
+      'agent-mock-open-page': {
+        choices: ['request', 'skip'],
         hidden: true,
       },
     })
+    .showHidden('show-hidden')
     .middleware(verboseMiddleware)
     .middleware(mainMiddleware);
 
@@ -121,7 +147,7 @@ async function verboseMiddleware(argv) {
 }
 
 function mainMiddleware(argv) {
-  argv.workingdir = path.resolve(argv.workingdir);
+  argv.planWorkingdir = path.resolve(argv.planWorkingdir);
 
   mainLoggerMiddleware(argv);
   mainTestPlanMiddleware(argv);
@@ -144,36 +170,20 @@ function mainLoggerMiddleware(argv) {
 }
 
 function mainTestPlanMiddleware(argv) {
-  const {
-    log,
-    testsMatch: testPattern,
-    planProtocol: protocol,
-    workingdir,
-    files,
-    stdin: stream,
-  } = argv;
+  const { log, testsMatch: testPattern, planProtocol, planWorkingdir, planFiles } = argv;
 
-  const planOptions = { log, testPattern };
-  let planInput;
-  if (['fork', 'shell', 'api'].includes(protocol)) {
-    if (!files || files.length === 0) {
-      throw new Error(`'--plan-protocol ${protocol}' requires 'files' argument to be not empty`);
-    }
-    planInput = {
-      protocol,
-      workingdir,
-      files,
-    };
-  } else if (protocol === 'stream') {
-    if (files && files.length > 0) {
-      throw new Error(`'--plan-protocol stream' and 'files' argument cannot be used together`);
-    }
-    planInput = { stream };
-  } else if (files && files.length > 0) {
-    planInput = { workingdir, files };
-  } else {
-    planInput = { stream };
+  if (!planFiles || planFiles.length === 0) {
+    throw new Error(
+      `'--plan-protocol ${planProtocol}' requires 'plan-files' argument to not be empty`
+    );
   }
+
+  const planInput = {
+    protocol: planProtocol,
+    workingdir: planWorkingdir,
+    files: planFiles,
+  };
+  const planOptions = { log, testPattern };
 
   argv.plans = plansFrom(planInput, planOptions);
 }
@@ -185,12 +195,26 @@ function mainServerMiddleware(argv) {
 }
 
 function mainAgentMiddleware(argv) {
-  const { log, agentProtocol: protocol, agentArg: config } = argv;
+  const {
+    log,
+    agentProtocol: protocol,
+    agentDebug,
+    agentQuiet,
+    agentVerbose,
+    agentMock,
+    agentMockOpenPage,
+  } = argv;
 
   argv.agent = new Agent({
     log,
     protocol,
-    config,
+    config: pickAgentCliOptions({
+      debug: agentDebug,
+      quiet: agentQuiet,
+      verbose: agentVerbose,
+      mock: agentMock,
+      mockOpenPage: agentMockOpenPage,
+    }),
   });
 }
 

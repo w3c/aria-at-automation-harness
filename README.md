@@ -26,28 +26,31 @@ Options:
   --verbose             Enable a subset of logging messages
   --reference-base-url  Url to append reference page listed in tests to
                                      [string] [default: "http://localhost:8000"]
+  --show-hidden         Show hidden options                            [boolean]
 ```
 
 ## `aria-at-harness-host`
 
 ```
-$ bin/host.js --help
-host.js [files..]
+$ bin/host.js run-plan --help
+host.js run-plan [plan-files..]
 
 Run test plans
 
 Positionals:
-  files  Files in a test plan
+  plan-files  Files in a test plan                         [array] [default: []]
 
 Options:
-  --help         Show help                                             [boolean]
-  --version      Show version number                                   [boolean]
-  --quiet        Disable all logging
-  --debug        Enable all logging
-  --verbose      Enable a subset of logging messages
-  --workingdir   Directory "files" are relative to       [string] [default: "."]
-  --tests-match  Files matching pattern in a test plan will be tested
+  --help             Show help                                         [boolean]
+  --version          Show version number                               [boolean]
+  --quiet            Disable all logging
+  --debug            Enable all logging
+  --verbose          Enable a subset of logging messages
+  --tests-match      Files matching pattern in a test plan will be tested
                                           [string] [default: "{,**/}test*.json"]
+  --plan-workingdir  Directory "plan-files" are relative to
+                                                         [string] [default: "."]
+  --show-hidden      Show hidden options                               [boolean]
 ```
 
 ---

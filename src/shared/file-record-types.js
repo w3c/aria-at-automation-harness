@@ -16,22 +16,5 @@
  */
 
 /**
- * @typedef {'parallel'
- *   | 'sequence'
- *   | 'makeDirectory'
- *   | 'writeFile'
- *   | 'unlinkEntry'
- * } FileRecord.Action
- */
-
-/**
- * @typedef FileRecord.Change
- * @property {string} path
- * @property {FileRecord.Action} action
- * @property {Uint8Array} [buffer]
- * @property {FileRecord.Change[]} [group]
- */
-
-/**
  * @typedef {function(FileRecord.Record, string[], FileRecord.Record[]): PromiseLike<FileRecord.Record> | FileRecord.Record} FileRecord.Functor
  */

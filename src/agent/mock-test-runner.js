@@ -88,10 +88,10 @@ export class MockTestRunner {
               ...(await carry),
               await this.runAssertion(command, assertion),
             ],
-            []
+            Promise.resolve([])
           )),
         ],
-        []
+        Promise.resolve([])
       ),
     };
   }

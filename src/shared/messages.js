@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
  * @returns {{log: AriaATCIShared.Log<T>, emitter: EventEmitter}}
  * @template T
  */
-export function _createLogger(messages) {
+export function createSharedLogger(messages) {
   const emitter = new EventEmitter();
   return {
     log(type, more) {

@@ -1,6 +1,6 @@
 /// <reference path="types.js" />
 
-import { createJob } from '../shared/job.js';
+import { startJob } from '../shared/job.js';
 
 import { HostMessage } from './messages.js';
 import {
@@ -21,7 +21,7 @@ import {
 export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
   log(HostMessage.START);
 
-  const hostLogJob = createJob(async function (signal) {
+  const hostLogJob = startJob(async function (signal) {
     for await (const agentLog of signal.cancelable(agent.logs())) {
       log(HostMessage.AGENT_LOG, agentLog);
     }
@@ -40,7 +40,7 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
 
     for (const test of plan.tests) {
       log(HostMessage.START_TEST);
-      const testLogJob = createJob(async function (signal) {
+      const testLogJob = startJob(async function (signal) {
         for await (const testLog of signal.cancelable(agent.logs())) {
           plan = addLogToTestPlan(plan, testLog);
           plan = addTestLogToTestPlan(plan, test);

@@ -1,3 +1,4 @@
+/// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 
 /** @namespace AriaATCIAgent */
@@ -15,17 +16,17 @@
  */
 
 /**
- * @typedef {Iterable<*>} AriaATCIAgent.TestIterable
+ * @typedef {Iterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
  */
 
 /**
  * @typedef AriaATCIAgent.TestRunner
- * @property {function(*): Promise<*>} run run a test
+ * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run run a test
  */
 
 /**
  * @callback AriaATCIAgent.ReportResult
- * @param {*} result
+ * @param {AriaATCIData.TestResult} result
  * @returns {Promise<void>}
  */
 
@@ -40,6 +41,6 @@
  * @property {boolean} [quiet]
  * @property {AriaATCIAgent.Message[]} [verbose]
  * @property {AriaATCIShared.BaseURL} [referenceBaseUrl]
- * @property {AriaATCIAgent.MockOptions} [mock]
- * @property {'fork' | 'shell'} [protocol]
+ * @property {boolean} [mock]
+ * @property {'request' | 'skip'} [mockOpenPage]
  */

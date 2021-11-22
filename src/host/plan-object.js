@@ -1,3 +1,4 @@
+/// <reference path="../shared/file-record.js" />
 /// <reference path="types.js" />
 
 import * as arrayUtil from '../shared/array-util.js';
@@ -25,9 +26,9 @@ export function blankTestPlan(name) {
 }
 
 /**
- * @param {TestPlanObject} testPlan
- * @param {TestPlanFile} file
- * @returns {TestPlanObject}
+ * @param {AriaATCIHost.TestPlan} testPlan
+ * @param {FileRecord.NamedRecord} file
+ * @returns {AriaATCIHost.TestPlan}
  */
 export function addFileToTestPlan(testPlan, file) {
   file = validateTestPlanFile(file);
@@ -35,9 +36,9 @@ export function addFileToTestPlan(testPlan, file) {
 }
 
 /**
- * @param {TestPlanObject} testPlan
+ * @param {AriaATCIHost.TestPlan} testPlan
  * @param {TestPlanServerOptionsPartial} serverOptions
- * @returns {TestPlanObject}
+ * @returns {AriaATCIHost.TestPlan}
  */
 export function setServerOptionsInTestPlan(testPlan, serverOptions) {
   serverOptions = validateTestPlanServerOptionsPartial(serverOptions);
@@ -45,9 +46,9 @@ export function setServerOptionsInTestPlan(testPlan, serverOptions) {
 }
 
 /**
- * @param {TestPlanObject} testPlan
+ * @param {AriaATCIHost.TestPlan} testPlan
  * @param {string} filepath
- * @returns {TestPlanObject}
+ * @returns {AriaATCIHost.TestPlan}
  */
 export function addTestToTestPlan(testPlan, filepath) {
   invariant(
@@ -58,9 +59,9 @@ export function addTestToTestPlan(testPlan, filepath) {
 }
 
 /**
- * @param {TestPlanObject} testPlan
+ * @param {AriaATCIHost.TestPlan} testPlan
  * @param {*} log
- * @returns {TestPlanObject}
+ * @returns {AriaATCIHost.TestPlan}
  */
 export function addLogToTestPlan(testPlan, log) {
   return { ...testPlan, log: [...testPlan.log, log] };
@@ -69,7 +70,7 @@ export function addLogToTestPlan(testPlan, log) {
 /**
  * @param {AriaATCIHost.TestPlan} testPlan
  * @param {{filepath: string}} testFilepath
- * @returns {TestPlanObject}
+ * @returns {AriaATCIHost.TestPlan}
  */
 export function addTestLogToTestPlan(testPlan, { filepath: testFilepath }) {
   const test = testPlan.tests.find(({ filepath }) => filepath === testFilepath);
@@ -83,10 +84,10 @@ export function addTestLogToTestPlan(testPlan, { filepath: testFilepath }) {
 }
 
 /**
- * @param {TestPlanObject} testPlan
+ * @param {AriaATCIHost.TestPlan} testPlan
  * @param {string} testFilepath
  * @param {*} result
- * @param {TestPlanObject}
+ * @param {AriaATCIHost.TestPlan}
  */
 export function addTestResultToTestPlan(testPlan, testFilepath, result) {
   const test = testPlan.tests.find(({ filepath }) => filepath === testFilepath);
@@ -159,8 +160,8 @@ function validateTestPlanFile(file) {
 
 function validateUint8Array(buffer) {
   invariant(
-    typeof buffer === 'object' && buffer !== null && buffer instanceof Uint8Array,
-    () => `'${typeof buffer}' === 'object' && '${buffer.constructor.name}' === 'Uint8Array'`
+    buffer instanceof Uint8Array,
+    () => `'${buffer && buffer.constructor.name}' === 'Uint8Array'`
   );
   return buffer;
 }
