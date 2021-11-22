@@ -28,7 +28,7 @@
   "scripts": {
     "build": "npm run build:docs",
     "build:docs": "jsdoc src/**/*.js -d docs",
-    "test": "npm run build && npm run test:unit",
+    "test": "npm run test:unit",
     "test:unit": "ava",
     "postinstall": "husky install"
   },
