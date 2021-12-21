@@ -10,9 +10,18 @@ import express from 'express';
 
 import { HostMessage } from './messages.js';
 
+const defaultBaseUrl = {
+  protocol: 'http',
+  hostname: 'localhost',
+  port: -1,
+  pathname: '',
+};
+
 export class HostServer {
   /**
-   * @param {*} serverOptions
+   * @param {object} serverOptions
+   * @param {AriaATCIHost.Log} serverOptions.log
+   * @param {AriaATCIShared.PartialBaseURL} [serverOptions.baseUrl]
    */
   constructor(serverOptions) {
     this.options = serverOptions;
@@ -30,12 +39,7 @@ export class HostServer {
     this._server = null;
 
     /** @type {HostServerBaseURL} */
-    this.baseUrl = new HostServerBaseURL({
-      protocol: 'http',
-      hostname: 'localhost',
-      port: -1,
-      pathname: '',
-    });
+    this.baseUrl = new HostServerBaseURL({ ...defaultBaseUrl, ...this.options.baseUrl });
 
     /** @type {Promise<void>} */
     this.ready = (async () => {

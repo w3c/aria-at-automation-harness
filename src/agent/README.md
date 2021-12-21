@@ -47,4 +47,9 @@ The main command's verbose level can be set with `--debug`, `--quiet`, or `--ver
 - `start`
 - `uncaughtError`
 - `willStop`
+- `startTest`
 - `openPage`
+- `invalidKeys`
+- `pressKeys`
+- `speechEvent`
+- `noRunTestSetup`

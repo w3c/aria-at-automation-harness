@@ -6,17 +6,28 @@
  */
 
 import { MockTestRunner } from './mock-test-runner.js';
+import { DriverTestRunner } from './driver-test-runner.js';
+import { createWebDriver } from './web-driver.js';
+import { createATDriver } from './at-driver.js';
 
 /**
  * @param {object} options
+ * @param {Promise<void>} options.abortSignal resolves when runner should stop
  * @param {AriaATCIShared.BaseURL} options.baseUrl
  * @param {AriaATCIAgent.Log} options.log
  * @param {AriaATCIAgent.MockOptions} [options.mock]
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {
+  if (!options.abortSignal) {
+    throw new Error('createRunner requires abortSignal option.');
+  }
   if (options.mock) {
     return new MockTestRunner(options);
   }
-  throw new Error('Non-mocked test runner not implemented');
+  const [webDriver, atDriver] = await Promise.all([
+    createWebDriver({ url: options.webDriverUrl, abortSignal: options.abortSignal }),
+    createATDriver({ url: options.atDriverUrl, abortSignal: options.abortSignal }),
+  ]);
+  return new DriverTestRunner({ ...options, webDriver, atDriver });
 }

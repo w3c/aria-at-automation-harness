@@ -130,9 +130,10 @@ class AgentProtocol {
    * @returns {Promise<AriaATCIData.TestResult>}
    */
   async run(test) {
+    const { testId } = test.info;
     this._sendTest(test);
     for await (const result of this._results()) {
-      if (result.testId === test.info.testId) {
+      if (result.testId === testId) {
         return result;
       }
     }
