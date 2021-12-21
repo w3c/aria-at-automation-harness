@@ -62,16 +62,29 @@ export const builder = (args = yargs) =>
         nargs: 1,
         type: 'string',
       },
+      'reference-hostname': {
+        default: 'localhost',
+      },
       'plan-workingdir': {
         describe: 'Directory "plan-files" are relative to',
         default: '.',
-        nargs: 1,
-        type: 'string',
       },
       'plan-protocol': {
         choices: ['fork', 'developer'],
         default: 'fork',
         hidden: true,
+      },
+      'agent-web-driver-url': {
+        coerce(arg) {
+          return new URL(arg);
+        },
+        default: 'localhost:4444',
+      },
+      'agent-at-driver-url': {
+        coerce(arg) {
+          return new URL(arg);
+        },
+        default: 'localhost:4382',
       },
       'agent-protocol': {
         choices: ['fork', 'developer'],
@@ -195,6 +208,7 @@ function mainServerMiddleware(argv) {
   const { log } = argv;
 
   argv.server = new HostServer({ log });
+  argv.server.baseUrl.hostname = argv.referenceHostname;
 }
 
 function mainAgentMiddleware(argv) {
@@ -204,6 +218,8 @@ function mainAgentMiddleware(argv) {
     agentDebug,
     agentQuiet,
     agentVerbose,
+    agentWebDriverUrl,
+    agentAtDriverUrl,
     agentMock,
     agentMockOpenPage,
   } = argv;
@@ -215,6 +231,8 @@ function mainAgentMiddleware(argv) {
       debug: agentDebug,
       quiet: agentQuiet,
       verbose: agentVerbose,
+      webDriverUrl: agentWebDriverUrl,
+      atDriverUrl: agentAtDriverUrl,
       mock: agentMock,
       mockOpenPage: agentMockOpenPage,
     }),

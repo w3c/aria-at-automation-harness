@@ -50,6 +50,18 @@ export function buildAgentCliOptions(args = yargs) {
         type: 'string',
         default: 'http://localhost:8000',
       },
+      'web-driver-url': {
+        coerce(arg) {
+          return new URL(arg);
+        },
+        default: 'http://localhost:4444',
+      },
+      'at-driver-url': {
+        coerce(arg) {
+          return new URL(arg);
+        },
+        default: 'ws://localhost:4382',
+      },
       mock: {
         type: 'boolean',
         hidden: true,
@@ -91,6 +103,12 @@ export function agentCliArgsFromOptionsMap(options) {
       case 'referenceBaseUrl':
         args.push('--reference-base-url', value.toString());
         break;
+      case 'webDriverUrl':
+        args.push('--web-driver-url', value.toString());
+        break;
+      case 'atDriverUrl':
+        args.push('--at-driver-url', value.toString());
+        break;
       case 'mock':
         if (value) {
           args.push('--mock');
@@ -117,6 +135,8 @@ export function pickAgentCliOptions({
   quiet,
   verbose,
   referenceBaseUrl,
+  webDriverUrl,
+  atDriverUrl,
   mock,
   mockOpenPage,
 }) {
@@ -125,6 +145,8 @@ export function pickAgentCliOptions({
     ...(quiet === undefined ? {} : { quiet }),
     ...(verbose === undefined ? {} : { verbose }),
     ...(referenceBaseUrl === undefined ? {} : { referenceBaseUrl }),
+    ...(webDriverUrl === undefined ? {} : { webDriverUrl }),
+    ...(atDriverUrl === undefined ? {} : { atDriverUrl }),
     ...(mock === undefined ? {} : { mock }),
     ...(mockOpenPage === undefined ? {} : { mockOpenPage }),
   };
@@ -139,8 +161,9 @@ export async function createAgentCliParser({ signals, send, stdin, stdout, stder
       argv.stdout = stdout;
       argv.stderr = stderr;
     })
-    .command('$0', 'Run tests from input', buildAgentCliOptions, agentMain, [
+    .command('$0', 'Run tests from input', buildAgentCliOptions, stopAfterMain, [
       agentVerboseMiddleware,
+      agentAbortMiddleware,
       agentLoggerMiddleware,
       agentTestsMiddleware,
       agentReportMiddleware,
@@ -168,6 +191,11 @@ export function agentMockOptions(cliOptions) {
   return undefined;
 }
 
+async function stopAfterMain(argv) {
+  await agentMain(argv);
+  await argv.stop();
+}
+
 /**
  * Build and assign a test runner based on passed arguments.
  * @param {object} argv
@@ -180,6 +208,9 @@ async function agentRunnerMiddleware(argv) {
     log: argv.log,
     baseUrl: new URL(argv.referenceBaseUrl),
     mock: agentMockOptions(argv),
+    webDriverUrl: argv.webDriverUrl,
+    atDriverUrl: argv.atDriverUrl,
+    abortSignal: argv.abortSignal,
   });
 }
 
@@ -202,6 +233,15 @@ async function agentVerboseMiddleware(argv) {
         ? argv.verbose
         : [AgentMessage.START, AgentMessage.UNCAUGHT_ERROR, AgentMessage.WILL_STOP];
   }
+}
+
+async function agentAbortMiddleware(argv) {
+  argv.stop = () => {};
+  argv.abortSignal = new Promise(resolve => {
+    argv.stop = resolve;
+    argv.signals.once('SIGINT', () => resolve());
+    process.once('beforeExit', () => resolve());
+  });
 }
 
 /**
@@ -240,7 +280,7 @@ export function agentLoggerMiddleware(argv) {
 export function agentTestsMiddleware(argv) {
   const { signals } = argv;
   argv.tests = (async function* () {
-    for await (const message of iterateEmitter(signals, 'message')) {
+    for await (const message of iterateEmitter(signals, 'message', 'SIGINT')) {
       if (message.type === 'task') {
         yield message.data;
       }
