@@ -1,6 +1,6 @@
-# aria-at-harness
+# aria-at-automation-harness
 
-An automation tool for running tests in w3c/aria-at in continuous integration servers.
+A command-line utility for executing test plans from [w3c/aria-at](https://github.com/w3c/aria-at) without human intervention using [the aria-at-automation-driver](https://github.com/bocoup/aria-at-automation-driver)
 
 ## Tools
 
