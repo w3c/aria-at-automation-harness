@@ -1,3 +1,7 @@
+/**
+ * @module host
+ */
+
 import path from 'path';
 import { Readable } from 'stream';
 
@@ -9,7 +13,7 @@ import { AgentController as Agent } from './agent.js';
 import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
-import { Server } from './server.js';
+import { HostServer } from './server.js';
 
 export const command = 'run-plan [plan-files..]';
 
@@ -179,11 +183,10 @@ function mainTestPlanMiddleware(argv) {
   }
 
   const planInput = {
-    protocol: planProtocol,
     workingdir: planWorkingdir,
     files: planFiles,
   };
-  const planOptions = { log, testPattern };
+  const planOptions = { log, testPattern, protocol: planProtocol };
 
   argv.plans = plansFrom(planInput, planOptions);
 }
@@ -191,7 +194,7 @@ function mainTestPlanMiddleware(argv) {
 function mainServerMiddleware(argv) {
   const { log } = argv;
 
-  argv.server = new Server({ log });
+  argv.server = new HostServer({ log });
 }
 
 function mainAgentMiddleware(argv) {

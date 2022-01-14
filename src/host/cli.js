@@ -1,7 +1,7 @@
 /// <reference path="./types.js" />
 
 /**
- * @module agent
+ * @module host
  */
 
 import yargs from 'yargs';

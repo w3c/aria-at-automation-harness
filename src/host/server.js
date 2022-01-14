@@ -1,31 +1,43 @@
 /// <reference path="types.js" />
 
+/**
+ * @module host
+ */
+
 import { Readable } from 'stream';
 
 import express from 'express';
 
 import { HostMessage } from './messages.js';
 
-export class Server {
+export class HostServer {
+  /**
+   * @param {*} serverOptions
+   */
   constructor(serverOptions) {
     this.options = serverOptions;
 
+    /** @type {AriaATCIHost.Log} */
     this.log = this.options.log;
 
+    /** @type {Map<string, HostServerDirectory>} */
     this._directories = new Map();
 
+    /** @type {express.Express} */
     this._app = express();
     this._app.use('/:directory', this._request.bind(this));
 
     this._server = null;
 
-    this.baseUrl = new BaseUrl({
+    /** @type {HostServerBaseURL} */
+    this.baseUrl = new HostServerBaseURL({
       protocol: 'http',
       hostname: 'localhost',
       port: -1,
       pathname: '',
     });
 
+    /** @type {Promise<void>} */
     this.ready = (async () => {
       this._server = await new Promise((resolve, reject) => {
         const server = this._app.listen(0, () => resolve(server));
@@ -73,7 +85,8 @@ export class Server {
       response.sendStatus(404).end();
       return;
     }
-    Readable.from(file.buffer).pipe(response.sendStatus(200));
+    response.statusCode = 200;
+    Readable.from(Buffer.from(file.bufferData)).pipe(response);
   }
 
   addFiles(files) {
@@ -82,8 +95,8 @@ export class Server {
       (Math.random() * 36).toString(36).substring(0, 1)
     ).join('');
     /** @type {AriaATCIShared.BaseURL} */
-    const baseUrl = new BaseUrl({ ...this.baseUrl, pathname: `/${id}` });
-    const directory = new ServerDirectory({ id, baseUrl, files });
+    const baseUrl = new HostServerBaseURL({ ...this.baseUrl, pathname: `/${id}` });
+    const directory = new HostServerDirectory({ id, baseUrl, files });
     this._directories.set(id, directory);
     return directory;
   }
@@ -97,7 +110,13 @@ export class Server {
   }
 }
 
-class ServerDirectory {
+class HostServerDirectory {
+  /**
+   * @param {object} options
+   * @param {string} options.id
+   * @param {AriaATCIShared.BaseURL} options.baseUrl
+   * @param {FileRecord.NamedRecord[]} options.files
+   */
   constructor({ id, baseUrl, files }) {
     /** @type {string} */
     this.id = id;
@@ -116,7 +135,10 @@ class ServerDirectory {
   }
 }
 
-class BaseUrl {
+/**
+ * @implements {AriaATCIShared.BaseURL}
+ */
+class HostServerBaseURL {
   /**
    * @param {object} url
    * @param {string} url.protocol

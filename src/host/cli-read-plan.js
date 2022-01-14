@@ -1,3 +1,7 @@
+/**
+ * @module host
+ */
+
 import path from 'path';
 
 import { host } from '../shared/file-record.js';
@@ -6,7 +10,7 @@ import { createHostLogger } from './messages.js';
 
 export const command = 'read-plan <files..>';
 
-// This cli module's describe is false to hiden the command.
+// This cli module's describe is false to hide the command.
 export const describe = false;
 
 export const builder = yargs => {
@@ -38,11 +42,15 @@ export function planLoggerMiddleware(argv) {
   argv.log = logger.log;
 
   const { send } = argv;
-  logger.emitter.on('message', message =>
-    send({
-      type: 'log',
-      data: message,
-    })
+  logger.emitter.on(
+    'message',
+    message => (
+      console.log(message),
+      send({
+        type: 'log',
+        data: message,
+      })
+    )
   );
 }
 
@@ -55,6 +63,7 @@ export function planLoggerMiddleware(argv) {
 export function planEmitMiddleware(argv) {
   const { send } = argv;
   argv.emitRecord = async function (record) {
+    console.warn(record);
     send({ type: 'record', data: record });
   };
 }

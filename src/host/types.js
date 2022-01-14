@@ -4,6 +4,10 @@
 /// <reference path="../agent/types.js" />
 
 /**
+ * @namespace AriaATCIHost
+ */
+
+/**
  * @typedef {'start'
  * | 'uncaughtError'
  * | 'willStop'

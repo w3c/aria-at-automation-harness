@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import test from 'ava';
 
-import { iterateEmitter } from './iterate-emitter.js';
+import { iterateEmitter } from '../iterate-emitter.js';
 
 const timeout = timeoutTestMiddleware();
 test.beforeEach(async () => {

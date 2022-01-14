@@ -1,6 +1,10 @@
 /// <reference path="../shared/file-record.js" />
 /// <reference path="types.js" />
 
+/**
+ * @module host
+ */
+
 import * as arrayUtil from '../shared/array-util.js';
 
 /**
@@ -37,7 +41,7 @@ export function addFileToTestPlan(testPlan, file) {
 
 /**
  * @param {AriaATCIHost.TestPlan} testPlan
- * @param {TestPlanServerOptionsPartial} serverOptions
+ * @param {AriaATCIHost.TestPlanServerOptionsPartial} serverOptions
  * @returns {AriaATCIHost.TestPlan}
  */
 export function setServerOptionsInTestPlan(testPlan, serverOptions) {
@@ -53,7 +57,7 @@ export function setServerOptionsInTestPlan(testPlan, serverOptions) {
 export function addTestToTestPlan(testPlan, filepath) {
   invariant(
     testPlan.files.find(file => file.name === filepath),
-    () => `File ${filepath} does not exist in test.`
+    () => `File ${filepath} does not exist in test plan.`
   );
   return { ...testPlan, tests: [...testPlan.tests, { filepath, log: [], results: [] }] };
 }
@@ -146,24 +150,24 @@ function validatePort(port) {
 
 /**
  * @param {*} file
- * @returns {TestPlanFile}
+ * @returns {FileRecord.NamedRecord}
  */
 function validateTestPlanFile(file) {
   invariant(typeof file === 'object' && file !== null);
   for (const key of Object.keys(file)) {
-    invariant(['name', 'buffer'].includes(key));
+    invariant(['name', 'bufferData'].includes(key));
   }
   invariant(typeof file.name === 'string');
-  validateUint8Array(file.buffer);
+  validateUint8Array(file.bufferData);
   return file;
 }
 
-function validateUint8Array(buffer) {
+function validateUint8Array(bufferData) {
   invariant(
-    buffer instanceof Uint8Array,
-    () => `'${buffer && buffer.constructor.name}' === 'Uint8Array'`
+    bufferData instanceof Uint8Array,
+    () => `'${bufferData && bufferData.constructor.name}' === 'Uint8Array'`
   );
-  return buffer;
+  return bufferData;
 }
 
 function invariant(condition, message) {

@@ -1,5 +1,9 @@
 /// <reference path="types.js" />
 
+/**
+ * @module host
+ */
+
 import { startJob } from '../shared/job.js';
 
 import { HostMessage } from './messages.js';
@@ -48,7 +52,7 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
       });
 
       const file = plan.files.find(({ name }) => name === test.filepath);
-      const result = await agent.run(JSON.parse(Buffer.from(file.buffer).toString()));
+      const result = await agent.run(JSON.parse(Buffer.from(file.bufferData).toString()));
       plan = addTestResultToTestPlan(plan, test.filepath, result);
 
       await testLogJob.cancel();

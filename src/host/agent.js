@@ -2,15 +2,18 @@
 /// <reference path="../agent/types.js" />
 /// <reference path="types.js" />
 
+/**
+ * @module host
+ */
+
 import child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { constants as osConstants } from 'os';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, URL } from 'url';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';
-import { startJob } from '../shared/job.js';
-import { processExited } from '../shared/process-util.js';
+import { processExited, collectProcessPipe } from '../shared/process-util.js';
 
 import { agentCliArgsFromOptionsMap, agentMockOptions } from '../agent/cli.js';
 import { createRunner } from '../agent/create-test-runner.js';
@@ -38,15 +41,15 @@ export class AgentController {
     };
 
     /** @type {AriaATCIAgent.CliOptions} */
-    this._instanceConfig = null;
+    this._activeConfig = null;
     /** @type {AgentProtocol} */
-    this._instance = null;
+    this._activeProtocol = null;
 
     this._logEmitter = new EventEmitter();
   }
 
   _defaultOptions() {
-    return { protocol: 'auto' };
+    return { protocol: 'fork' };
   }
 
   /**
@@ -62,18 +65,18 @@ export class AgentController {
 
   /**
    * @param {AriaATCIData.Test} test
-   * @returns {AriaATCIData.TestResult}
+   * @returns {Promise<AriaATCIData.TestResult>}
    */
   async run(test) {
-    return await this._instance.run(test);
+    return await this._activeProtocol.run(test);
   }
 
   /**
    * @returns {AsyncGenerator<AriaATCIData.Log>}
    */
   async *logs() {
-    if (this._instance) {
-      yield* this._instance.logs();
+    if (this._activeProtocol) {
+      yield* this._activeProtocol.logs();
     }
     for await (const instance of iterateEmitter(this._logEmitter, 'log')) {
       yield* instance.logs();
@@ -86,24 +89,24 @@ export class AgentController {
   async start(options) {
     const { log, protocol, config } = this._options;
     options = { ...config, ...options };
-    this._instanceConfig = options;
+    this._activeConfig = options;
     const errors = [];
 
     for (const Protocol of AGENT_PROTOCOLS[protocol]) {
       try {
-        this._instance = new Protocol();
-        const ready = this._instance.start(options);
-        this._logEmitter.emit('log', this._instance);
+        this._activeProtocol = new Protocol();
+        const ready = this._activeProtocol.start(options);
+        this._logEmitter.emit('log', this._activeProtocol);
         await ready;
-        log(HostMessage.AGENT_PROTOCOL, { protocol: Protocol.protocol });
+        log(HostMessage.AGENT_PROTOCOL, { protocol: Protocol.protocolName });
         break;
       } catch (error) {
         errors.push(error);
-        this._instance = null;
+        this._activeProtocol = null;
       }
     }
 
-    if (this._instance === null) {
+    if (this._activeProtocol === null) {
       throw new Error(
         `Agent failed to start.\n${errors
           .map(error => (error.stack ? error.stack : error.toString()))
@@ -113,16 +116,19 @@ export class AgentController {
   }
 
   async stop() {
-    await this._instance.stop();
-    this._instance = null;
+    await this._activeProtocol.stop();
+    this._activeProtocol = null;
   }
 }
 
 class AgentProtocol {
-  static get protocol() {
+  static get protocolName() {
     return 'unknown';
   }
 
+  /**
+   * Start a copy of src/agent and run tests in it.
+   */
   constructor() {
     /** @type {Promise<{code: number, signal: number}> | null} */
     this.exited = null;
@@ -184,11 +190,14 @@ class AgentProtocol {
   }
 }
 
-class AgentFork extends AgentProtocol {
-  static get protocol() {
+class AgentForkProtocol extends AgentProtocol {
+  static get protocolName() {
     return 'fork';
   }
 
+  /**
+   * Start a copy of src/agent with child_process.fork and run tests in it.
+   */
   constructor() {
     super();
     /** @type {child_process.ChildProcess | null} */
@@ -217,16 +226,8 @@ class AgentFork extends AgentProtocol {
       agentCliArgsFromOptionsMap(options),
       { stdio: 'pipe' }
     ));
-    const stderrJob = startJob(async function ({ cancelable }) {
-      let carry = '';
-      for await (const buffer of cancelable(
-        iterateEmitter(agentProcess.stderr, 'data', 'end', 'error')
-      )) {
-        carry += buffer.toString();
-      }
-      return carry;
-    });
 
+    const stderrJob = collectProcessPipe(agentProcess.stderr);
     this.exited = processExited(agentProcess);
     this.ready = (async () => {
       for await (const log of this.logs()) {
@@ -270,11 +271,14 @@ class AgentFork extends AgentProtocol {
   }
 }
 
-class AgentAPI extends AgentProtocol {
-  static get protocol() {
+class AgentAPIProtocol extends AgentProtocol {
+  static get protocolName() {
     return 'api';
   }
 
+  /**
+   * Start a copy of src/agent with the js api and run tests in it.
+   */
   constructor() {
     super();
     this._testEmitter = null;
@@ -302,7 +306,7 @@ class AgentAPI extends AgentProtocol {
 
     this.exited = agentMain({
       runner: await createRunner({
-        baseUrl: options.referenceBaseUrl,
+        baseUrl: options.referenceBaseUrl || new URL('http://localhost:4400'),
         log,
         mock: agentMockOptions(options),
       }),
@@ -311,7 +315,11 @@ class AgentAPI extends AgentProtocol {
       reportResult: result => {
         this._resultEmitter.emit('result', result);
       },
-    }).then(() => ({ code: 0 }));
+    })
+      .then(() => {
+        this.stop();
+      })
+      .then(() => ({ code: 0 }));
     this.ready = Promise.resolve();
 
     await this.ready;
@@ -330,7 +338,7 @@ class AgentAPI extends AgentProtocol {
 }
 
 const AGENT_PROTOCOLS = {
-  fork: [AgentFork],
-  api: [AgentAPI],
-  auto: [AgentFork, AgentAPI],
+  fork: [AgentForkProtocol],
+  api: [AgentAPIProtocol],
+  auto: [AgentForkProtocol, AgentAPIProtocol],
 };

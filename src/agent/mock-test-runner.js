@@ -1,13 +1,13 @@
-/// <reference path="../../node_modules/aria-at/types/aria-at-file.js" />
+/// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
-
-import { request } from 'http';
-import { AgentMessage } from './messages.js';
 
 /**
  * @module agent
  */
+
+import { request } from 'http';
+import { AgentMessage } from './messages.js';
 
 export class MockTestRunner {
   /**
@@ -69,7 +69,7 @@ export class MockTestRunner {
   }
 
   /**
-   * @param {AriaATFile.CollectedTest} task
+   * @param {AriaATCIData.CollectedTest} task
    */
   async run(task) {
     await this.openPage(

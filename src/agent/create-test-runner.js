@@ -1,6 +1,10 @@
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
 
+/**
+ * @module agent
+ */
+
 import { MockTestRunner } from './mock-test-runner.js';
 
 /**
