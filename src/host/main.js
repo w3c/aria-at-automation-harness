@@ -34,6 +34,7 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
   await server.ready;
   log(HostMessage.SERVER_LISTENING, { url: server.baseUrl });
 
+  const textDecoder = new TextDecoder();
   for await (let plan of plans) {
     const serverDirectory = server.addFiles(plan.files);
     log(HostMessage.ADD_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
@@ -52,7 +53,7 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
       });
 
       const file = plan.files.find(({ name }) => name === test.filepath);
-      const result = await agent.run(JSON.parse(Buffer.from(file.bufferData).toString()));
+      const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
       plan = addTestResultToTestPlan(plan, test.filepath, result);
 
       await testLogJob.cancel();

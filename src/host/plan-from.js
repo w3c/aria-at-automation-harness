@@ -55,6 +55,7 @@ async function planFromCommandFork({ workingdir, files }) {
     {
       cwd: workingdir,
       stdio: 'pipe',
+      serialization: 'advanced',
     }
   );
 
@@ -66,7 +67,7 @@ async function planFromCommandFork({ workingdir, files }) {
       if (message.type === 'record') {
         await stdoutJob.cancel();
         await stderrJob.cancel();
-        return { ...planFromRecord(parseRecordBuffers(message.data)), source: 'fork' };
+        return { ...planFromRecord(message.data), source: 'fork' };
       }
     }
     throw new Error(
@@ -82,25 +83,6 @@ ${await stderrJob.cancel()}`
 }
 
 planFromCommandFork.protocolName = 'fork';
-
-/**
- * @param {FileRecord.Record} record
- * @returns {FileRecord.Record}
- */
-function parseRecordBuffers(record) {
-  if (record.entries) {
-    return { ...record, entries: record.entries.map(parseRecordBuffers) };
-  }
-  const { bufferData } = record;
-  if (bufferData && bufferData.type === 'Buffer') {
-    return { ...record, bufferData: new Uint8Array(Buffer.from(bufferData)) };
-  } else if (Array.isArray(bufferData)) {
-    return { ...record, bufferData: new Uint8Array(bufferData) };
-  } else if (bufferData && Object.keys(bufferData).every(key => Number.isInteger(Number(key)))) {
-    return { ...record, bufferData: new Uint8Array(Object.values(bufferData)) };
-  }
-  return record;
-}
 
 async function planFromAPI({ workingdir, files }) {
   const host = createHost();

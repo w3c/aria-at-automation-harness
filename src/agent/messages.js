@@ -21,7 +21,7 @@ export const AgentMessage = {
 
 export const AGENT_TEMPLATES = {
   [AgentMessage.START]: () => `Starting...`,
-  [AgentMessage.UNCAUGHT_ERROR]: ({ error }) => `Uncaught error: ${error.message}`,
+  [AgentMessage.UNCAUGHT_ERROR]: ({ error }) => `Uncaught error: ${error.stack || error.message}`,
   [AgentMessage.WILL_STOP]: () => `Stopping...`,
   [AgentMessage.OPEN_PAGE]: ({ url }) => `Open page: '${url}'.`,
 };

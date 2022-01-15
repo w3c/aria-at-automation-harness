@@ -1,5 +1,5 @@
 /// <reference path="../data/types.js" />
-/// <reference path="../agent/types.js" />
+/// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
 
 /**
@@ -224,7 +224,7 @@ class AgentForkProtocol extends AgentProtocol {
     const agentProcess = (this._processFork = child_process.fork(
       agentPath,
       agentCliArgsFromOptionsMap(options),
-      { stdio: 'pipe' }
+      { stdio: 'pipe', serialization: 'advanced' }
     ));
 
     const stderrJob = collectProcessPipe(agentProcess.stderr);
