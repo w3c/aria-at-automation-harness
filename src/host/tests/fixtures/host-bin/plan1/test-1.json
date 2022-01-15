@@ -3,7 +3,7 @@
   "target": {
     "at": { "key": "at", "name": "At", "raw": "AT" },
     "mode": "reading",
-    "referencePage": "reference/index.html"
+    "referencePage": "index.html"
   },
   "instructions": { "raw": "", "user": "" },
   "commands": [
