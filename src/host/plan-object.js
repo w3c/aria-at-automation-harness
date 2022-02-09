@@ -165,7 +165,8 @@ function validateTestPlanFile(file) {
 function validateUint8Array(bufferData) {
   invariant(
     bufferData instanceof Uint8Array,
-    () => `'${bufferData && bufferData.constructor.name}' === 'Uint8Array'`
+    () =>
+      `'${bufferData && bufferData.constructor && bufferData.constructor.name}' === 'Uint8Array'`
   );
   return bufferData;
 }

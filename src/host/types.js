@@ -38,7 +38,7 @@
 /**
  * @typedef AriaATCIHost.TestPlan
  * @property {string} name
- * @property {'fork' | 'api' | 'unknown'} source
+ * @property {'fork' | 'developer' | 'unknown'} source
  * @property {object} serverOptions
  * @property {AriaATCIShared.BaseURL} serverOptions.baseUrl
  * @property {object[]} tests

@@ -69,12 +69,12 @@ export const builder = (args = yargs) =>
         type: 'string',
       },
       'plan-protocol': {
-        choices: ['fork', 'api', 'auto'],
-        default: 'auto',
+        choices: ['fork', 'developer'],
+        default: 'fork',
         hidden: true,
       },
       'agent-protocol': {
-        choices: ['fork', 'api', 'auto'],
+        choices: ['fork', 'developer'],
         default: 'fork',
         hidden: true,
       },

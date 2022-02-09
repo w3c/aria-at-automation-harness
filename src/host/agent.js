@@ -30,7 +30,7 @@ export class AgentController {
   /**
    * @param {object} options
    * @param {AriaATCIHost.Log} options.log
-   * @param {'fork' | 'api' | 'auto'} [options.protocol]
+   * @param {'fork' | 'developer'} [options.protocol]
    * @param {AriaATCIAgent.CliOptions} [options.config]
    */
   constructor({ config = {}, ...otherOptions } = {}) {
@@ -87,31 +87,20 @@ export class AgentController {
    * @param {AriaATCIAgent.CliOptions} options
    */
   async start(options) {
-    const { log, protocol, config } = this._options;
-    options = { ...config, ...options };
-    this._activeConfig = options;
-    const errors = [];
+    try {
+      const { log, protocol, config } = this._options;
+      options = { ...config, ...options };
+      this._activeConfig = options;
 
-    for (const Protocol of AGENT_PROTOCOLS[protocol]) {
-      try {
-        this._activeProtocol = new Protocol();
-        const ready = this._activeProtocol.start(options);
-        this._logEmitter.emit('log', this._activeProtocol);
-        await ready;
-        log(HostMessage.AGENT_PROTOCOL, { protocol: Protocol.protocolName });
-        break;
-      } catch (error) {
-        errors.push(error);
-        this._activeProtocol = null;
-      }
-    }
-
-    if (this._activeProtocol === null) {
-      throw new Error(
-        `Agent failed to start.\n${errors
-          .map(error => (error.stack ? error.stack : error.toString()))
-          .join('\n')}`
-      );
+      const Protocol = AGENT_PROTOCOL[protocol];
+      this._activeProtocol = new Protocol();
+      const ready = this._activeProtocol.start(options);
+      this._logEmitter.emit('log', this._activeProtocol);
+      await ready;
+      log(HostMessage.AGENT_PROTOCOL, { protocol: Protocol.protocolName });
+    } catch (error) {
+      this._activeProtocol = null;
+      throw new Error(`Agent failed to start.\n${error.stack ? error.stack : error.toString()}`);
     }
   }
 
@@ -271,9 +260,9 @@ class AgentForkProtocol extends AgentProtocol {
   }
 }
 
-class AgentAPIProtocol extends AgentProtocol {
+class AgentDeveloperProtocol extends AgentProtocol {
   static get protocolName() {
-    return 'api';
+    return 'developer';
   }
 
   /**
@@ -337,8 +326,7 @@ class AgentAPIProtocol extends AgentProtocol {
   }
 }
 
-const AGENT_PROTOCOLS = {
-  fork: [AgentForkProtocol],
-  api: [AgentAPIProtocol],
-  auto: [AgentForkProtocol, AgentAPIProtocol],
+const AGENT_PROTOCOL = {
+  fork: AgentForkProtocol,
+  developer: AgentDeveloperProtocol,
 };

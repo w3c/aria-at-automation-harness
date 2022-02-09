@@ -59,8 +59,8 @@ Options:
                                           [string] [default: "{,**/}test*.json"]
   --plan-workingdir       Directory "plan-files" are relative to
                                                          [string] [default: "."]
-  --plan-protocol             [choices: "fork", "api", "auto"] [default: "auto"]
-  --agent-protocol            [choices: "fork", "api", "auto"] [default: "fork"]
+  --plan-protocol             [choices: "fork", "developer"] [default: "fork"]
+  --agent-protocol            [choices: "fork", "developer"] [default: "fork"]
   --agent-quiet           Disable all logging
   --agent-debug           Enable all logging
   --agent-verbose         Enable a subset of logging messages
@@ -70,11 +70,14 @@ Options:
 
 ### Loading a test plan
 
-`bin/host.js` can load a test plan through the `read-plan` command or api with `src/host/plan-from.js`. For convenience the `run-plan` command takes arguments prefixed with `plan` that map to arguments that can be passed to `read-plan`, to read a plan.
+`bin/host.js` can load a test plan through the `read-plan` command (or developer
+interface) with `src/host/plan-from.js`. For convenience the `run-plan` command
+takes arguments prefixed with `plan` that map to arguments that can be passed to
+`read-plan`, to read a plan.
 
 ### `bin/agent.js` communication
 
-The host while managing an agent instance can operate it through the `bin/agent.js` tool or `src/agent/main.js` api.
+The host while managing an agent instance can operate it through the `bin/agent.js` tool or `src/agent/main.js` developer interface.
 
 ### `--verbose` options
 

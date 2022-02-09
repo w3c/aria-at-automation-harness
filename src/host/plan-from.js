@@ -84,30 +84,26 @@ ${await stderrJob.cancel()}`
 
 planFromCommandFork.protocolName = 'fork';
 
-async function planFromAPI({ workingdir, files }) {
+async function planFromDeveloperInterface({ workingdir, files }) {
   const host = createHost();
   const record = await host.read(workingdir, { glob: files.join(',') });
-  return { ...planFromRecord(record), source: 'api' };
+  return { ...planFromRecord(record), source: 'developer' };
 }
 
-planFromAPI.protocolName = 'api';
+planFromDeveloperInterface.protocolName = 'developer';
 
-const PLAN_PROTOCOLS = {
-  fork: [planFromCommandFork],
-  api: [planFromAPI],
-  auto: [planFromCommandFork, planFromAPI],
+const PLAN_PROTOCOL = {
+  fork: planFromCommandFork,
+  developer: planFromDeveloperInterface,
 };
 
-async function planFromFiles({ workingdir, files }, { protocol = 'auto' }) {
-  const errors = [];
-  for (const activeProtocol of PLAN_PROTOCOLS[protocol]) {
-    try {
-      return await activeProtocol({ workingdir, files });
-    } catch (error) {
-      errors.push(error);
-    }
+async function planFromFiles({ workingdir, files }, { protocol = 'fork' }) {
+  try {
+    const activeProtocol = PLAN_PROTOCOL[protocol];
+    return await activeProtocol({ workingdir, files });
+  } catch (error) {
+    throw Object.assign(new Error('could not load files'), { error });
   }
-  throw Object.assign(new Error('could not load files'), { errors });
 }
 
 /**
@@ -115,7 +111,7 @@ async function planFromFiles({ workingdir, files }, { protocol = 'auto' }) {
  * @param {string} target.workingdir
  * @param {string[]} target.files
  * @param {object} [options]
- * @param {'fork' | 'api' | 'auto'} [options.protocol]
+ * @param {'fork' | 'developer'} [options.protocol]
  * @param {string} [options.testPattern]
  * @param {AriaATCIHost.Log} [options.log]
  * @returns {AsyncGenerator<AriaATCIHost.TestPlan>}
