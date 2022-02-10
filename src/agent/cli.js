@@ -1,4 +1,4 @@
-/// <reference path="./types.js" />
+/// <reference path="types.js" />
 
 /**
  * @module agent
@@ -7,13 +7,131 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import { MockTestRunner } from './mock-test-runner.js';
-import { main } from './main.js';
-import { forkMiddleware } from './cli-protocol-fork.js';
-import { shellMiddleware } from './cli-protocol-shell.js';
+import { iterateEmitter } from '../shared/iterate-emitter.js';
 
-export async function createParser({ signals, send, stdin, stdout, stderr }) {
-  return (await yargs())
+import { createRunner } from './create-test-runner.js';
+import { agentMain } from './main.js';
+import { AgentMessage, createAgentLogger } from './messages.js';
+
+/** @param {yargs} args */
+export function buildAgentCliOptions(args = yargs) {
+  return args
+    .options({
+      quiet: {
+        conflicts: ['debug', 'verbose'],
+        describe: 'Disable all logging',
+      },
+      debug: {
+        conflicts: ['quiet', 'verbose'],
+        describe: 'Enable all logging',
+      },
+      verbose: {
+        coerce(arg) {
+          if (!arg) {
+            return;
+          }
+          const messageValues = Object.values(AgentMessage);
+          const verbosity = arg.split(',');
+          for (const name of verbosity) {
+            if (!messageValues.includes(name)) {
+              throw new Error(
+                `--verbose must be a comma separated list including: ${messageValues.join(', ')}`
+              );
+            }
+          }
+          return verbosity;
+        },
+        conflicts: ['debug', 'quiet'],
+        describe: 'Enable a subset of logging messages',
+        nargs: 1,
+      },
+      'reference-base-url': {
+        description: 'Url to append reference page listed in tests to',
+        type: 'string',
+        default: 'http://localhost:8000',
+      },
+      mock: {
+        type: 'boolean',
+        hidden: true,
+      },
+      'mock-open-page': {
+        choices: ['request', 'skip'],
+        hidden: true,
+      },
+    })
+    .showHidden('show-hidden');
+}
+
+/**
+ * @param {AriaATCIAgent.CliOptions} options
+ * @returns {string[]}
+ */
+export function agentCliArgsFromOptionsMap(options) {
+  const args = [];
+  for (const key of Object.keys(options)) {
+    const value = options[key];
+    switch (key) {
+      case 'debug':
+        if (value) {
+          args.push('--debug');
+        } else if (value === false) {
+          args.push('--debug=false');
+        }
+        break;
+      case 'quiet':
+        if (value) {
+          args.push('--quiet');
+        } else if (value === false) {
+          args.push('--quiet=false');
+        }
+        break;
+      case 'verbose':
+        args.push('--verbose', value.join(','));
+        break;
+      case 'referenceBaseUrl':
+        args.push('--reference-base-url', value.toString());
+        break;
+      case 'mock':
+        if (value) {
+          args.push('--mock');
+        } else if (value === false) {
+          args.push('--mock=false');
+        }
+        break;
+      case 'mockOpenPage':
+        args.push(`--mock-open-page=${value}`);
+        break;
+      default:
+        throw new Error(`unknown agent cli argument ${key}`);
+    }
+  }
+  return args;
+}
+
+/**
+ * @param {AriaATCIAgent.CliOptions} options
+ * @returns {AriaATCIAgent.CliOptions}
+ */
+export function pickAgentCliOptions({
+  debug,
+  quiet,
+  verbose,
+  referenceBaseUrl,
+  mock,
+  mockOpenPage,
+}) {
+  return {
+    ...(debug === undefined ? {} : { debug }),
+    ...(quiet === undefined ? {} : { quiet }),
+    ...(verbose === undefined ? {} : { verbose }),
+    ...(referenceBaseUrl === undefined ? {} : { referenceBaseUrl }),
+    ...(mock === undefined ? {} : { mock }),
+    ...(mockOpenPage === undefined ? {} : { mockOpenPage }),
+  };
+}
+
+export async function createAgentCliParser({ signals, send, stdin, stdout, stderr }) {
+  return /** @type {yargs} */ (await yargs())
     .middleware(argv => {
       argv.signals = signals;
       argv.send = send;
@@ -21,64 +139,130 @@ export async function createParser({ signals, send, stdin, stdout, stderr }) {
       argv.stdout = stdout;
       argv.stderr = stderr;
     })
-    .command(
-      '$0',
-      'Run tests from input',
-      {
-        protocol: {
-          choices: ['fork', 'shell'],
-          description: 'Read tests from shell input or from parent nodejs process messages',
-          default: 'shell',
-          type: 'string',
-        },
-      },
-      main,
-      [protocolMiddleware, runnerMiddleware]
-    );
+    .command('$0', 'Run tests from input', buildAgentCliOptions, agentMain, [
+      agentVerboseMiddleware,
+      agentLoggerMiddleware,
+      agentTestsMiddleware,
+      agentReportMiddleware,
+      agentRunnerMiddleware,
+    ]);
+}
+
+export async function parseAgentCli({ argv = [], ...parserConfiguration } = {}) {
+  return await (await createAgentCliParser(parserConfiguration)).parse(hideBin(argv));
+}
+
+/**
+ * Summarize cli options as mock options for creating a test runner.
+ * @param {AgentATCIAgent.CliOptions} cliOptions
+ * @returns {AriaATCIAgent.MockOptions}
+ */
+export function agentMockOptions(cliOptions) {
+  let { mock, mockOpenPage } = pickAgentCliOptions(cliOptions);
+  if (mock === undefined && mockOpenPage) {
+    mock = true;
+  }
+  if (mock) {
+    return { openPage: mockOpenPage ? mockOpenPage : 'request' };
+  }
+  return undefined;
 }
 
 /**
  * Build and assign a test runner based on passed arguments.
  * @param {object} argv
+ * @param {AriaATCIAgent.Log} argv.log
  * @param {AriaATCIAgent.TestRunner} argv.runner
+ * @param {AriaATCIAgent.MockOptions} [argv.mock]
  */
-function runnerMiddleware(argv) {
-  argv.runner = new MockTestRunner();
+async function agentRunnerMiddleware(argv) {
+  argv.runner = await createRunner({
+    log: argv.log,
+    baseUrl: new URL(argv.referenceBaseUrl),
+    mock: agentMockOptions(argv),
+  });
+}
+
+/**
+ * Build and assign a test runner based on passed arguments.
+ * @param {object} argv
+ * @param {boolean} argv.debug
+ * @param {boolean} argv.quiet
+ * @param {string[]} argv.verbose
+ * @param {boolean} argv.verbosity
+ */
+async function agentVerboseMiddleware(argv) {
+  if (argv.debug) {
+    argv.verbosity = Object.values(AgentMessage);
+  } else if (argv.quiet) {
+    argv.verbosity = [];
+  } else {
+    argv.verbosity =
+      argv.verbose && argv.verbose.length
+        ? argv.verbose
+        : [AgentMessage.START, AgentMessage.UNCAUGHT_ERROR, AgentMessage.WILL_STOP];
+  }
 }
 
 /**
  * Build and assign main loop arguments based on passed protocol and other arguments.
  * @param {object} argv
- * @param {string} argv.protocol
  * @param {function(*): void} argv.send
- * @param {EventEmitter} argv.signals
- * @param {ReadableStream} argv.stdin
- * @param {WritableStream} argv.stdout
- * @param {WritableStream} argv.stderr
  * @param {AriaATCIAgent.Log} argv.log
- * @param {AriaATCIAgent.TestIterable} argv.tests
- * @param {AriaATCIAgent.ReportResult} argv.reportResult
  */
-function protocolMiddleware(argv) {
-  switch (argv.protocol) {
-    case 'shell':
-      shellMiddleware(argv);
-      break;
-    case 'fork':
-      if (typeof argv.send !== 'function') {
-        throw new Error(
-          `'fork' protocol may only be used when launched by a nodejs child_process.fork call.`
-        );
-      }
-      forkMiddleware(argv);
-      break;
-    default:
-      throw new Error(
-        `Unknown protocol. Options are 'fork' or 'shell'. Received: ${argv.protocol}`
-      );
+export function agentLoggerMiddleware(argv) {
+  if (typeof argv.send !== 'function') {
+    throw new Error(
+      `Currently, this command may only be used when launched by a nodejs child_process.fork call.`
+    );
   }
+
+  const logger = createAgentLogger();
+  argv.log = logger.log;
+
+  const { send, verbosity } = argv;
+  logger.emitter.on('message', message => {
+    if (verbosity.includes(message.data.type)) {
+      send({
+        type: 'log',
+        data: message,
+      });
+    }
+  });
 }
 
-export async function parse({ argv = [], ...parserConfiguration } = {}) {
-  return (await createParser(parserConfiguration)).parse(hideBin(argv));
+/**
+ * Build and assign main loop arguments based on passed protocol and other arguments.
+ * @param {object} argv
+ * @param {EventEmitter} argv.signals
+ * @param {AriaATCIAgent.TestIterable} argv.tests
+ */
+export function agentTestsMiddleware(argv) {
+  const { signals } = argv;
+  argv.tests = (async function* () {
+    for await (const message of iterateEmitter(signals, 'message')) {
+      if (message.type === 'task') {
+        yield message.data;
+      }
+    }
+  })();
+}
+
+/**
+ * Build and assign main loop arguments based on passed protocol and other arguments.
+ * @param {object} argv
+ * @param {function(*): void} argv.send
+ * @param {AriaATCIAgent.ReportResult} argv.reportResult
+ */
+export function agentReportMiddleware(argv) {
+  if (typeof argv.send !== 'function') {
+    throw new Error(
+      `Currently, this command may only be used when launched by a nodejs child_process.fork call.`
+    );
+  }
+
+  const { send } = argv;
+  argv.reportResult = async function (result) {
+    send({ type: 'result', data: result });
+  };
 }

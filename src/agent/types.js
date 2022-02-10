@@ -1,9 +1,14 @@
+/// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 
 /** @namespace AriaATCIAgent */
 
 /**
- * @typedef {'start' | 'uncaughtError' | 'willStop'} AriaATCIAgent.Message
+ * @typedef {'start'
+ * | 'uncaughtError'
+ * | 'willStop'
+ * | 'openPage'
+ * } AriaATCIAgent.Message
  */
 
 /**
@@ -11,16 +16,31 @@
  */
 
 /**
- * @typedef {Iterable<*>} AriaATCIAgent.TestIterable
+ * @typedef {Iterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
  */
 
 /**
  * @typedef AriaATCIAgent.TestRunner
- * @property {function(*): Promise<*>} run run a test
+ * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run run a test
  */
 
 /**
  * @callback AriaATCIAgent.ReportResult
- * @param {*} result
+ * @param {AriaATCIData.TestResult} result
  * @returns {Promise<void>}
+ */
+
+/**
+ * @typedef AriaATCIAgent.MockOptions
+ * @property {'request' | 'skip'} [openPage]
+ */
+
+/**
+ * @typedef AriaATCIAgent.CliOptions
+ * @property {boolean} [debug]
+ * @property {boolean} [quiet]
+ * @property {AriaATCIAgent.Message[]} [verbose]
+ * @property {AriaATCIShared.BaseURL} [referenceBaseUrl]
+ * @property {boolean} [mock]
+ * @property {'request' | 'skip'} [mockOpenPage]
  */
