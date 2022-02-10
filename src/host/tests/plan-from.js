@@ -17,7 +17,7 @@ test('plansFrom', async t => {
       ['tests/*.json'],
       ['tests/*.json', 'reference/**'],
     ]) {
-      for (const protocol of [undefined, 'fork', 'api', 'auto']) {
+      for (const protocol of [undefined, 'fork', 'developer']) {
         for (const testPattern of [undefined]) {
           for (const log of [undefined]) {
             for await (const plan of plansFrom(

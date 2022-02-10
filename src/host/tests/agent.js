@@ -13,7 +13,7 @@ test('new AgentController(options)', async t => {
   t.timeout(60000);
   const TEST_DEFINITIONS = [];
   for (const tests of createTests()) {
-    for (const protocol of [undefined, 'fork', 'api']) {
+    for (const protocol of [undefined, 'fork', 'developer']) {
       for (const { debug, quiet, verbose, referenceBaseUrl } of [
         {},
         { debug: true },
