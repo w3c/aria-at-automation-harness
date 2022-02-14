@@ -111,7 +111,7 @@ test('Host.collapse', async t => {
 function normalizeFileRecord(record, coders = textCoders()) {
   if (record.entries) {
     return { ...record, entries: record.entries.map(entry => normalizeFileRecord(entry, coders)) };
-  } else if (isTextFile(record)) {
+  } else if (isTextFile(record.name)) {
     return normalizeTextRecordEOL(record, coders);
   }
   return record;
