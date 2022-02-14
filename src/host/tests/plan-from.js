@@ -87,7 +87,7 @@ function normalizeTestPlanFiles(testPlan, coders = textCoders()) {
  * @returns {boolean}
  */
 function isTextFile(filePath) {
-  return /\.(?:html|js|json|txt)$/.test(filePath);
+  return /\.(?:html|js|json|md|txt)$/.test(filePath);
 }
 
 /**
