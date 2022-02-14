@@ -74,7 +74,10 @@ function normalizeTestPlanFiles(testPlan, coders = textCoders()) {
   return {
     ...testPlan,
     files: testPlan.files.map(file => {
-      return isTextFile(file.name) ? normalizeTextRecordEOL(file, coders) : file;
+      if (isTextFile(file.name)) {
+        return normalizeTextRecordEOL(file, coders);
+      }
+      return file;
     }),
   };
 }
@@ -98,7 +101,7 @@ function isTextFile(filePath) {
 function normalizeTextRecordEOL(file, { textEncoder, textDecoder } = textCoders()) {
   return {
     ...file,
-    bufferData: textEncoder.encode(textDecoder.decode(file.bufferData).replace('\r\n', '\n')),
+    bufferData: textEncoder.encode(textDecoder.decode(file.bufferData).replace(/\r\n/g, '\n')),
   };
 }
 
