@@ -32,7 +32,7 @@ test('plansFrom', async t => {
               }
             )) {
               t.snapshot(
-                omitDates(plan),
+                normalizeTestPlanFiles(omitDates(plan)),
                 JSON.stringify({
                   workingdir: _workingdir,
                   files,
@@ -63,4 +63,48 @@ function omitDates(testPlan) {
       return log;
     }),
   };
+}
+
+/**
+ * Normalize differences in files between operating system environments.
+ * @param {AriaATCIHost.TestPlan} testPlan
+ * @returns {AriaATCIHost.TestPlan}
+ */
+function normalizeTestPlanFiles(testPlan, coders = textCoders()) {
+  return {
+    ...testPlan,
+    files: testPlan.files.map(file => {
+      return isTextFile(file.name) ? normalizeTextRecordEOL(file, coders) : file;
+    }),
+  };
+}
+
+/**
+ * @param {string} filePath
+ * @returns {boolean}
+ */
+function isTextFile(filePath) {
+  return /\.(?:html|js|json|txt)$/.test(filePath);
+}
+
+/**
+ * Replace CRLF line ending sequence with LF line ending sequence.
+ * @param {FileRecord.NamedRecord} file
+ * @param {object} coders
+ * @param {TextEncoder} coders.textEncoder
+ * @param {TextDecoder} coders.textDecoder
+ * @returns {FileRecord.NamedRecord}
+ */
+function normalizeTextRecordEOL(file, { textEncoder, textDecoder } = textCoders()) {
+  return {
+    ...file,
+    bufferData: textEncoder.encode(textDecoder.decode(file.bufferData).replace('\r\n', '\n')),
+  };
+}
+
+/**
+ * @returns {{textEncoder: TextEncoder, textDecoder: TextDecoder}}
+ */
+function textCoders() {
+  return { textEncoder: new TextEncoder(), textDecoder: new TextDecoder() };
 }
