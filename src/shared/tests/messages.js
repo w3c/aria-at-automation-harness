@@ -22,10 +22,14 @@ test('createSharedLogger', t => {
 });
 
 test('log', async t => {
+  const start = Date.now();
   const { log, emitter } = messages.createSharedLogger(MESSAGES);
   emitter.on('message', ({ text, data: { date, ...otherData } }) => {
-    // The date value is not deterministic. Check only that it is a Date.
+    // The date value is not deterministic. Check that it is older than the
+    // start of the test and newer than now.
     t.true(date instanceof Date);
+    t.true(date >= start);
+    t.true(date <= Date.now());
     t.snapshot({ text, data: otherData });
   });
   log(TestMessage.TEST1);

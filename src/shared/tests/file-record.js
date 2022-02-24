@@ -44,7 +44,7 @@ test('createHost', t => {
   assertImplementsHost(fileRecord.createHost());
   assertImplementsHost(fileRecord.createHost({ fs: fs.promises, path: path }));
   assertImplementsHost(fileRecord.createHost({ fs: { async readdir() {}, async readFile() {} } }));
-  assertImplementsHost(fileRecord.createHost({ path: { sep: '/', join() {} }, path: path.posix }));
+  assertImplementsHost(fileRecord.createHost({ path: { sep: '/', join() {} } }));
 });
 test('Host.read', async t => {
   const dirname = path.dirname(fileURLToPath(import.meta.url));

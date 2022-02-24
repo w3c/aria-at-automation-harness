@@ -14,7 +14,7 @@ test('new AgentController(options)', async t => {
   const TEST_DEFINITIONS = [];
   for (const tests of createTests()) {
     for (const protocol of [undefined, 'fork', 'developer']) {
-      for (const { debug, quiet, verbose, referenceBaseUrl } of [
+      for (const config of [
         {},
         { debug: true },
         { verbose: [AgentMessage.START] },
@@ -32,7 +32,7 @@ test('new AgentController(options)', async t => {
       ]) {
         TEST_DEFINITIONS.push({
           tests,
-          options: { protocol, config: { debug, quiet, verbose, referenceBaseUrl } },
+          options: { protocol, config },
         });
       }
     }
@@ -53,14 +53,14 @@ test('new AgentController(options)', async t => {
 
     const controller = new AgentController({
       log,
-      ...omitUndefined({
+      ...(testDefinition.options.protocol && {
         protocol: testDefinition.options.protocol,
-        config: {
-          ...testDefinition.options.config,
-          mock: true,
-          mockOpenPage: 'skip',
-        },
       }),
+      config: {
+        ...testDefinition.options.config,
+        mock: true,
+        mockOpenPage: 'skip',
+      },
     });
 
     const agentLogJob = startJob(async ({ cancelable }) => {
@@ -154,20 +154,6 @@ function createTests() {
 
 function snapshotPrefix({ tests, options }) {
   return JSON.stringify({ tests: tests.map(test => test.info.testId), options });
-}
-
-function omitUndefined(obj) {
-  if (Array.isArray(obj)) {
-    return obj.map(omitUndefined);
-  }
-  if (typeof obj === 'object' && obj !== null) {
-    return Object.fromEntries(
-      Object.entries(obj)
-        .map(([key, value]) => (value === undefined ? null : [key, omitUndefined(value)]))
-        .filter(Boolean)
-    );
-  }
-  return obj;
 }
 
 function omitDates(obj) {

@@ -66,7 +66,7 @@ const ISO_DATE = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z/g;
 const DETERMINISTIC_DATE = '2000-01-01T12:00:00.000Z';
 const URL_PATHNAME_ONLY = /'\/[^/']+((?:\/[^/']*)*')/g;
 const DETERMINISTIC_PATHNAME_PREFIX = (...match) => `'/static${match[1]}`;
-const URL_PORT_PATHNAME = /(https?:\/\/[^:]+:)\d+(\/[^/]+)?/g;
+const URL_PORT_PATHNAME = /(https?:\/\/[^:]+:)\d+(\/[^/\s]+)?/g;
 const DETERMINISTIC_PORT_PATHNAME = (...match) => `${match[1]}8888${match[2] ? '/static' : ''}`;
 
 function replaceNonDeterministicOutput(text) {

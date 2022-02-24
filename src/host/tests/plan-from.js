@@ -8,18 +8,25 @@ import test from 'ava';
 import { plansFrom } from '../plan-from.js';
 
 test('plansFrom', async t => {
+  t.plan(216);
+
   const dirname = path.dirname(fileURLToPath(import.meta.url));
-  for (const _workingdir of ['fixtures/plan-from/plan1']) {
-    const workingdir = path.join(dirname, _workingdir);
+  for (const relativeFixtureWorkingdir of [
+    'fixtures/plan-from/plan1',
+    'fixtures/plan-from/plan2',
+  ]) {
+    const workingdir = path.join(dirname, relativeFixtureWorkingdir);
     for (const files of [
       ['*.json'],
+      ['*.json', '*.{html,js}'],
       ['*.json', 'reference/**'],
-      ['tests/*.json'],
-      ['tests/*.json', 'reference/**'],
+      ['tests/**'],
+      ['tests/**', '*.{html,js}'],
+      ['tests/**', 'reference/**'],
     ]) {
       for (const protocol of [undefined, 'fork', 'developer']) {
-        for (const testPattern of [undefined]) {
-          for (const log of [undefined]) {
+        for (const testPattern of [undefined, '*.json', 'tests/*']) {
+          for (const log of [undefined, () => {}]) {
             for await (const plan of plansFrom(
               {
                 workingdir,
@@ -34,11 +41,11 @@ test('plansFrom', async t => {
               t.snapshot(
                 normalizeTestPlanFiles(omitDates(plan)),
                 JSON.stringify({
-                  workingdir: _workingdir,
+                  workingdir: relativeFixtureWorkingdir,
                   files,
                   protocol,
                   testPattern,
-                  log,
+                  log: log !== undefined ? typeof log : undefined,
                 })
               );
             }

@@ -6,15 +6,13 @@ test('log', async t => {
   t.plan(16);
   const { log, emitter } = createHostLogger();
   const logAndResolveMessage = async (...args) => {
-    const {
-      text,
-      data: { date, ...otherData },
-    } = await new Promise(resolve => {
+    const message = await new Promise(resolve => {
       emitter.once('message', resolve);
       log(...args);
     });
     // Remove non-determinstic date from the log data.
-    return { text, data: otherData };
+    delete message.data.date;
+    return message;
   };
   t.snapshot(await logAndResolveMessage(HostMessage.START));
   t.snapshot(
