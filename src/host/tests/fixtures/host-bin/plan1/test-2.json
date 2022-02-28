@@ -1,0 +1,20 @@
+{
+  "info": { "testId": 2, "title": "test 2", "task": "interaction", "references": [] },
+  "target": {
+    "at": { "key": "at", "name": "At", "raw": "AT" },
+    "mode": "interaction",
+    "referencePage": "index.html"
+  },
+  "instructions": { "raw": "", "user": "" },
+  "commands": [
+    {
+      "id": "UP_ARROW,DOWN_ARROW",
+      "keystroke": "up arrow, then down arrow",
+      "keypresses": [
+        { "id": "UP_ARROW", "keystroke": "up arrow" },
+        { "id": "DOWN_ARROW", "keystroke": "down arrow" }
+      ]
+    }
+  ],
+  "assertions": [{ "expectation": "role down", "priority": 1 }]
+}

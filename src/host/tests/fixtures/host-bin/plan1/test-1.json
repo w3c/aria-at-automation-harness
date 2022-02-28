@@ -1,0 +1,17 @@
+{
+  "info": { "testId": 1, "title": "test 1", "task": "test", "references": [] },
+  "target": {
+    "at": { "key": "at", "name": "At", "raw": "AT" },
+    "mode": "reading",
+    "referencePage": "index.html"
+  },
+  "instructions": { "raw": "", "user": "" },
+  "commands": [
+    {
+      "id": "UP_ARROW",
+      "keystroke": "up arrow",
+      "keypresses": [{ "id": "UP_ARROW", "keystroke": "up arrow" }]
+    }
+  ],
+  "assertions": [{ "expectation": "role up", "priority": 1 }]
+}

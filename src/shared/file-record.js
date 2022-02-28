@@ -106,7 +106,7 @@ class FileSystemHost {
    */
   async readFS(root) {
     try {
-      const names = await this.fs.readdir(root);
+      const names = (await this.fs.readdir(root)).sort();
       return { entries: names.map(name => ({ name })) };
     } catch (error) {
       if (error.code === 'ENOTDIR') {
