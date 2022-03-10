@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "noEmit": true,
+    "target": "ES6",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "lib": ["es2018"]
+  },
+  "include": ["src/**/*"]
+}
