@@ -2,11 +2,9 @@
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
 
-import { WebDriver, until, By } from 'selenium-webdriver';
-
 import { startJob } from '../shared/job.js';
+import { iterateEmitter } from '../shared/iterate-emitter.js';
 
-import { ATDriver, ATKey } from './at-driver.js';
 import { AgentMessage } from './messages.js';
 
 /**
@@ -28,14 +26,13 @@ export class DriverTestRunner {
    * @param {object} options
    * @param {AriaATCIShared.BaseURL} options.baseUrl
    * @param {AriaATCIAgent.Log} options.log
-   * @param {WebDriver} options.webDriver
-   * @param {ATDriver} options.atDriver
    */
-  constructor({ baseUrl, log, webDriver, atDriver }) {
+  constructor({ baseUrl, log, browser, page, vmWithPlaywright }) {
     this.baseUrl = baseUrl;
     this.log = log;
-    this.webDriver = webDriver;
-    this.atDriver = atDriver;
+    this.browser = browser;
+    this.page = page;
+    this.vmWithPlaywright = vmWithPlaywright;
   }
 
   /**
@@ -43,14 +40,12 @@ export class DriverTestRunner {
    */
   async openPage({ url, referencePage }) {
     await this.log(AgentMessage.OPEN_PAGE, { url });
-    await this.webDriver.switchTo().defaultContent();
-    await this.webDriver.navigate().to(url.toString());
+    await this.page.goto(url.toString());
 
     try {
-      const runTestSetup = await this.webDriver.wait(
-        until.elementLocated(By.className('button-run-test-setup')),
-        RUN_TEST_SETUP_BUTTON_TIMEOUT
-      );
+      const runTestSetup = await this.page.waitForSelector('.button-run-test-setup', {
+        timeout: RUN_TEST_SETUP_BUTTON_TIMEOUT,
+      });
       await timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY);
       await runTestSetup.click();
     } catch ({}) {
@@ -73,7 +68,7 @@ export class DriverTestRunner {
     await this.log(AgentMessage.START_TEST, { id: test.info.testId, title: test.info.task });
 
     await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
-    await this.webDriver.navigate().to('about:blank');
+    await this.page.goto('about:blank');
 
     const commandsOutput = [];
     const results = [];
@@ -138,7 +133,9 @@ export class DriverTestRunner {
   _collectSpeech() {
     let spoken = [];
     const speechJob = startJob(async signal => {
-      for await (const speech of signal.cancelable(this.atDriver.speeches())) {
+      const { screenReader } = this.vmWithPlaywright;
+      const messagess = iterateEmitter(screenReader, 'message', 'close', 'error');
+      for await (const speech of signal.cancelable(messages)) {
         spoken.push(speech);
         this.log(AgentMessage.SPEECH_EVENT, { spokenText: speech });
       }

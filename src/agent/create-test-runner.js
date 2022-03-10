@@ -7,8 +7,7 @@
 
 import { MockTestRunner } from './mock-test-runner.js';
 import { DriverTestRunner } from './driver-test-runner.js';
-import { createWebDriver } from './web-driver.js';
-import { createATDriver } from './at-driver.js';
+import { createVM } from 'assistive-playwright-client';
 
 /**
  * @param {object} options
@@ -25,9 +24,28 @@ export async function createRunner(options) {
   if (options.mock) {
     return new MockTestRunner(options);
   }
-  const [webDriver, atDriver] = await Promise.all([
-    createWebDriver({ url: options.webDriverUrl, abortSignal: options.abortSignal }),
-    createATDriver({ url: options.atDriverUrl, abortSignal: options.abortSignal }),
-  ]);
-  return new DriverTestRunner({ ...options, webDriver, atDriver });
+  if (!options.abortSignal) process.exit(1);
+  const { browser, page, vmWithPlaywright } = await create('firefox', options.abortSignal);
+
+  return new DriverTestRunner({ ...options, browser, page, vmWithPlaywright });
+}
+
+async function create(browserName, abortSignal) {
+  const vmWithPlaywright = await createVM({
+    vmSettings: {
+      type: 'virtualbox',
+      vm: 'win10-chromium-nvda',
+      snapshot: 'nvda',
+    },
+  });
+  abortSignal.then(() => vmWithPlaywright.vm.destroy());
+
+  try {
+    const browser = await vmWithPlaywright[browserName].launch({ headless: false });
+    const page = await browser.newPage({ viewport: null });
+
+    return { browser, page, vmWithPlaywright };
+  } catch ({}) {
+    await vmWithPlaywright.vm.destroy();
+  }
 }
