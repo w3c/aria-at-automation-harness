@@ -294,8 +294,13 @@ class AgentDeveloperProtocol extends AgentProtocol {
     this._logEmitter = logEmitter;
     this._resultEmitter = new EventEmitter();
 
+    const abortSignal = new Promise(resolve => {
+      this._testEmitter.once('stop', () => resolve());
+    });
+
     this.exited = agentMain({
       runner: await createRunner({
+        abortSignal,
         baseUrl: options.referenceBaseUrl || new URL('http://localhost:4400'),
         log,
         mock: agentMockOptions(options),
