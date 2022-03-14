@@ -32,7 +32,7 @@ export class HostServer {
     /** @type {HostServerBaseURL} */
     this.baseUrl = new HostServerBaseURL({
       protocol: 'http',
-      hostname: 'localhost',
+      hostname: this.options.referenceHostname,
       port: -1,
       pathname: '',
     });
