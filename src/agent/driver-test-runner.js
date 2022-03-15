@@ -5,6 +5,7 @@
 import { startJob } from '../shared/job.js';
 import { iterateEmitter } from '../shared/iterate-emitter.js';
 
+import { ATDriver, ATKey } from './at-driver.js';
 import { AgentMessage } from './messages.js';
 
 /**
@@ -58,7 +59,15 @@ export class DriverTestRunner {
    */
   async sendKeys(sequence) {
     await this.log(AgentMessage.PRESS_KEYS, { keys: sequence });
-    await this.atDriver.sendKeys(sequence);
+
+    for (const chord of sequence) {
+      for (const { key } of chord) {
+        await this.vmWithPlaywright.keyboard.down(key);
+      }
+      for (const { key } of Array.from(chord).reverse()) {
+        await this.vmWithPlaywright.keyboard.up(key);
+      }
+    }
   }
 
   /**
@@ -90,7 +99,7 @@ export class DriverTestRunner {
 
         const clearSpeechJob = this._collectSpeech();
         await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
-        await this.webDriver.navigate().to('about:blank');
+        await this.page.goto('about:blank');
         await clearSpeechJob.wait({ debounceDelay: AFTER_NAVIGATION_DELAY });
 
         commandsOutput.push({
@@ -134,7 +143,7 @@ export class DriverTestRunner {
     let spoken = [];
     const speechJob = startJob(async signal => {
       const { screenReader } = this.vmWithPlaywright;
-      const messagess = iterateEmitter(screenReader, 'message', 'close', 'error');
+      const messages = iterateEmitter(screenReader, 'message', 'close', 'error');
       for await (const speech of signal.cancelable(messages)) {
         spoken.push(speech);
         this.log(AgentMessage.SPEECH_EVENT, { spokenText: speech });
@@ -201,7 +210,12 @@ export function atKeysFromCommand(command) {
           .split('+')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
-          .map(key => key.replace(/\s?arrow\s?/g, ''))
+          .map(key =>
+            key.replace(/([^\s]*)\s*arrow\s*([^\s]*)/g, (_, before, after) => {
+              const direction = before || after;
+              return `Arrow${direction[0].toUpperCase()}${direction.slice(1)}`;
+            })
+          )
           // remove whitespace for keys like 'page up'
           .map(key => key.replace(/\s/g, ''))
           .map(key => ATKey.key(key))
