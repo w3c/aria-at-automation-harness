@@ -45,7 +45,8 @@ async function create(browserName, abortSignal) {
     const page = await browser.newPage({ viewport: null });
 
     return { browser, page, vmWithPlaywright };
-  } catch ({}) {
+  } catch (error) {
     await vmWithPlaywright.vm.destroy();
+    throw error;
   }
 }
