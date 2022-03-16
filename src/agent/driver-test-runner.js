@@ -208,7 +208,7 @@ export function atKeysFromCommand(command) {
       ATKey.chord(
         ...keystroke
           .split('+')
-          .map(key => key.trim().toLowerCase())
+          .map(key => key.trim())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
           .map(key =>
             key.replace(/([^\s]*)\s*arrow\s*([^\s]*)/g, (_, before, after) => {
