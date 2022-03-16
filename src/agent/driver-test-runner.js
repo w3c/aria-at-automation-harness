@@ -211,9 +211,8 @@ export function atKeysFromCommand(command) {
           .map(key => key.trim())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
           .map(key =>
-            key.replace(/([^\s]*)\s*arrow\s*([^\s]*)/g, (_, before, after) => {
-              const direction = before || after;
-              return `Arrow${direction[0].toUpperCase()}${direction.slice(1)}`;
+            key.replace(/([^\s]*)\s*arrow/gi, (_, direction) => {
+              return `Arrow${direction[0].toUpperCase()}${direction.slice(1).toLowerCase()}`;
             })
           )
           // remove whitespace for keys like 'page up'
