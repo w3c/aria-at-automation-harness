@@ -209,6 +209,7 @@ export function atKeysFromCommand(command) {
         ...keystroke
           .split('+')
           .map(key => key.trim())
+          .map(key => (key.length === 1 ? key.toLowerCase() : key))
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
           .map(key =>
             key.replace(/([^\s]*)\s*arrow/gi, (_, direction) => {
