@@ -199,6 +199,10 @@ export function validateKeysFromCommand(command) {
   return { value: command };
 }
 
+const replaceDirection = (_, direction) => {
+  return `Arrow${direction[0].toUpperCase()}${direction.slice(1).toLowerCase()}`;
+};
+
 /**
  * @param {CommandKeystroke} command
  */
@@ -210,12 +214,10 @@ export function atKeysFromCommand(command) {
           .split('+')
           .map(key => key.trim())
           .map(key => (key.length === 1 ? key.toLowerCase() : key))
-          // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
-          .map(key =>
-            key.replace(/([^\s]*)\s*arrow/gi, (_, direction) => {
-              return `Arrow${direction[0].toUpperCase()}${direction.slice(1).toLowerCase()}`;
-            })
-          )
+          // `up arrow`, `down arrow`, etc are sent as `ArrowUp`, `ArrowDown`, etc
+          .map(key => key.replace(/([^\s]+)\s*arrow/gi, replaceDirection))
+          // transform `up`, `down`, etc. to `ArrowUp`, `ArrowDown`, etc.
+          .map(key => key.replace(/^(up|right|down|left)$/i, replaceDirection))
           // remove whitespace for keys like 'page up'
           .map(key => key.replace(/\s/g, ''))
           .map(key => ATKey.key(key))
