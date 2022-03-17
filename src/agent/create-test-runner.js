@@ -24,17 +24,22 @@ export async function createRunner(options) {
   if (options.mock) {
     return new MockTestRunner(options);
   }
-  const { browser, page, vmWithPlaywright } = await create('chromium', options.abortSignal);
+  const { browser, page, vmWithPlaywright } = await create({
+    browserName: process.env.AWD_BROWSER_NAME,
+    vmName: process.env.AWD_VM_NAME,
+    snapshotName: process.env.AWD_SNAPSHOT_NAME,
+    abortSignal: options.abortSignal,
+  });
 
   return new DriverTestRunner({ ...options, browser, page, vmWithPlaywright });
 }
 
-async function create(browserName, abortSignal) {
+async function create({ browserName, vmName, snapshotName, abortSignal }) {
   const vmWithPlaywright = await createVM({
     vmSettings: {
       type: 'virtualbox',
-      vm: 'win10-chromium-nvda',
-      snapshot: 'nvda',
+      vm: vmName,
+      snapshot: snapshotName,
     },
   });
   abortSignal.then(() => vmWithPlaywright.vm.destroy());
