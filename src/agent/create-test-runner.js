@@ -24,7 +24,6 @@ export async function createRunner(options) {
   if (options.mock) {
     return new MockTestRunner(options);
   }
-  if (!options.abortSignal) process.exit(1);
   const { browser, page, vmWithPlaywright } = await create('firefox', options.abortSignal);
 
   return new DriverTestRunner({ ...options, browser, page, vmWithPlaywright });
