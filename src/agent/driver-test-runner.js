@@ -28,11 +28,12 @@ export class DriverTestRunner {
    * @param {AriaATCIShared.BaseURL} options.baseUrl
    * @param {AriaATCIAgent.Log} options.log
    */
-  constructor({ baseUrl, log, browser, page, vmWithPlaywright }) {
+  constructor({ baseUrl, log, browser, mouse, page, vmWithPlaywright }) {
     this.baseUrl = baseUrl;
     this.log = log;
     this.browser = browser;
     this.page = page;
+    this.mouse = mouse;
     this.vmWithPlaywright = vmWithPlaywright;
   }
 
@@ -48,6 +49,17 @@ export class DriverTestRunner {
         timeout: RUN_TEST_SETUP_BUTTON_TIMEOUT,
       });
       await timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY);
+      //await this.page.bringToFront(); // This does not appear to give focus to the operating system window.
+      // Use the AssistivePlaywright-provided "mouse" interface to simulate
+      // clicking on the page. This ensures that the browser window has the
+      // focus of the operating system window manager so that any keypresses in
+      // the test are sent to the correct window.
+      //
+      // The `page.bringToFront` method provided by Playwright may be capable
+      // of performing this action, but since its documentation is somewhat
+      // vague, and initial experimentation suggested that it does not
+      // influence the state of the window manager.
+      await this.mouse.click(0, 0, { origin: await page.$('body') });
       await runTestSetup.click();
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
