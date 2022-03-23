@@ -102,10 +102,10 @@ export class DriverTestRunner {
       });
       await openPageSpeech.wait({ debounceDelay: AFTER_NAVIGATION_DELAY });
 
-      const commandOutputSpeech = this._collectSpeech();
       const { value: validCommand, errors } = validateKeysFromCommand(command);
 
       if (validCommand) {
+        const commandOutputSpeech = this._collectSpeech();
         await this.sendKeys(atKeysFromCommand(validCommand));
         const spokenOutput = await commandOutputSpeech.wait({ debounceDelay: AFTER_KEYS_DELAY });
 
