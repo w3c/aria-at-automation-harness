@@ -235,7 +235,17 @@ class AgentForkProtocol extends AgentProtocol {
 
   async stop() {
     if (this._processFork) {
-      this._processFork.kill(SIGINT);
+      this._processFork.send({ type: 'stop' });
+      try {
+        await Promise.race([
+          this.exited,
+          new Promise(resolve => setTimeout(resolve, 1000)).then(() => {
+            throw new Error('AgentProtocol: graceful stop timeout');
+          }),
+        ]);
+      } catch (_) {
+        this._processFork.kill(SIGINT);
+      }
     }
     await this.exited;
 
