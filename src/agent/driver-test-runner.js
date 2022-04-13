@@ -34,7 +34,9 @@ export class DriverTestRunner {
   }
 
   /**
-   * @param {URL} url
+   * @param {object} options
+   * @param {URL} options.url
+   * @param {string} options.referencePage
    */
   async openPage({ url, referencePage }) {
     await this.log(AgentMessage.OPEN_PAGE, { url });

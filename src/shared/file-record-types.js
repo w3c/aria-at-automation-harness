@@ -16,7 +16,9 @@ FileRecord.Host = {
    * @param {string} [options.glob] a glob pattern to filter what is read
    * @returns {Promise<FileRecord.Record>} a graph of directories and files read
    */
-  async read(root, options) {},
+  async read(root, options) {
+    return null;
+  },
 
   /**
    * Collapse a record graph into a flat list of only bufferData records.

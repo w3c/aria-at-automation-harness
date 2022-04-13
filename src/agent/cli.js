@@ -171,13 +171,13 @@ export async function createAgentCliParser({ signals, send, stdin, stdout, stder
     ]);
 }
 
-export async function parseAgentCli({ argv = [], ...parserConfiguration } = {}) {
+export async function parseAgentCli({ argv = [], ...parserConfiguration }) {
   return await (await createAgentCliParser(parserConfiguration)).parse(hideBin(argv));
 }
 
 /**
  * Summarize cli options as mock options for creating a test runner.
- * @param {AgentATCIAgent.CliOptions} cliOptions
+ * @param {AriaATCIAgent.CliOptions} cliOptions
  * @returns {AriaATCIAgent.MockOptions}
  */
 export function agentMockOptions(cliOptions) {
@@ -199,9 +199,12 @@ async function stopAfterMain(argv) {
 /**
  * Build and assign a test runner based on passed arguments.
  * @param {object} argv
+ * @param {{}} argv.atDriverUrl
  * @param {AriaATCIAgent.Log} argv.log
- * @param {AriaATCIAgent.TestRunner} argv.runner
  * @param {AriaATCIAgent.MockOptions} [argv.mock]
+ * @param {AriaATCIShared.BaseURL} argv.referenceBaseUrl
+ * @param {AriaATCIAgent.TestRunner} argv.runner
+ * @param {AriaATCIShared.BaseURL} argv.webDriverUrl
  */
 async function agentRunnerMiddleware(argv) {
   argv.runner = await createRunner({

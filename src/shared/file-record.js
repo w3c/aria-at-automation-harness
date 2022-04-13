@@ -4,8 +4,8 @@
  * @module shared
  */
 
-import _fs from 'fs';
-import _path from 'path';
+import * as _fs from 'fs';
+import * as _path from 'path';
 
 import { compileGlob } from './file-glob.js';
 

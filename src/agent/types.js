@@ -21,7 +21,7 @@
  */
 
 /**
- * @typedef {Iterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
+ * @typedef {AsyncIterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
  */
 
 /**
@@ -32,7 +32,7 @@
 /**
  * @callback AriaATCIAgent.ReportResult
  * @param {AriaATCIData.TestResult} result
- * @returns {Promise<void>}
+ * @returns {Promise<void> | void}
  */
 
 /**

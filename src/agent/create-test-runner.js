@@ -13,9 +13,11 @@ import { createATDriver } from './at-driver.js';
 /**
  * @param {object} options
  * @param {Promise<void>} options.abortSignal resolves when runner should stop
+ * @param {{hostname: string, port: number}} options.atDriverUrl
  * @param {AriaATCIShared.BaseURL} options.baseUrl
  * @param {AriaATCIAgent.Log} options.log
  * @param {AriaATCIAgent.MockOptions} [options.mock]
+ * @param {{toString: function(): string}} options.webDriverUrl
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {

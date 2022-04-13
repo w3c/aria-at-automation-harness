@@ -83,6 +83,7 @@ export class MockTestRunner {
     );
     return {
       testId: task.info.testId,
+      commands: [],
       results: await task.commands.reduce(
         async (carry, command) => [
           ...(await carry),

@@ -5,7 +5,7 @@ import { iterateEmitter } from '../shared/iterate-emitter.js';
 export async function createATDriver({
   url: { hostname = 'localhost', port = 4382 } = {},
   abortSignal,
-} = {}) {
+}) {
   if (!abortSignal) process.exit(1);
   const socket = new ws(`ws://${hostname}:${port}`, ['v1.aria-at.bocoup.com']);
   const driver = new ATDriver({ socket });
