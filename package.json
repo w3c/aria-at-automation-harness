@@ -35,6 +35,6 @@
     "*.{js,css,md}": "prettier --write"
   },
   "ava": {
-    "timeout": "5m"
+    "timeout": "1m"
   }
 }
