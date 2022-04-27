@@ -155,6 +155,11 @@ export class DriverTestRunner {
     let spoken = [];
     const speechJob = startJob(async signal => {
       const { screenReader } = this.vmWithPlaywright;
+
+      // Define the method required by `iterateEmitter`.
+      // TODO(jugglinmike): formalize this
+      screenReader.removeListener = screenReader.off;
+
       const messages = iterateEmitter(screenReader, 'message', 'close', 'error');
       for await (const speech of signal.cancelable(messages)) {
         spoken.push(speech);
