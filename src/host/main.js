@@ -43,27 +43,33 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
     log(HostMessage.START_AGENT);
     await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
 
-    for (const test of plan.tests) {
-      log(HostMessage.START_TEST);
-      const testLogJob = startJob(async function (signal) {
-        for await (const testLog of signal.cancelable(agent.logs())) {
-          plan = addLogToTestPlan(plan, testLog);
-          plan = addTestLogToTestPlan(plan, test);
-        }
-      });
+    try {
+      for (const test of plan.tests) {
+        log(HostMessage.START_TEST);
+        const testLogJob = startJob(async function (signal) {
+          for await (const testLog of signal.cancelable(agent.logs())) {
+            plan = addLogToTestPlan(plan, testLog);
+            plan = addTestLogToTestPlan(plan, test);
+          }
+        });
 
-      const file = plan.files.find(({ name }) => name === test.filepath);
-      const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
-      plan = addTestResultToTestPlan(plan, test.filepath, result);
+        const file = plan.files.find(({ name }) => name === test.filepath);
+        const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
+        plan = addTestResultToTestPlan(plan, test.filepath, result);
 
-      await testLogJob.cancel();
+        await testLogJob.cancel();
+      }
+
+      server.removeFiles(serverDirectory);
+      log(HostMessage.REMOVE_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
+
+      log(HostMessage.STOP_AGENT);
+    } finally {
+      // In the event of error, the agent may emit relevant information via its
+      // logging channel. Attempt to cleanly stop the agent even following
+      // errors so that such information reaches the end user.
+      await agent.stop();
     }
-
-    server.removeFiles(serverDirectory);
-    log(HostMessage.REMOVE_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
-
-    log(HostMessage.STOP_AGENT);
-    await agent.stop();
 
     await emitPlanResults(plan);
   }
