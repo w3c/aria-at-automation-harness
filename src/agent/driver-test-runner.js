@@ -235,6 +235,13 @@ export function atKeysFromCommand(command) {
           .map(key => key.replace(/([^\s]+)\s*arrow/gi, replaceDirection))
           // transform `up`, `down`, etc. to `ArrowUp`, `ArrowDown`, etc.
           .map(key => key.replace(/^(up|right|down|left)$/i, replaceDirection))
+          // Tests written for macOS may reference the "Option" key, which
+          // corresponds to the key named "Alt" on non-Apple hardware.
+          .map(key => (key === 'Option' ? 'Alt' : key))
+          .map(key => (key === 'Ctrl' ? 'ControlLeft' : key))
+          // Tests written for macOS may reference the "Command" key, which
+          // AssistiveWebdriver names "OSLeft" and "OSRight".
+          .map(key => (key === 'Command' ? 'OSLeft' : key))
           // remove whitespace for keys like 'page up'
           .map(key => key.replace(/\s/g, ''))
           .map(key => ATKey.key(key))
