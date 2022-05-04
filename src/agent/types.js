@@ -7,7 +7,12 @@
  * @typedef {'start'
  * | 'uncaughtError'
  * | 'willStop'
+ * | 'startTest'
  * | 'openPage'
+ * | 'invalidKeys'
+ * | 'pressKeys'
+ * | 'speechEvent'
+ * | 'noRunTestSetup'
  * } AriaATCIAgent.Message
  */
 
@@ -43,4 +48,6 @@
  * @property {AriaATCIShared.BaseURL} [referenceBaseUrl]
  * @property {boolean} [mock]
  * @property {'request' | 'skip'} [mockOpenPage]
+ * @property {URL} [webDriverUrl]
+ * @property {URL} [atDriverUrl]
  */

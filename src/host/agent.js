@@ -130,9 +130,10 @@ class AgentProtocol {
    * @returns {Promise<AriaATCIData.TestResult>}
    */
   async run(test) {
+    const { testId } = test.info;
     this._sendTest(test);
     for await (const result of this._results()) {
-      if (result.testId === test.info.testId) {
+      if (result.testId === testId) {
         return result;
       }
     }
@@ -234,7 +235,17 @@ class AgentForkProtocol extends AgentProtocol {
 
   async stop() {
     if (this._processFork) {
-      this._processFork.kill(SIGINT);
+      this._processFork.send({ type: 'stop' });
+      try {
+        await Promise.race([
+          this.exited,
+          new Promise(resolve => setTimeout(resolve, 1000)).then(() => {
+            throw new Error('AgentProtocol: graceful stop timeout');
+          }),
+        ]);
+      } catch (_) {
+        this._processFork.kill(SIGINT);
+      }
     }
     await this.exited;
 
@@ -293,8 +304,13 @@ class AgentDeveloperProtocol extends AgentProtocol {
     this._logEmitter = logEmitter;
     this._resultEmitter = new EventEmitter();
 
+    const abortSignal = new Promise(resolve => {
+      this._testEmitter.once('stop', () => resolve());
+    });
+
     this.exited = agentMain({
       runner: await createRunner({
+        abortSignal,
         baseUrl: options.referenceBaseUrl || new URL('http://localhost:4400'),
         log,
         mock: agentMockOptions(options),

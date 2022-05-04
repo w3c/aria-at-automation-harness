@@ -8,6 +8,9 @@ import test from 'ava';
 import { plansFrom } from '../plan-from.js';
 
 test('plansFrom', async t => {
+  // Set a 5 minute timeout on this test.
+  t.timeout(5 * 60 * 1000);
+
   t.plan(216);
 
   const dirname = path.dirname(fileURLToPath(import.meta.url));

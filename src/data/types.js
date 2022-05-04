@@ -76,6 +76,10 @@
  * Result from a single test in a test plan.
  * @typedef AriaATCIData.TestResult
  * @property {number} testId numeric id of a test in a test plan
+ * @property {object[]} commands input commands and the speech emitted
+ * @property {string} commands[].command id of input command sent to system
+ * @property {string} [commands[].output] speech emitted
+ * @property {string[]} [commands[].errors] errors that occured while during command
  * @property {object[]} results permutation of input commands and assertions passing or not passing
  * @property {string} results[].command id of input command sent to system
  * @property {string} results[].expectation description of expected assertion

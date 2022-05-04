@@ -16,6 +16,14 @@
  */
 
 /**
+ * @typedef AriaATCIShared.PartialBaseURL
+ * @property {string} [protocol]
+ * @property {string} [hostname]
+ * @property {number} [port]
+ * @property {string} [pathname]
+ */
+
+/**
  * A token to some parallelized work.
  *
  * Canceling the job will stop any loops of async iterables that have been

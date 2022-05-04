@@ -9,6 +9,9 @@
 import { request } from 'http';
 import { AgentMessage } from './messages.js';
 
+/**
+ * @implements {AriaATCIAgent.TestRunner}
+ */
 export class MockTestRunner {
   /**
    * @param {object} options
