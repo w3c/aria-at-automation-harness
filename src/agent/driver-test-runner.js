@@ -2,6 +2,9 @@
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
 
+import { refreshScreenReaderText } from 'assistive-webdriver';
+import { By, until } from 'selenium-webdriver';
+
 import { startJob } from '../shared/job.js';
 import { iterateEmitter } from '../shared/iterate-emitter.js';
 
@@ -28,13 +31,10 @@ export class DriverTestRunner {
    * @param {AriaATCIShared.BaseURL} options.baseUrl
    * @param {AriaATCIAgent.Log} options.log
    */
-  constructor({ baseUrl, log, browser, mouse, page, vmWithPlaywright }) {
+  constructor({ baseUrl, log, driver }) {
     this.baseUrl = baseUrl;
     this.log = log;
-    this.browser = browser;
-    this.page = page;
-    this.mouse = mouse;
-    this.vmWithPlaywright = vmWithPlaywright;
+    this.driver = driver;
   }
 
   /**
@@ -42,24 +42,13 @@ export class DriverTestRunner {
    */
   async openPage({ url, referencePage }) {
     await this.log(AgentMessage.OPEN_PAGE, { url });
-    await this.page.goto(url.toString());
+    await this.driver.get(url.toString());
 
     try {
-      const runTestSetup = await this.page.waitForSelector('.button-run-test-setup', {
-        timeout: RUN_TEST_SETUP_BUTTON_TIMEOUT,
-      });
+      const runTestSetup = await this.driver.wait(
+        until.elementsLocated(By.css('.button-run-test-setup'))
+      );
       await timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY);
-      //await this.page.bringToFront(); // This does not appear to give focus to the operating system window.
-      // Use the AssistivePlaywright-provided "mouse" interface to simulate
-      // clicking on the page. This ensures that the browser window has the
-      // focus of the operating system window manager so that any keypresses in
-      // the test are sent to the correct window.
-      //
-      // The `page.bringToFront` method provided by Playwright may be capable
-      // of performing this action, but since its documentation is somewhat
-      // vague, and initial experimentation suggested that it does not
-      // influence the state of the window manager.
-      await this.mouse.click(0, 0, { origin: await page.$('body') });
       await runTestSetup.click();
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
@@ -72,13 +61,18 @@ export class DriverTestRunner {
   async sendKeys(sequence) {
     await this.log(AgentMessage.PRESS_KEYS, { keys: sequence });
 
-    for (const chord of sequence) {
+    for (const chord of sequences) {
+      const actions = this.driver.actions();
+
       for (const { key } of chord) {
-        await this.vmWithPlaywright.keyboard.down(key);
+        actions.keyDown(Key[key]);
       }
+
       for (const { key } of Array.from(chord).reverse()) {
-        await this.vmWithPlaywright.keyboard.up(key);
+        actions.keyUp(Key[key]);
       }
+
+      await actions.perform();
     }
   }
 
@@ -89,7 +83,7 @@ export class DriverTestRunner {
     await this.log(AgentMessage.START_TEST, { id: test.info.testId, title: test.info.task });
 
     await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
-    await this.page.goto('about:blank');
+    await this.driver.get('about:blank');
 
     const commandsOutput = [];
     const results = [];
@@ -111,7 +105,7 @@ export class DriverTestRunner {
 
         const clearSpeechJob = this._collectSpeech();
         await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
-        await this.page.goto('about:blank');
+        await this.driver.get('about:blank');
         await clearSpeechJob.wait({ debounceDelay: AFTER_NAVIGATION_DELAY });
 
         commandsOutput.push({
@@ -154,13 +148,14 @@ export class DriverTestRunner {
   _collectSpeech() {
     let spoken = [];
     const speechJob = startJob(async signal => {
-      const { screenReader } = this.vmWithPlaywright;
+      const messages = (async function* () {
+        while (true) {
+          for (const text of await refreshScreenReaderText(this.driver)) {
+            yield text;
+          }
+        }
+      })();
 
-      // Define the method required by `iterateEmitter`.
-      // TODO(jugglinmike): formalize this
-      screenReader.removeListener = screenReader.off;
-
-      const messages = iterateEmitter(screenReader, 'message', 'close', 'error');
       for await (const speech of signal.cancelable(messages)) {
         spoken.push(speech);
         this.log(AgentMessage.SPEECH_EVENT, { spokenText: speech });
@@ -192,21 +187,8 @@ export class DriverTestRunner {
 export function validateKeysFromCommand(command) {
   const errors = [];
   for (const { keystroke } of command.keypresses) {
-    // Some old test plans have keys that contain indications of unspecified
-    // instructions ('/') or additional instructions that are not standardized
-    // in test plans. These keys should be updated to be separate commands or
-    // use a standardized approach.
-    if (/\//.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain '/'.`);
-    }
-    if (/[()]/.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain '(' or ')'.`);
-    }
-    if (/\bor\b/.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain 'or'.`);
-    }
-    if (/\bfollowed\b/.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain 'followed' or 'followed by'.`);
+    if (!(keystroke in Keys)) {
+      errors.push(`Unrecognized key: "${keystroke}"`);
     }
   }
 

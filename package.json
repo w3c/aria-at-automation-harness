@@ -15,7 +15,7 @@
     "prettier": "^2.4.1"
   },
   "dependencies": {
-    "assistive-playwright-client": "^0.2.1",
+    "assistive-webdriver": "^0.1.1",
     "express": "^4.17.1",
     "selenium-webdriver": "^4.1.0",
     "ws": "^8.3.0",

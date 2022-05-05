@@ -5,9 +5,10 @@
  * @module agent
  */
 
+import { Builder, Browser } from 'selenium-webdriver';
+
 import { MockTestRunner } from './mock-test-runner.js';
 import { DriverTestRunner } from './driver-test-runner.js';
-import { createVM } from 'assistive-playwright-client';
 
 /**
  * @param {object} options
@@ -24,38 +25,25 @@ export async function createRunner(options) {
   if (options.mock) {
     return new MockTestRunner(options);
   }
-  const { browser, page, mouse, vmWithPlaywright } = await create({
-    browserName: process.env.AWD_BROWSER_NAME,
-    vmName: process.env.AWD_VM_NAME,
-    snapshotName: process.env.AWD_SNAPSHOT_NAME,
+  const driver = await create({
     abortSignal: options.abortSignal,
+    browserName: process.env.AWD_BROWSER_NAME,
+    screenReaderName: process.env.AWD_SCREEN_READER_NAME,
   });
 
-  return new DriverTestRunner({ ...options, browser, page, mouse, vmWithPlaywright });
+  return new DriverTestRunner({ ...options, driver });
 }
 
-async function create({ browserName, vmName, snapshotName, abortSignal }) {
-  const vmWithPlaywright = await createVM({
-    vmSettings: {
-      type: 'virtualbox',
-      vm: vmName,
-      snapshot: snapshotName,
-    },
-  });
-  abortSignal.then(() => vmWithPlaywright.vm.destroy());
+async function create({ abortSignal, browserName, screenReaderName }) {
+  const driver = await new Builder()
+    .withCapabilities({
+      'awd:vm-config': screenReaderName,
+    })
+    .forBrowser(Browser[browserName])
+    .usingServer('http://localhost:3000/')
+    .build();
 
-  try {
-    const browser = await vmWithPlaywright[browserName].launch({ headless: false });
-    const page = await browser.newPage({ viewport: null });
-    // The "mouse" interface provided by AssistivePlaywright is not used by
-    // tests directly. Instead, it is used to ensure that the browser window
-    // has focus in the operating system window manager, ensuring that any key
-    // presses scripted by the tests are sent to the correct window.
-    const mouse = await vmWithPlaywright.calibrateMouse(page);
+  abortSignal.then(() => driver.quit());
 
-    return { browser, page, mouse, vmWithPlaywright };
-  } catch (error) {
-    await vmWithPlaywright.vm.destroy();
-    throw error;
-  }
+  return driver;
 }
