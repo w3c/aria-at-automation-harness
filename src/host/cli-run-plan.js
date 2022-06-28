@@ -78,13 +78,13 @@ export const builder = (args = yargs) =>
         coerce(arg) {
           return new URL(arg);
         },
-        default: 'localhost:4444',
+        default: 'http://localhost:4444',
       },
       'agent-at-driver-url': {
         coerce(arg) {
           return new URL(arg);
         },
-        default: 'localhost:4382',
+        default: 'http://localhost:4382',
       },
       'agent-protocol': {
         choices: ['fork', 'developer'],
