@@ -314,6 +314,8 @@ class AgentDeveloperProtocol extends AgentProtocol {
         baseUrl: options.referenceBaseUrl || new URL('http://localhost:4400'),
         log,
         mock: agentMockOptions(options),
+        atDriverUrl: options.atDriverUrl,
+        webDriverUrl: options.webDriverUrl,
       }),
       log,
       tests: iterateEmitter(this._testEmitter, 'message', 'stop'),
