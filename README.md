@@ -62,8 +62,8 @@ A collection of projects for automating assistive technology tests from [w3c/ari
 **aria-at-automation-harness**  
 A command-line utility for executing test plans from [w3c/aria-at](https://github.com/w3c/aria-at) without human intervention using [the aria-at-automation-driver](https://github.com/w3c/aria-at-automation-driver)
 
-**[aria-at-automation-driver](https://github.com/w3c/aria-at-automation-driver)**
+**[aria-at-automation-driver](https://github.com/w3c/aria-at-automation-driver)**  
 A WebSocket server which allows clients to observe the text enunciated by a screen reader and to simulate user input
 
-**[aria-at-automation-results-viewer](https://github.com/w3c/aria-at-automation-results-viewer)**
+**[aria-at-automation-results-viewer](https://github.com/w3c/aria-at-automation-results-viewer)**  
 A tool which translates the JSON-formatted data produced by the [aria-at-automation-harness](https://github.com/w3c/aria-at-automation-harness) into a human-readable form
