@@ -2,6 +2,14 @@ import ws from 'ws';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';
 
+/**
+ * @param {object} options
+ * @param {object} [options.url]
+ * @param {string} [options.url.hostname]
+ * @param {number | string} [options.url.port]
+ * @param {object} options.abortSignal
+ * @returns {Promise<ATDriver>}
+ */
 export async function createATDriver({
   url: { hostname = 'localhost', port = 4382 } = {},
   abortSignal,

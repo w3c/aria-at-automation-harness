@@ -1,7 +1,13 @@
 import { Builder } from 'selenium-webdriver';
 
-export async function createWebDriver({ url, abortSignal }) {
-  const driver = await new Builder().forBrowser('firefox').usingServer(url.toString()).build();
+/**
+ * @param {object} options
+ * @param {{toString: function(): string}} options.url
+ * @param {AriaATCIAgent.Browser} [options.browser]
+ * @param {Promise<void>} options.abortSignal
+ */
+export async function createWebDriver({ url, browser = 'firefox', abortSignal }) {
+  const driver = await new Builder().forBrowser(browser).usingServer(url.toString()).build();
   abortSignal.then(() => driver.quit());
   return driver;
 }

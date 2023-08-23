@@ -13,9 +13,12 @@ import { createATDriver } from './at-driver.js';
 /**
  * @param {object} options
  * @param {Promise<void>} options.abortSignal resolves when runner should stop
+ * @param {{hostname: string, port: number | string}} options.atDriverUrl
  * @param {AriaATCIShared.BaseURL} options.baseUrl
  * @param {AriaATCIAgent.Log} options.log
  * @param {AriaATCIAgent.MockOptions} [options.mock]
+ * @param {AriaATCIAgent.Browser} [options.webDriverBrowser]
+ * @param {{toString: function(): string}} options.webDriverUrl
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {
@@ -26,7 +29,11 @@ export async function createRunner(options) {
     return new MockTestRunner(options);
   }
   const [webDriver, atDriver] = await Promise.all([
-    createWebDriver({ url: options.webDriverUrl, abortSignal: options.abortSignal }),
+    createWebDriver({
+      url: options.webDriverUrl,
+      browser: options.webDriverBrowser,
+      abortSignal: options.abortSignal,
+    }),
     createATDriver({ url: options.atDriverUrl, abortSignal: options.abortSignal }),
   ]);
   return new DriverTestRunner({ ...options, webDriver, atDriver });

@@ -11,7 +11,7 @@
  * @typedef AriaATCIShared.BaseURL
  * @property {string} protocol
  * @property {string} hostname
- * @property {number} port
+ * @property {number | string} port
  * @property {string} pathname
  */
 
@@ -19,7 +19,7 @@
  * @typedef AriaATCIShared.PartialBaseURL
  * @property {string} [protocol]
  * @property {string} [hostname]
- * @property {number} [port]
+ * @property {number | string} [port]
  * @property {string} [pathname]
  */
 
