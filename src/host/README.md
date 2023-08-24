@@ -49,23 +49,27 @@ Positionals:
   plan-files  Files in a test plan                         [array] [default: []]
 
 Options:
-  --help                  Show help                                    [boolean]
-  --version               Show version number                          [boolean]
-  --show-hidden           Show hidden options                          [boolean]
-  --quiet                 Disable all logging
-  --debug                 Enable all logging
-  --verbose               Enable a subset of logging messages
-  --tests-match           Files matching pattern in a test plan will be tested
-                                          [string] [default: "{,**/}test*.json"]
-  --plan-workingdir       Directory "plan-files" are relative to
-                                                         [string] [default: "."]
-  --plan-protocol             [choices: "fork", "developer"] [default: "fork"]
-  --agent-protocol            [choices: "fork", "developer"] [default: "fork"]
-  --agent-quiet           Disable all logging
-  --agent-debug           Enable all logging
-  --agent-verbose         Enable a subset of logging messages
+  --help                      Show help                                [boolean]
+  --version                   Show version number                      [boolean]
+  --quiet                     Disable all logging
+  --debug                     Enable all logging
+  --verbose                   Enable a subset of logging messages
+  --tests-match               Files matching pattern in a test plan will be test
+                              ed          [string] [default: "{,**/}test*.json"]
+  --reference-hostname                                    [default: "localhost"]
+  --plan-workingdir           Directory "plan-files" are relative to
+                                                                  [default: "."]
+  --plan-protocol               [choices: "fork", "developer"] [default: "fork"]
+  --agent-web-driver-url                      [default: "http://localhost:4444"]
+  --agent-web-driver-browser [choices: "chrome", "firefox"] [default: "firefox"]
+  --agent-at-driver-url                       [default: "http://localhost:4382"]
+  --agent-protocol              [choices: "fork", "developer"] [default: "fork"]
+  --agent-quiet               Disable all logging
+  --agent-debug               Enable all logging
+  --agent-verbose             Enable a subset of logging messages
   --agent-mock                                                         [boolean]
   --agent-mock-open-page                            [choices: "request", "skip"]
+  --show-hidden               Show hidden options                      [boolean]
 ```
 
 ### Loading a test plan
