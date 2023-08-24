@@ -56,6 +56,10 @@ export function buildAgentCliOptions(args = yargs) {
         },
         default: 'http://localhost:4444',
       },
+      'web-driver-browser': {
+        choices: ['chrome', 'firefox'],
+        default: 'firefox',
+      },
       'at-driver-url': {
         coerce(arg) {
           return new URL(arg);
@@ -106,6 +110,9 @@ export function agentCliArgsFromOptionsMap(options) {
       case 'webDriverUrl':
         args.push('--web-driver-url', value.toString());
         break;
+      case 'webDriverBrowser':
+        args.push('--web-driver-browser', value.toString());
+        break;
       case 'atDriverUrl':
         args.push('--at-driver-url', value.toString());
         break;
@@ -136,6 +143,7 @@ export function pickAgentCliOptions({
   verbose,
   referenceBaseUrl,
   webDriverUrl,
+  webDriverBrowser,
   atDriverUrl,
   mock,
   mockOpenPage,
@@ -146,6 +154,7 @@ export function pickAgentCliOptions({
     ...(verbose === undefined ? {} : { verbose }),
     ...(referenceBaseUrl === undefined ? {} : { referenceBaseUrl }),
     ...(webDriverUrl === undefined ? {} : { webDriverUrl }),
+    ...(webDriverBrowser === undefined ? {} : { webDriverBrowser }),
     ...(atDriverUrl === undefined ? {} : { atDriverUrl }),
     ...(mock === undefined ? {} : { mock }),
     ...(mockOpenPage === undefined ? {} : { mockOpenPage }),
@@ -177,7 +186,7 @@ export async function parseAgentCli({ argv = [], ...parserConfiguration } = {}) 
 
 /**
  * Summarize cli options as mock options for creating a test runner.
- * @param {AgentATCIAgent.CliOptions} cliOptions
+ * @param {AriaATCIAgent.CliOptions} cliOptions
  * @returns {AriaATCIAgent.MockOptions}
  */
 export function agentMockOptions(cliOptions) {
@@ -200,8 +209,10 @@ async function stopAfterMain(argv) {
  * Build and assign a test runner based on passed arguments.
  * @param {object} argv
  * @param {AriaATCIAgent.Log} argv.log
- * @param {AriaATCIAgent.TestRunner} argv.runner
  * @param {AriaATCIAgent.MockOptions} [argv.mock]
+ * @param {AriaATCIAgent.TestRunner} argv.runner
+ * @param {AriaATCIAgent.Browser} [argv.webDriverBrowser]
+ * @param {AriaATCIShared.BaseURL} argv.webDriverUrl
  */
 async function agentRunnerMiddleware(argv) {
   argv.runner = await createRunner({
@@ -209,6 +220,7 @@ async function agentRunnerMiddleware(argv) {
     baseUrl: new URL(argv.referenceBaseUrl),
     mock: agentMockOptions(argv),
     webDriverUrl: argv.webDriverUrl,
+    webDriverBrowser: argv.webDriverBrowser,
     atDriverUrl: argv.atDriverUrl,
     abortSignal: argv.abortSignal,
   });

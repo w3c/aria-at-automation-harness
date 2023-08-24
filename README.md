@@ -26,6 +26,9 @@ Options:
   --verbose             Enable a subset of logging messages
   --reference-base-url  Url to append reference page listed in tests to
                                      [string] [default: "http://localhost:8000"]
+  --web-driver-url                            [default: "http://localhost:4444"]
+  --web-driver-browser       [choices: "chrome", "firefox"] [default: "firefox"]
+  --at-driver-url                               [default: "ws://localhost:4382"]
   --show-hidden         Show hidden options                            [boolean]
 ```
 
@@ -41,16 +44,20 @@ Positionals:
   plan-files  Files in a test plan                         [array] [default: []]
 
 Options:
-  --help             Show help                                         [boolean]
-  --version          Show version number                               [boolean]
-  --quiet            Disable all logging
-  --debug            Enable all logging
-  --verbose          Enable a subset of logging messages
-  --tests-match      Files matching pattern in a test plan will be tested
-                                          [string] [default: "{,**/}test*.json"]
-  --plan-workingdir  Directory "plan-files" are relative to
-                                                         [string] [default: "."]
-  --show-hidden      Show hidden options                               [boolean]
+  --help                      Show help                                [boolean]
+  --version                   Show version number                      [boolean]
+  --quiet                     Disable all logging
+  --debug                     Enable all logging
+  --verbose                   Enable a subset of logging messages
+  --tests-match               Files matching pattern in a test plan will be test
+                              ed          [string] [default: "{,**/}test*.json"]
+  --reference-hostname                                    [default: "localhost"]
+  --plan-workingdir           Directory "plan-files" are relative to
+                                                                  [default: "."]
+  --agent-web-driver-url                      [default: "http://localhost:4444"]
+  --agent-web-driver-browser [choices: "chrome", "firefox"] [default: "firefox"]
+  --agent-at-driver-url                       [default: "http://localhost:4382"]
+  --show-hidden               Show hidden options                      [boolean]
 ```
 
 ---

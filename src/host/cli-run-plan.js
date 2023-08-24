@@ -80,6 +80,10 @@ export const builder = (args = yargs) =>
         },
         default: 'http://localhost:4444',
       },
+      'agent-web-driver-browser': {
+        choices: ['chrome', 'firefox'],
+        default: 'firefox',
+      },
       'agent-at-driver-url': {
         coerce(arg) {
           return new URL(arg);
@@ -218,6 +222,7 @@ function mainAgentMiddleware(argv) {
     agentQuiet,
     agentVerbose,
     agentWebDriverUrl,
+    agentWebDriverBrowser,
     agentAtDriverUrl,
     agentMock,
     agentMockOpenPage,
@@ -231,6 +236,7 @@ function mainAgentMiddleware(argv) {
       quiet: agentQuiet,
       verbose: agentVerbose,
       webDriverUrl: agentWebDriverUrl,
+      webDriverBrowser: agentWebDriverBrowser,
       atDriverUrl: agentAtDriverUrl,
       mock: agentMock,
       mockOpenPage: agentMockOpenPage,

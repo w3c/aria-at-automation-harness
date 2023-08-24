@@ -298,6 +298,9 @@ class AgentDeveloperProtocol extends AgentProtocol {
     yield* iterateEmitter(this._logEmitter, 'message', 'stop');
   }
 
+  /**
+   * @param {AriaATCIAgent.CliOptions} options
+   */
   async start(options) {
     const { log, emitter: logEmitter } = createAgentLogger();
     this._testEmitter = new EventEmitter();
@@ -315,6 +318,7 @@ class AgentDeveloperProtocol extends AgentProtocol {
         log,
         mock: agentMockOptions(options),
         atDriverUrl: options.atDriverUrl,
+        webDriverBrowser: options.webDriverBrowser,
         webDriverUrl: options.webDriverUrl,
       }),
       log,

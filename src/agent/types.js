@@ -41,6 +41,10 @@
  */
 
 /**
+ * @typedef {'chrome' | 'firefox'} AriaATCIAgent.Browser
+ */
+
+/**
  * @typedef AriaATCIAgent.CliOptions
  * @property {boolean} [debug]
  * @property {boolean} [quiet]
@@ -49,5 +53,6 @@
  * @property {boolean} [mock]
  * @property {'request' | 'skip'} [mockOpenPage]
  * @property {URL} [webDriverUrl]
+ * @property {AriaATCIAgent.Browser} [webDriverBrowser]
  * @property {URL} [atDriverUrl]
  */

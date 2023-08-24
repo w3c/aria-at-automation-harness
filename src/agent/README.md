@@ -34,6 +34,9 @@ Options:
   --verbose             Enable a subset of logging messages
   --reference-base-url  Url to append reference page listed in tests to
                                      [string] [default: "http://localhost:8000"]
+  --web-driver-url                            [default: "http://localhost:4444"]
+  --web-driver-browser       [choices: "chrome", "firefox"] [default: "firefox"]
+  --at-driver-url                               [default: "ws://localhost:4382"]
   --mock                                                               [boolean]
   --mock-open-page                                  [choices: "request", "skip"]
 ```
