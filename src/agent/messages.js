@@ -27,6 +27,8 @@ export const AgentMessage = {
   SPEECH_EVENT: 'speechEvent',
   /** @type {'noRunTestSetup'} */
   NO_RUN_TEST_SETUP: 'noRunTestSetup',
+  /** @type {'focusForced'} */
+  FOCUS_FORCED: 'focusForced',
 };
 
 export const AGENT_TEMPLATES = {
@@ -35,6 +37,7 @@ export const AGENT_TEMPLATES = {
   [AgentMessage.WILL_STOP]: () => `Stopping...`,
   [AgentMessage.START_TEST]: ({ id, title }) => `Starting test #${id} '${title}'.`,
   [AgentMessage.OPEN_PAGE]: ({ url }) => `Open page: '${url}'.`,
+  [AgentMessage.FOCUS_FORCED]: () => `Focus Forced on new window.`,
   [AgentMessage.INVALID_KEYS]: ({ command, errors }) =>
     `Keys in '${command.id}' have issues:\n${errors.map(error => `- ${error}`).join('\n')}`,
   [AgentMessage.PRESS_KEYS]: ({ keys }) => `Press keys: '${keys.toString()}'.`,
