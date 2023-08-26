@@ -82,17 +82,6 @@ export class DriverTestRunner {
     await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
     await this.webDriver.navigate().to('about:blank');
 
-    await this.atDriver.sendKeys(
-      ATKey.chord(ATKey.key('alt'), ATKey.key('tab')),
-      ATKey.chord(ATKey.key('alt'), ATKey.key('tab')),
-      ATKey.chord(ATKey.key('alt'), ATKey.key('tab'))
-    );
-
-    await this.webDriver
-      .executeScript('alert("Focus window")')
-      .then(() => this.webDriver.switchTo().alert().accept())
-      .then(this.log(AgentMessage.FOCUS_FORCED));
-
     const commandsOutput = [];
     const results = [];
 
