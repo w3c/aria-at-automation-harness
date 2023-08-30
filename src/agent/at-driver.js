@@ -15,7 +15,7 @@ export async function createATDriver({
   abortSignal,
 } = {}) {
   if (!abortSignal) process.exit(1);
-  const socket = new ws(`ws://${hostname}:${port}`, ['v1.aria-at.bocoup.com']);
+  const socket = new ws(`ws://${hostname}:${port}/command`);
   const driver = new ATDriver({ socket });
   await driver.ready;
   abortSignal.then(() => driver.quit());
@@ -25,7 +25,9 @@ export async function createATDriver({
 export class ATDriver {
   constructor({ socket }) {
     this.socket = socket;
-    this.ready = new Promise(resolve => socket.once('open', () => resolve()));
+    this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
+      socket.send(JSON.stringify({ method: 'session.new' }))
+    );
     this.closed = new Promise(resolve => socket.once('close', () => resolve()));
 
     this._nextId = 0;
@@ -61,7 +63,7 @@ export class ATDriver {
   async sendKeys(...keys) {
     for (const chord of ATKey.sequence(...keys)) {
       for (const { key } of chord) {
-        await this._send({ type: 'command', name: 'pressKey', params: [key] });
+        await this._send({ type: 'command', method: 'interaction.pressKeys', params: [key] });
       }
       for (const { key } of Array.from(chord).reverse()) {
         await this._send({ type: 'command', name: 'releaseKey', params: [key] });
@@ -74,8 +76,9 @@ export class ATDriver {
    */
   async *speeches() {
     for await (const message of this._messages()) {
-      if (message.type === 'event' && message.name === 'speech') {
-        yield message.data;
+      console.log(message);
+      if (message.method === 'interaction.capturedOutput') {
+        yield message.params.data;
       }
     }
   }
