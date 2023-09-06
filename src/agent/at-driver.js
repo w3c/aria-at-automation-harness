@@ -63,10 +63,7 @@ export class ATDriver {
   async sendKeys(...keys) {
     for (const chord of ATKey.sequence(...keys)) {
       for (const { key } of chord) {
-        await this._send({ type: 'command', method: 'interaction.pressKeys', params: [key] });
-      }
-      for (const { key } of Array.from(chord).reverse()) {
-        await this._send({ type: 'command', name: 'releaseKey', params: [key] });
+        await this._send({ type: 'command', method: 'interaction.pressKeys', keys: chord.keys });
       }
     }
   }
