@@ -33,6 +33,7 @@ export async function createRunner(options) {
       url: options.webDriverUrl,
       browser: options.webDriverBrowser,
       abortSignal: options.abortSignal,
+      log: options.log
     }),
     createATDriver({ url: options.atDriverUrl, abortSignal: options.abortSignal }),
   ]);

@@ -157,14 +157,18 @@ export class DriverTestRunner {
     });
 
     await asyncOperation();
+    // this.log(AgentMessage.DEBUG, {msg: '_collectSpeech - operation completed'});
 
     let i = 0;
     do {
       i = spoken.length;
+      // this.log(AgentMessage.DEBUG, {msg: `collected ${i} speech events so far - delay ${debounceDelay}`});
       await timeout(debounceDelay);
     } while (i < spoken.length);
 
+    // this.log(AgentMessage.DEBUG, {msg: 'canceling speech job'});
     await speechJob.cancel();
+    // this.log(AgentMessage.DEBUG, {msg: 'done collecting speech'});
     return spoken;
   }
 

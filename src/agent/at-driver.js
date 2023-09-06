@@ -1,6 +1,7 @@
 import ws from 'ws';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';
+import { AgentMessage } from './messages.js';
 
 /**
  * @param {object} options
@@ -13,18 +14,20 @@ import { iterateEmitter } from '../shared/iterate-emitter.js';
 export async function createATDriver({
   url: { hostname = 'localhost', port = 4382 } = {},
   abortSignal,
+  log,
 } = {}) {
   if (!abortSignal) process.exit(1);
   const socket = new ws(`ws://${hostname}:${port}/command`);
-  const driver = new ATDriver({ socket });
+  const driver = new ATDriver({ socket, log });
   await driver.ready;
   abortSignal.then(() => driver.quit());
   return driver;
 }
 
 export class ATDriver {
-  constructor({ socket }) {
+  constructor({ socket, log }) {
     this.socket = socket;
+    this.log = log;
     this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
       socket.send(JSON.stringify({ method: 'session.new' }))
     );
@@ -40,15 +43,16 @@ export class ATDriver {
 
   async *_messages() {
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
+      // this.log(AgentMessage.DEBUG, {msg: `[message raw] ${rawMessage}`});
       yield JSON.parse(rawMessage.toString());
     }
   }
 
   async _send(command) {
-    const id = this._nextId++;
+    const id = (this._nextId++).toString();
     this.socket.send(JSON.stringify({ id, ...command }));
     for await (const message of this._messages()) {
-      if (message.type === 'response' && message.id === id) {
+      if (message.id === id) {
         if (message.error) {
           throw new Error(message.error);
         }
@@ -63,7 +67,11 @@ export class ATDriver {
   async sendKeys(...keys) {
     for (const chord of ATKey.sequence(...keys)) {
       for (const { key } of chord) {
-        await this._send({ type: 'command', method: 'interaction.pressKeys', keys: chord.keys });
+        await this._send({
+          type: 'command',
+          method: 'interaction.pressKeys',
+          params: { keys: chord.keys.map(({ key }) => key.toUpperCase()) },
+        });
       }
     }
   }
@@ -73,7 +81,6 @@ export class ATDriver {
    */
   async *speeches() {
     for await (const message of this._messages()) {
-      console.log(message);
       if (message.method === 'interaction.capturedOutput') {
         yield message.params.data;
       }
