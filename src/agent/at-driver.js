@@ -70,7 +70,7 @@ export class ATDriver {
         await this._send({
           type: 'command',
           method: 'interaction.pressKeys',
-          params: { keys: chord.keys.map(({ key }) => key.toUpperCase()) },
+          params: { keys: chord.keys.map(({ mapped }) => mapped) },
         });
       }
     }
@@ -88,6 +88,10 @@ export class ATDriver {
   }
 }
 
+const seleniumKeysMap = {
+  space: '\ue00d',
+};
+
 export class ATKey {
   /**
    * @param {string} key
@@ -95,6 +99,7 @@ export class ATKey {
   constructor(key) {
     this.type = 'key';
     this.key = key;
+    this.mapped = seleniumKeysMap[this.key] ?? this.key;
   }
   toString() {
     return this.key;
