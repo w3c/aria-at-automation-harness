@@ -32,7 +32,7 @@ export class ATDriver {
     this.socket = socket;
     this.log = log;
     this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
-      socket.send(JSON.stringify({ method: 'session.new', params: { capabilities: {} } }))
+      this._send({ method: 'session.new', params: { capabilities: {} } })
     );
     this.closed = new Promise(resolve => socket.once('close', () => resolve()));
 
@@ -53,7 +53,7 @@ export class ATDriver {
   }
 
   async _send(command) {
-    const id = (this._nextId++).toString();
+    const id = this._nextId++;
     const rawMessage = JSON.stringify({ id, ...command });
     this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
     this.socket.send(rawMessage);
