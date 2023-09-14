@@ -13,7 +13,7 @@ import { AgentMessage } from './messages.js';
  * @returns {Promise<ATDriver>}
  */
 export async function createATDriver({
-  url: { hostname = 'localhost', port = 4382, path: pathname = '/session' } = {},
+  url: { hostname = 'localhost', port = 4382, pathname = '/session' } = {},
   abortSignal,
   log,
 } = {}) {
@@ -74,7 +74,6 @@ export class ATDriver {
     for (const chord of ATKey.sequence(...keys)) {
       for (const { key } of chord) {
         await this._send({
-          type: 'command',
           method: 'interaction.pressKeys',
           params: { keys: chord.keys.map(({ mapped }) => mapped) },
         });
