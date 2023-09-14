@@ -28,7 +28,7 @@ export const AgentMessage = {
   /** @type {'noRunTestSetup'} */
   NO_RUN_TEST_SETUP: 'noRunTestSetup',
   /** @type {'debug'} */
-  DEBUG: 'debug',
+  AT_DRIVER_COMMS: 'atDriverComms',
 };
 
 export const AGENT_TEMPLATES = {
@@ -43,7 +43,7 @@ export const AGENT_TEMPLATES = {
   [AgentMessage.SPEECH_EVENT]: ({ spokenText }) => `Speech event: '${spokenText}'.`,
   [AgentMessage.NO_RUN_TEST_SETUP]: ({ referencePage }) =>
     `Test reference, ${referencePage}, does not have a Run Test Setup button.`,
-  [AgentMessage.DEBUG]: ({ msg }) => `[debug] ${msg}`,
+  [AgentMessage.AT_DRIVER_COMMS]: ({ direction, message }) => `AT-Driver: ${direction}: ${message}`,
 };
 
 export function createAgentLogger(messages = AGENT_TEMPLATES) {

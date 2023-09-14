@@ -7,17 +7,20 @@ import { AgentMessage } from './messages.js';
  * @param {object} options
  * @param {object} [options.url]
  * @param {string} [options.url.hostname]
+ * @param {string} [options.url.pathname]
  * @param {number | string} [options.url.port]
  * @param {object} options.abortSignal
  * @returns {Promise<ATDriver>}
  */
 export async function createATDriver({
-  url: { hostname = 'localhost', port = 4382 } = {},
+  url: { hostname = 'localhost', port = 4382, path: pathname = '/session' } = {},
   abortSignal,
   log,
 } = {}) {
   if (!abortSignal) process.exit(1);
-  const socket = new ws(`ws://${hostname}:${port}/command`);
+  const url = `ws://${hostname}:${port}${pathname}`;
+  log(AgentMessage.AT_DRIVER_COMMS, { direction: 'connect', message: url });
+  const socket = new ws(url);
   const driver = new ATDriver({ socket, log });
   await driver.ready;
   abortSignal.then(() => driver.quit());
@@ -29,7 +32,7 @@ export class ATDriver {
     this.socket = socket;
     this.log = log;
     this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
-      socket.send(JSON.stringify({ method: 'session.new' }))
+      socket.send(JSON.stringify({ method: 'session.new', params: { capabilities: {} } }))
     );
     this.closed = new Promise(resolve => socket.once('close', () => resolve()));
 
@@ -37,20 +40,23 @@ export class ATDriver {
   }
 
   async quit() {
+    this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'close' });
     this.socket.close();
     await this.closed;
   }
 
   async *_messages() {
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
-      // this.log(AgentMessage.DEBUG, {msg: `[message raw] ${rawMessage}`});
+      this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message: rawMessage });
       yield JSON.parse(rawMessage.toString());
     }
   }
 
   async _send(command) {
     const id = (this._nextId++).toString();
-    this.socket.send(JSON.stringify({ id, ...command }));
+    const rawMessage = JSON.stringify({ id, ...command });
+    this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
+    this.socket.send(rawMessage);
     for await (const message of this._messages()) {
       if (message.id === id) {
         if (message.error) {

@@ -310,7 +310,6 @@ class AgentDeveloperProtocol extends AgentProtocol {
     const abortSignal = new Promise(resolve => {
       this._testEmitter.once('stop', () => resolve());
     });
-
     this.exited = agentMain({
       runner: await createRunner({
         abortSignal,
