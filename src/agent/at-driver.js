@@ -95,8 +95,9 @@ export class ATDriver {
 }
 
 // https://w3c.github.io/webdriver/#keyboard-actions
-const webDriverCodePoints = {
+export const webDriverCodePoints = {
   NULL: '\ue000',
+  UNIDENTIFIED: '\ue000',
   CANCEL: '\ue001',
   HELP: '\ue002',
   BACKSPACE: '\ue003',
@@ -112,13 +113,19 @@ const webDriverCodePoints = {
   SPACE: '\ue00d',
   ' ': '\ue00d',
   PAGE_UP: '\ue00e',
+  PAGEUP: '\ue00e',
   PAGE_DOWN: '\ue00f',
+  PAGEDOWN: '\ue00f',
   END: '\ue010',
   HOME: '\ue011',
   LEFT: '\ue012',
+  ARROWLEFT: '\ue012',
   UP: '\ue013',
+  ARROWUP: '\ue013',
   RIGHT: '\ue014',
+  ARROWRIGHT: '\ue014',
   DOWN: '\ue015',
+  ARROWDOWN: '\ue015',
   INSERT: '\ue016',
   DELETE: '\ue017',
   SEMICOLON: '\ue018',

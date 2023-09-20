@@ -6,7 +6,7 @@ import { WebDriver, until, By } from 'selenium-webdriver';
 
 import { startJob } from '../shared/job.js';
 
-import { ATDriver, ATKey } from './at-driver.js';
+import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
 import { AgentMessage } from './messages.js';
 
 /**
@@ -198,6 +198,12 @@ export function validateKeysFromCommand(command) {
     }
     if (/\bfollowed\b/.test(keystroke)) {
       errors.push(`'${keystroke}' cannot contain 'followed' or 'followed by'.`);
+    }
+
+    if (keystroke.length != 1 && !webDriverCodePoints[keystroke.toUpperCase()]) {
+      errors.push(
+        `'${keystroke}' is not a recognized key - use single characters or "Normalized" values from https://w3c.github.io/webdriver/#keyboard-actions`
+      );
     }
   }
 
