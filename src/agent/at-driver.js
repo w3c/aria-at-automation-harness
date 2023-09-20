@@ -71,13 +71,14 @@ export class ATDriver {
    * @param  {...(ATKey | ATKeyChord | ATKeySequence)} keys
    */
   async sendKeys(...keys) {
+    // the sequence can be like ['UP', ATChord(['SHIFT', 'P'])]
+    // the we loop over each "chord" (combo of keys to press) asking the driver
+    // to press it, waiting for that keypress to finish, then pressing the next.
     for (const chord of ATKey.sequence(...keys)) {
-      for (const { key } of chord) {
-        await this._send({
-          method: 'interaction.pressKeys',
-          params: { keys: chord.keys.map(({ mapped }) => mapped) },
-        });
-      }
+      await this._send({
+        method: 'interaction.pressKeys',
+        params: { keys: chord.toAtDriverKeyCodes() },
+      });
     }
   }
 
@@ -93,7 +94,8 @@ export class ATDriver {
   }
 }
 
-const seleniumKeysMap = {
+// https://w3c.github.io/webdriver/#keyboard-actions
+const webDriverCodePoints = {
   NULL: '\ue000',
   CANCEL: '\ue001',
   HELP: '\ue002',
@@ -108,6 +110,7 @@ const seleniumKeysMap = {
   PAUSE: '\ue00b',
   ESCAPE: '\ue00c',
   SPACE: '\ue00d',
+  ' ': '\ue00d',
   PAGE_UP: '\ue00e',
   PAGE_DOWN: '\ue00f',
   END: '\ue010',
@@ -163,7 +166,10 @@ export class ATKey {
   constructor(key) {
     this.type = 'key';
     this.key = key;
-    this.mapped = seleniumKeysMap[this.key.toUpperCase()] ?? this.key;
+    this.codePoint = webDriverCodePoints[this.key.toUpperCase()] ?? this.key;
+    if (this.codePoint.length > 1) {
+      throw new Error(`Unknown key: ${this.key} - should be a single character, or a special key`);
+    }
   }
   toString() {
     return this.key;
@@ -220,6 +226,10 @@ export class ATKeyChord {
 
   toString() {
     return this.keys.join(' + ');
+  }
+
+  toAtDriverKeyCodes() {
+    return this.keys.map(({ codePoint }) => codePoint);
   }
 }
 

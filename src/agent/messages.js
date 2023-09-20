@@ -27,7 +27,7 @@ export const AgentMessage = {
   SPEECH_EVENT: 'speechEvent',
   /** @type {'noRunTestSetup'} */
   NO_RUN_TEST_SETUP: 'noRunTestSetup',
-  /** @type {'debug'} */
+  /** @type {'atDriverComms'} */
   AT_DRIVER_COMMS: 'atDriverComms',
 };
 
