@@ -47,8 +47,9 @@ export class ATDriver {
 
   async *_messages() {
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
-      this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message: rawMessage });
-      yield JSON.parse(rawMessage.toString());
+      const message = rawMessage.toString();
+      this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
+      yield JSON.parse(message);
     }
   }
 
