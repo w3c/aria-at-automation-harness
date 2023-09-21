@@ -46,13 +46,6 @@ export const AGENT_TEMPLATES = {
   [AgentMessage.AT_DRIVER_COMMS]: ({ direction, message }) => `AT-Driver: ${direction}: ${message}`,
 };
 
-// anything with a truthy value in this map should not be stored in the "permanent" logs.
-// these log types are designed for extra information for implementors, but inclusion in the
-// output format is very un-nessecary.
-export const AGENT_VERBOSE_LOGS = {
-  [AgentMessage.AT_DRIVER_COMMS]: true,
-};
-
 export function createAgentLogger(messages = AGENT_TEMPLATES) {
   return createSharedLogger(messages);
 }
