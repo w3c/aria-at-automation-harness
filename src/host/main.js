@@ -4,6 +4,7 @@
  * @module host
  */
 
+import { AGENT_VERBOSE_LOGS } from '../agent/messages.js';
 import { startJob } from '../shared/job.js';
 
 import { HostMessage } from './messages.js';
@@ -47,8 +48,10 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
       log(HostMessage.START_TEST);
       const testLogJob = startJob(async function (signal) {
         for await (const testLog of signal.cancelable(agent.logs())) {
-          plan = addLogToTestPlan(plan, testLog);
-          plan = addTestLogToTestPlan(plan, test);
+          if (!AGENT_VERBOSE_LOGS[testLog.type]) {
+            plan = addLogToTestPlan(plan, testLog);
+            plan = addTestLogToTestPlan(plan, test);
+          }
         }
       });
 
