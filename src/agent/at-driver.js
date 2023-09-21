@@ -1,52 +1,65 @@
 import ws from 'ws';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';
+import { AgentMessage } from './messages.js';
 
 /**
  * @param {object} options
  * @param {object} [options.url]
  * @param {string} [options.url.hostname]
+ * @param {string} [options.url.pathname]
  * @param {number | string} [options.url.port]
  * @param {object} options.abortSignal
  * @returns {Promise<ATDriver>}
  */
 export async function createATDriver({
-  url: { hostname = 'localhost', port = 4382 } = {},
+  url: { hostname = 'localhost', port = 4382, pathname = '/session' } = {},
   abortSignal,
+  log,
 } = {}) {
   if (!abortSignal) process.exit(1);
-  const socket = new ws(`ws://${hostname}:${port}`, ['v1.aria-at.bocoup.com']);
-  const driver = new ATDriver({ socket });
+  const url = `ws://${hostname}:${port}${pathname}`;
+  log(AgentMessage.AT_DRIVER_COMMS, { direction: 'connect', message: url });
+  const socket = new ws(url);
+  const driver = new ATDriver({ socket, log });
   await driver.ready;
   abortSignal.then(() => driver.quit());
   return driver;
 }
 
 export class ATDriver {
-  constructor({ socket }) {
+  constructor({ socket, log }) {
     this.socket = socket;
-    this.ready = new Promise(resolve => socket.once('open', () => resolve()));
+    this.log = log;
+    this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
+      this._send({ method: 'session.new', params: { capabilities: {} } })
+    );
     this.closed = new Promise(resolve => socket.once('close', () => resolve()));
 
     this._nextId = 0;
   }
 
   async quit() {
+    this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'close' });
     this.socket.close();
     await this.closed;
   }
 
   async *_messages() {
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
-      yield JSON.parse(rawMessage.toString());
+      const message = rawMessage.toString();
+      this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
+      yield JSON.parse(message);
     }
   }
 
   async _send(command) {
     const id = this._nextId++;
-    this.socket.send(JSON.stringify({ id, ...command }));
+    const rawMessage = JSON.stringify({ id, ...command });
+    this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
+    this.socket.send(rawMessage);
     for await (const message of this._messages()) {
-      if (message.type === 'response' && message.id === id) {
+      if (message.id === id) {
         if (message.error) {
           throw new Error(message.error);
         }
@@ -59,13 +72,14 @@ export class ATDriver {
    * @param  {...(ATKey | ATKeyChord | ATKeySequence)} keys
    */
   async sendKeys(...keys) {
+    // the sequence can be like ['UP', ATChord(['SHIFT', 'P'])]
+    // the we loop over each "chord" (combo of keys to press) asking the driver
+    // to press it, waiting for that keypress to finish, then pressing the next.
     for (const chord of ATKey.sequence(...keys)) {
-      for (const { key } of chord) {
-        await this._send({ type: 'command', name: 'pressKey', params: [key] });
-      }
-      for (const { key } of Array.from(chord).reverse()) {
-        await this._send({ type: 'command', name: 'releaseKey', params: [key] });
-      }
+      await this._send({
+        method: 'interaction.pressKeys',
+        params: { keys: chord.toAtDriverKeyCodes() },
+      });
     }
   }
 
@@ -74,12 +88,84 @@ export class ATDriver {
    */
   async *speeches() {
     for await (const message of this._messages()) {
-      if (message.type === 'event' && message.name === 'speech') {
-        yield message.data;
+      if (message.method === 'interaction.capturedOutput') {
+        yield message.params.data;
       }
     }
   }
 }
+
+// https://w3c.github.io/webdriver/#keyboard-actions
+export const webDriverCodePoints = {
+  NULL: '\ue000',
+  UNIDENTIFIED: '\ue000',
+  CANCEL: '\ue001',
+  HELP: '\ue002',
+  BACKSPACE: '\ue003',
+  TAB: '\ue004',
+  CLEAR: '\ue005',
+  RETURN: '\ue006',
+  ENTER: '\ue007',
+  SHIFT: '\ue008',
+  CONTROL: '\ue009',
+  ALT: '\ue00a',
+  PAUSE: '\ue00b',
+  ESCAPE: '\ue00c',
+  SPACE: '\ue00d',
+  ' ': '\ue00d',
+  PAGE_UP: '\ue00e',
+  PAGEUP: '\ue00e',
+  PAGE_DOWN: '\ue00f',
+  PAGEDOWN: '\ue00f',
+  END: '\ue010',
+  HOME: '\ue011',
+  LEFT: '\ue012',
+  ARROWLEFT: '\ue012',
+  UP: '\ue013',
+  ARROWUP: '\ue013',
+  RIGHT: '\ue014',
+  ARROWRIGHT: '\ue014',
+  DOWN: '\ue015',
+  ARROWDOWN: '\ue015',
+  INSERT: '\ue016',
+  DELETE: '\ue017',
+  SEMICOLON: '\ue018',
+  EQUALS: '\ue019',
+
+  NUMPAD0: '\ue01a',
+  NUMPAD1: '\ue01b',
+  NUMPAD2: '\ue01c',
+  NUMPAD3: '\ue01d',
+  NUMPAD4: '\ue01e',
+  NUMPAD5: '\ue01f',
+  NUMPAD6: '\ue020',
+  NUMPAD7: '\ue021',
+  NUMPAD8: '\ue022',
+  NUMPAD9: '\ue023',
+  MULTIPLY: '\ue024',
+  ADD: '\ue025',
+  SEPARATOR: '\ue026',
+  SUBTRACT: '\ue027',
+  DECIMAL: '\ue028',
+  DIVIDE: '\ue029',
+
+  F1: '\ue031',
+  F2: '\ue032',
+  F3: '\ue033',
+  F4: '\ue034',
+  F5: '\ue035',
+  F6: '\ue036',
+  F7: '\ue037',
+  F8: '\ue038',
+  F9: '\ue039',
+  F10: '\ue03a',
+  F11: '\ue03b',
+  F12: '\ue03c',
+
+  META: '\ue03d',
+  COMMAND: '\ue03d',
+  ZENKAKU_HANKAKU: '\ue040',
+};
 
 export class ATKey {
   /**
@@ -88,6 +174,10 @@ export class ATKey {
   constructor(key) {
     this.type = 'key';
     this.key = key;
+    this.codePoint = webDriverCodePoints[this.key.toUpperCase()] ?? this.key;
+    if (this.codePoint.length > 1) {
+      throw new Error(`Unknown key: ${this.key} - should be a single character, or a special key`);
+    }
   }
   toString() {
     return this.key;
@@ -144,6 +234,10 @@ export class ATKeyChord {
 
   toString() {
     return this.keys.join(' + ');
+  }
+
+  toAtDriverKeyCodes() {
+    return this.keys.map(({ codePoint }) => codePoint);
   }
 }
 
