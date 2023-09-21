@@ -5,6 +5,7 @@
  * @module host
  */
 
+import { AGENT_VERBOSE_LOGS } from '../agent/messages.js';
 import * as arrayUtil from '../shared/array-util.js';
 
 /**
@@ -68,6 +69,8 @@ export function addTestToTestPlan(testPlan, filepath) {
  * @returns {AriaATCIHost.TestPlan}
  */
 export function addLogToTestPlan(testPlan, log) {
+  // ignore "VERBOSE" logs
+  if (AGENT_VERBOSE_LOGS[log?.type]) return testPlan;
   return { ...testPlan, log: [...testPlan.log, log] };
 }
 
