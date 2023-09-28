@@ -160,7 +160,7 @@ export class DriverTestRunner {
         'Content-Type': 'application/json',
       };
       if (this.callbackHeader) {
-        const [name, value] = this.callbackHeader.split(/:\s+/);
+        const [name, value] = this.callbackHeader.split(/:\s*/);
         headers[name] = value;
       }
       const body = JSON.stringify({
