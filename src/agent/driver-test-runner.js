@@ -8,6 +8,7 @@ import { startJob } from '../shared/job.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
 import { AgentMessage } from './messages.js';
+import fetch from 'node-fetch';
 
 /**
  * @module agent
@@ -25,12 +26,26 @@ export class DriverTestRunner {
    * @param {AriaATCIAgent.Log} options.log
    * @param {WebDriver} options.webDriver
    * @param {ATDriver} options.atDriver
+   * @param {string} options.callbackUrl
+   * @param {string} options.callbackHeader
    */
-  constructor({ baseUrl, log, webDriver, atDriver }) {
+  constructor({ baseUrl, log, webDriver, atDriver, callbackUrl, callbackHeader }) {
     this.baseUrl = baseUrl;
     this.log = log;
     this.webDriver = webDriver;
     this.atDriver = atDriver;
+    this.collectedCapabilities = this.getCapabilities();
+    this.callbackUrl = callbackUrl;
+    this.callbackHeader = callbackHeader;
+  }
+
+  async getCapabilities() {
+    const capabilities = await this.webDriver.getCapabilities();
+    const browserName = capabilities.get('browserName');
+    const browserVersion = capabilities.get('browserVersion');
+    await this.atDriver.ready;
+    const { atName, atVersion, platformName } = this.atDriver.capabilities;
+    return { atName, atVersion, browserName, browserVersion, platformName };
   }
 
   /**
@@ -77,6 +92,9 @@ export class DriverTestRunner {
    * @param {AriaATFile.CollectedTest} test
    */
   async run(test) {
+    const capabilities = await this.collectedCapabilities;
+    await this.log(AgentMessage.CAPABILITIES, { capabilities });
+
     await this.log(AgentMessage.START_TEST, { id: test.info.testId, title: test.info.task });
 
     await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
@@ -135,8 +153,31 @@ export class DriverTestRunner {
       }
     }
 
+    const testId = test.info.testId;
+
+    if (this.callbackUrl) {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (this.callbackHeader) {
+        const [name, value] = this.callbackHeader.split(/:\s+/);
+        headers[name] = value;
+      }
+      const body = JSON.stringify({
+        testId,
+        capabilities,
+        responses: commandsOutput.map(({ output }) => output),
+      });
+      await fetch(this.callbackUrl, {
+        method: 'post',
+        body,
+        headers,
+      });
+    }
+
     return {
-      testId: test.info.testId,
+      testId,
+      capabilities,
       commands: commandsOutput,
       results,
     };

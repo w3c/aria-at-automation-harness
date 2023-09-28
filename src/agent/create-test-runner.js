@@ -20,6 +20,8 @@ import { AgentMessage } from './messages.js';
  * @param {AriaATCIAgent.MockOptions} [options.mock]
  * @param {AriaATCIAgent.Browser} [options.webDriverBrowser]
  * @param {{toString: function(): string}} options.webDriverUrl
+ * @param {string} [options.callbackUrl]
+ * @param {string} [options.callbackHeader]
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {

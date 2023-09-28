@@ -136,6 +136,12 @@ export const builder = (args = yargs) =>
         choices: ['request', 'skip'],
         hidden: true,
       },
+      'agent-callback-url': {
+        default: process.env.ARIA_APP_CALLBACK_URL,
+      },
+      'agent-callback-header': {
+        default: process.env.ARIA_APP_CALLBACK_HEADER,
+      },
     })
     .showHidden('show-hidden')
     .middleware(verboseMiddleware)
@@ -226,6 +232,8 @@ function mainAgentMiddleware(argv) {
     agentAtDriverUrl,
     agentMock,
     agentMockOpenPage,
+    agentCallbackUrl,
+    agentCallbackHeader,
   } = argv;
 
   argv.agent = new Agent({
@@ -240,6 +248,8 @@ function mainAgentMiddleware(argv) {
       atDriverUrl: agentAtDriverUrl,
       mock: agentMock,
       mockOpenPage: agentMockOpenPage,
+      callbackUrl: agentCallbackUrl,
+      callbackHeader: agentCallbackHeader,
     }),
   });
 }
