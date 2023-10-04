@@ -8,7 +8,6 @@ import { startJob } from '../shared/job.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
 import { AgentMessage } from './messages.js';
-import fetch from 'node-fetch';
 
 /**
  * @module agent
@@ -26,25 +25,20 @@ export class DriverTestRunner {
    * @param {AriaATCIAgent.Log} options.log
    * @param {WebDriver} options.webDriver
    * @param {ATDriver} options.atDriver
-   * @param {string} options.callbackUrl
-   * @param {string} options.callbackHeader
    */
-  constructor({ baseUrl, log, webDriver, atDriver, callbackUrl, callbackHeader }) {
+  constructor({ baseUrl, log, webDriver, atDriver }) {
     this.baseUrl = baseUrl;
     this.log = log;
     this.webDriver = webDriver;
     this.atDriver = atDriver;
     this.collectedCapabilities = this.getCapabilities();
-    this.callbackUrl = callbackUrl;
-    this.callbackHeader = callbackHeader;
   }
 
   async getCapabilities() {
     const capabilities = await this.webDriver.getCapabilities();
     const browserName = capabilities.get('browserName');
     const browserVersion = capabilities.get('browserVersion');
-    await this.atDriver.ready;
-    const { atName, atVersion, platformName } = this.atDriver.capabilities;
+    const { atName, atVersion, platformName } = await this.atDriver.getCapabilities();
     return { atName, atVersion, browserName, browserVersion, platformName };
   }
 
@@ -154,26 +148,6 @@ export class DriverTestRunner {
     }
 
     const testId = test.info.testId;
-
-    if (this.callbackUrl) {
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      if (this.callbackHeader) {
-        const [name, value] = this.callbackHeader.split(/:\s*/);
-        headers[name] = value;
-      }
-      const body = JSON.stringify({
-        testId,
-        capabilities,
-        responses: commandsOutput.map(({ output }) => output),
-      });
-      await fetch(this.callbackUrl, {
-        method: 'post',
-        body,
-        headers,
-      });
-    }
 
     return {
       testId,

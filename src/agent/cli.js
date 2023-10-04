@@ -66,12 +66,6 @@ export function buildAgentCliOptions(args = yargs) {
         },
         default: 'ws://localhost:4382',
       },
-      'callback-url': {
-        default: process.env.ARIA_APP_CALLBACK_URL,
-      },
-      'callback-header': {
-        default: process.env.ARIA_APP_CALLBACK_HEADER,
-      },
       mock: {
         type: 'boolean',
         hidden: true,

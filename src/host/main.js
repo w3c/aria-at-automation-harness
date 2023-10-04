@@ -22,7 +22,16 @@ import {
  * @param {AriaATCIHost.Agent} options.agent
  * @param {AriaATCIHost.EmitPlanResults} options.emitPlanResults
  */
-export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
+export async function hostMain({
+  log,
+  plans,
+  server,
+  agent,
+  emitPlanResults,
+  callbackUrl,
+  callbackHeader,
+  fetch,
+}) {
   log(HostMessage.START);
 
   const hostLogJob = startJob(async function (signal) {
@@ -43,6 +52,8 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
     log(HostMessage.START_AGENT);
     await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
 
+    const callbackRequests = [];
+
     for (const test of plan.tests) {
       log(HostMessage.START_TEST);
       const testLogJob = startJob(async function (signal) {
@@ -54,8 +65,32 @@ export async function hostMain({ log, plans, server, agent, emitPlanResults }) {
 
       const file = plan.files.find(({ name }) => name === test.filepath);
       const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
+      console.log('test result', result);
+      if (callbackUrl) {
+        const headers = {
+          'Content-Type': 'application/json',
+        };
+        if (callbackHeader) {
+          // capture all non ":" characters, ignore :\s*, capture rest of string
+          const [, name, value] = callbackHeader.match(/^([^:]+):\s*(.*)$/);
+          headers[name] = value;
+        }
+        const { testId, capabilities, commands } = result;
+        const body = JSON.stringify({
+          testId,
+          capabilities,
+          responses: commands.map(({ output }) => output),
+        });
+        callbackRequests.push(
+          fetch(callbackUrl, {
+            method: 'post',
+            body,
+            headers,
+          })
+        );
+      }
       plan = addTestResultToTestPlan(plan, test.filepath, result);
-
+      await Promise.allSettled(callbackRequests);
       await testLogJob.cancel();
     }
 
