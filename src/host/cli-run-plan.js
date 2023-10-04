@@ -200,7 +200,15 @@ function mainMiddleware(argv) {
 
 function mainFetchMiddleware(argv) {
   if (!argv.fetch) {
-    argv.fetch = fetch;
+    if (!argv.agentMock) {
+      argv.fetch = fetch;
+    } else {
+      argv.fetch = (...params) =>
+        new Promise(resolve => {
+          console.log('Callback Fetch Mocked: ', ...params);
+          resolve();
+        });
+    }
   }
 }
 

@@ -59,6 +59,7 @@ export class MockTestRunner {
     return {
       command: command.id,
       expectation: assertion.expectation,
+      output: assertion.expectation,
       pass: await this.testAssertion(command, assertion),
     };
   }
@@ -83,7 +84,14 @@ export class MockTestRunner {
     );
     return {
       testId: task.info.testId,
-      results: await task.commands.reduce(
+      capabilities: {
+        browserName: 'mock',
+        browserVersion: '1.0',
+        atName: 'mock',
+        atVersion: '1.0',
+        platformName: 'mock',
+      },
+      commands: await task.commands.reduce(
         async (carry, command) => [
           ...(await carry),
           ...(await task.assertions.reduce(
