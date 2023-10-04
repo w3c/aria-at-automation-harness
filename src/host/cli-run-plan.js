@@ -138,9 +138,11 @@ export const builder = (args = yargs) =>
         hidden: true,
       },
       'callback-url': {
+        describe: 'URL to POST test results to as they complete',
         default: process.env.ARIA_APP_CALLBACK_URL,
       },
       'callback-header': {
+        describe: 'Header to send with callback request',
         default: process.env.ARIA_APP_CALLBACK_HEADER,
         // set to hidden if the callback header is set via environment (to not accidentally leak secret in a log)
         hidden: Boolean(process.env.ARIA_APP_CALLBACK_HEADER),
