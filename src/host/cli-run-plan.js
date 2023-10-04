@@ -139,17 +139,22 @@ export const builder = (args = yargs) =>
       },
       'callback-url': {
         default: process.env.ARIA_APP_CALLBACK_URL,
+        hidden: true,
       },
       'callback-header': {
         default: process.env.ARIA_APP_CALLBACK_HEADER,
+        hideen: true,
         coerce(arg) {
           if (!arg) {
-            return;
+            return {};
           }
           if (String(arg).indexOf(':') == -1) {
             throw new Error('callback header must include a : to separate header name from value');
           }
-          return arg;
+          // capture all non ":" characters, ignore :\s*, capture rest of string
+          const [, name, value] = arg.match(/^([^:]+):\s*(.*)$/);
+
+          return { [name]: value };
         },
       },
     })

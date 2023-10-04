@@ -65,16 +65,11 @@ export async function hostMain({
 
       const file = plan.files.find(({ name }) => name === test.filepath);
       const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
-      console.log('test result', result);
       if (callbackUrl) {
         const headers = {
           'Content-Type': 'application/json',
+          ...(callbackHeader || {}),
         };
-        if (callbackHeader) {
-          // capture all non ":" characters, ignore :\s*, capture rest of string
-          const [, name, value] = callbackHeader.match(/^([^:]+):\s*(.*)$/);
-          headers[name] = value;
-        }
         const { testId, capabilities, commands } = result;
         const body = JSON.stringify({
           testId,

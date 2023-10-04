@@ -101,12 +101,6 @@ export function agentCliArgsFromOptionsMap(options) {
           args.push('--quiet=false');
         }
         break;
-      case 'callbackUrl':
-        args.push('--callback-url', value.toString());
-        break;
-      case 'callbackHeader':
-        args.push('--callback-header', value.toString());
-        break;
       case 'verbose':
         args.push('--verbose', value.join(','));
         break;
@@ -153,8 +147,6 @@ export function pickAgentCliOptions({
   atDriverUrl,
   mock,
   mockOpenPage,
-  callbackUrl,
-  callbackHeader,
 }) {
   return {
     ...(debug === undefined ? {} : { debug }),
@@ -166,8 +158,6 @@ export function pickAgentCliOptions({
     ...(atDriverUrl === undefined ? {} : { atDriverUrl }),
     ...(mock === undefined ? {} : { mock }),
     ...(mockOpenPage === undefined ? {} : { mockOpenPage }),
-    ...(callbackUrl === undefined ? {} : { callbackUrl }),
-    ...(callbackHeader === undefined ? {} : { callbackHeader }),
   };
 }
 
@@ -231,8 +221,6 @@ async function agentRunnerMiddleware(argv) {
     mock: agentMockOptions(argv),
     webDriverUrl: argv.webDriverUrl,
     webDriverBrowser: argv.webDriverBrowser,
-    callbackUrl: argv.callbackUrl,
-    callbackHeader: argv.callbackHeader,
     atDriverUrl: argv.atDriverUrl,
     abortSignal: argv.abortSignal,
   });
