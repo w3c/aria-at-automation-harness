@@ -139,11 +139,11 @@ export const builder = (args = yargs) =>
       },
       'callback-url': {
         default: process.env.ARIA_APP_CALLBACK_URL,
-        hidden: true,
       },
       'callback-header': {
         default: process.env.ARIA_APP_CALLBACK_HEADER,
-        hideen: true,
+        // set to hidden if the callback header is set via environment (to not accidentally leak secret in a log)
+        hidden: Boolean(process.env.ARIA_APP_CALLBACK_HEADER),
         coerce(arg) {
           if (!arg) {
             return {};
