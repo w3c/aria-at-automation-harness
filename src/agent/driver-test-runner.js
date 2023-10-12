@@ -31,6 +31,15 @@ export class DriverTestRunner {
     this.log = log;
     this.webDriver = webDriver;
     this.atDriver = atDriver;
+    this.collectedCapabilities = this.getCapabilities();
+  }
+
+  async getCapabilities() {
+    const capabilities = await this.webDriver.getCapabilities();
+    const browserName = capabilities.get('browserName');
+    const browserVersion = capabilities.get('browserVersion');
+    const { atName, atVersion, platformName } = await this.atDriver.getCapabilities();
+    return { atName, atVersion, browserName, browserVersion, platformName };
   }
 
   /**
@@ -77,6 +86,9 @@ export class DriverTestRunner {
    * @param {AriaATFile.CollectedTest} test
    */
   async run(test) {
+    const capabilities = await this.collectedCapabilities;
+    await this.log(AgentMessage.CAPABILITIES, { capabilities });
+
     await this.log(AgentMessage.START_TEST, { id: test.info.testId, title: test.info.task });
 
     await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
@@ -135,8 +147,11 @@ export class DriverTestRunner {
       }
     }
 
+    const testId = test.info.testId;
+
     return {
-      testId: test.info.testId,
+      testId,
+      capabilities,
       commands: commandsOutput,
       results,
     };

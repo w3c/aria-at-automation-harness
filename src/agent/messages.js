@@ -29,6 +29,8 @@ export const AgentMessage = {
   NO_RUN_TEST_SETUP: 'noRunTestSetup',
   /** @type {'atDriverComms'} */
   AT_DRIVER_COMMS: 'atDriverComms',
+  /** @type {'capabilities'} */
+  CAPABILITIES: 'capabilities',
 };
 
 export const AGENT_TEMPLATES = {
@@ -44,6 +46,8 @@ export const AGENT_TEMPLATES = {
   [AgentMessage.NO_RUN_TEST_SETUP]: ({ referencePage }) =>
     `Test reference, ${referencePage}, does not have a Run Test Setup button.`,
   [AgentMessage.AT_DRIVER_COMMS]: ({ direction, message }) => `AT-Driver: ${direction}: ${message}`,
+  [AgentMessage.CAPABILITIES]: ({ capabilities }) =>
+    `Capabilities: ${JSON.stringify(capabilities)}`,
 };
 
 export function createAgentLogger(messages = AGENT_TEMPLATES) {

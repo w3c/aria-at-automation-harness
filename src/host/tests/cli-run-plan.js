@@ -38,6 +38,19 @@ test('plan3', async t => {
   );
 });
 
+test('plan3 with callback', async t => {
+  t.snapshot(
+    await spawnRunPlan([
+      '--plan-workingdir=fixtures/host-bin/plan3',
+      '"**"',
+      '--agent-mock',
+      '--debug',
+      '--callback-url=http://callback.url/',
+      '--callback-header=test:header:multiple:colon',
+    ])
+  );
+});
+
 async function spawnRunPlan(args) {
   const dirname = path.dirname(fileURLToPath(import.meta.url));
   const hostBin = path.join(dirname, '../../../bin/host.js');

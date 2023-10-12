@@ -4,6 +4,7 @@
 
 import path from 'path';
 import { Readable } from 'stream';
+import fetch from 'node-fetch';
 
 import yargs from 'yargs';
 import { pickAgentCliOptions } from '../agent/cli.js';
@@ -25,6 +26,7 @@ export const describe = 'Run test plans';
 export const builder = (args = yargs) =>
   args
     .positional('plan-files', { describe: 'Files in a test plan' })
+    .env('ARIA_AT')
     .options({
       quiet: {
         conflicts: ['debug', 'verbose'],
@@ -136,6 +138,24 @@ export const builder = (args = yargs) =>
         choices: ['request', 'skip'],
         hidden: true,
       },
+      'callback-url': {
+        describe: 'URL to POST test results to as they complete',
+      },
+      'callback-header': {
+        describe: 'Header to send with callback request',
+        coerce(arg) {
+          if (!arg) {
+            return {};
+          }
+          if (String(arg).indexOf(':') == -1) {
+            throw new Error('callback header must include a : to separate header name from value');
+          }
+          // capture all non ":" characters, ignore :\s*, capture rest of string
+          const [, name, value] = arg.match(/^([^:]+):\s*(.*)$/);
+
+          return { [name]: value };
+        },
+      },
     })
     .showHidden('show-hidden')
     .middleware(verboseMiddleware)
@@ -169,12 +189,26 @@ async function verboseMiddleware(argv) {
 
 function mainMiddleware(argv) {
   argv.planWorkingdir = path.resolve(argv.planWorkingdir);
-
+  mainFetchMiddleware(argv);
   mainLoggerMiddleware(argv);
   mainTestPlanMiddleware(argv);
   mainServerMiddleware(argv);
   mainAgentMiddleware(argv);
   mainResultMiddleware(argv);
+}
+
+function mainFetchMiddleware(argv) {
+  if (!argv.fetch) {
+    if (!argv.agentMock) {
+      argv.fetch = fetch;
+    } else {
+      argv.fetch = (...params) =>
+        new Promise(resolve => {
+          console.log('Callback Fetch Mocked: ', ...params);
+          resolve();
+        });
+    }
+  }
 }
 
 function mainLoggerMiddleware(argv) {

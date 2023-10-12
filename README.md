@@ -35,7 +35,7 @@ Options:
 ## `aria-at-harness-host`
 
 ```
-$ bin/host.js run-plan --help
+$ bin/host.js run-plan --help --show-hidden
 host.js run-plan [plan-files..]
 
 Run test plans
@@ -54,9 +54,18 @@ Options:
   --reference-hostname                                    [default: "localhost"]
   --plan-workingdir           Directory "plan-files" are relative to
                                                                   [default: "."]
+  --plan-protocol               [choices: "fork", "developer"] [default: "fork"]
   --agent-web-driver-url                      [default: "http://localhost:4444"]
   --agent-web-driver-browser [choices: "chrome", "firefox"] [default: "firefox"]
   --agent-at-driver-url                       [default: "http://localhost:4382"]
+  --agent-protocol              [choices: "fork", "developer"] [default: "fork"]
+  --agent-quiet               Disable all logging
+  --agent-debug               Enable all logging
+  --agent-verbose             Enable a subset of logging messages
+  --agent-mock                                                         [boolean]
+  --agent-mock-open-page                            [choices: "request", "skip"]
+  --callback-url              URL to POST test results to as they complete
+  --callback-header           Header to send with callback request
   --show-hidden               Show hidden options                      [boolean]
 ```
 

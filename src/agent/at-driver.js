@@ -32,11 +32,19 @@ export class ATDriver {
     this.socket = socket;
     this.log = log;
     this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
-      this._send({ method: 'session.new', params: { capabilities: {} } })
+      this._send({ method: 'session.new', params: { capabilities: {} } }).then(
+        ({ result: { capabilities } }) => {
+          this._capabilities = capabilities;
+        }
+      )
     );
     this.closed = new Promise(resolve => socket.once('close', () => resolve()));
-
     this._nextId = 0;
+  }
+
+  async getCapabilities() {
+    await this.ready;
+    return this._capabilities;
   }
 
   async quit() {
@@ -63,7 +71,7 @@ export class ATDriver {
         if (message.error) {
           throw new Error(message.error);
         }
-        return;
+        return message;
       }
     }
   }

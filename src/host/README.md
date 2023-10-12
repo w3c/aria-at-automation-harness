@@ -69,6 +69,8 @@ Options:
   --agent-verbose             Enable a subset of logging messages
   --agent-mock                                                         [boolean]
   --agent-mock-open-page                            [choices: "request", "skip"]
+  --callback-url              URL to POST test results to as they complete
+  --callback-header           Header to send with callback request
   --show-hidden               Show hidden options                      [boolean]
 ```
 

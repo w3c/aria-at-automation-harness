@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
+    "node-fetch": "^3.3.2",
     "selenium-webdriver": "^4.1.0",
     "ws": "^8.3.0",
     "yargs": "^17.2.1"
