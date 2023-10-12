@@ -26,6 +26,7 @@ export const describe = 'Run test plans';
 export const builder = (args = yargs) =>
   args
     .positional('plan-files', { describe: 'Files in a test plan' })
+    .env('ARIA_AT')
     .options({
       quiet: {
         conflicts: ['debug', 'verbose'],
@@ -139,13 +140,9 @@ export const builder = (args = yargs) =>
       },
       'callback-url': {
         describe: 'URL to POST test results to as they complete',
-        default: process.env.ARIA_APP_CALLBACK_URL,
       },
       'callback-header': {
         describe: 'Header to send with callback request',
-        default: process.env.ARIA_APP_CALLBACK_HEADER,
-        // set to hidden if the callback header is set via environment (to not accidentally leak secret in a log)
-        hidden: Boolean(process.env.ARIA_APP_CALLBACK_HEADER),
         coerce(arg) {
           if (!arg) {
             return {};

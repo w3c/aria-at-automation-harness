@@ -59,7 +59,7 @@ export class MockTestRunner {
     return {
       command: command.id,
       expectation: assertion.expectation,
-      output: assertion.expectation,
+      output: `mocked output for ${assertion.expectation}`,
       pass: await this.testAssertion(command, assertion),
     };
   }
