@@ -72,9 +72,12 @@ export async function hostMain({
         };
         const { testId, capabilities, commands } = result;
         const body = JSON.stringify({
-          testId,
+          testCsvRow: testId,
           capabilities,
           responses: commands.map(({ output }) => output),
+          // a v2 of this API should allow the aria at app to parse the capabilities we are sending instead.
+          atVersionName: capabilities.atVersion,
+          browserVersionName: capabilities.browserVersion,
         });
         callbackRequests.push(
           fetch(callbackUrl, {
