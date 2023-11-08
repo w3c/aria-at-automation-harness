@@ -48,6 +48,9 @@ export class DriverTestRunner {
   async openPage({ url, referencePage }) {
     await this.log(AgentMessage.OPEN_PAGE, { url });
     await this.webDriver.switchTo().defaultContent();
+    await this.webDriver.manage().window().minimize();
+    await this.webDriver.manage().window().setRect({ x: 0, y: 0 });
+    await this.webDriver.switchTo().defaultContent();
     await this.webDriver.navigate().to(url.toString());
 
     try {
