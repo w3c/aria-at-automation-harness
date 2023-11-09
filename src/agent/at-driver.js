@@ -121,6 +121,7 @@ export const webDriverCodePoints = {
   OPT: '\ue00a',
   OPTION: '\ue00a',
   PAUSE: '\ue00b',
+  ESC: '\ue00c',
   ESCAPE: '\ue00c',
   SPACE: '\ue00d',
   ' ': '\ue00d',
