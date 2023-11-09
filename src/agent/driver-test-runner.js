@@ -210,6 +210,7 @@ export function validateKeysFromCommand(command) {
     if (/\bfollowed\b/.test(id)) {
       errors.push(`'${id}' cannot contain 'followed' or 'followed by'.`);
     }
+    id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
     for (const part of id.split('_')) {
       // Some old test plans have keys that contain indications of unspecified
       // instructions ('/') or additional instructions that are not standardized
@@ -238,6 +239,7 @@ export function atKeysFromCommand(command) {
     ...command.keypresses.map(({ id }) =>
       ATKey.chord(
         ...id
+          .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
           .split('_')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
