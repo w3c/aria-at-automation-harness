@@ -115,6 +115,7 @@ export const webDriverCodePoints = {
   RETURN: '\ue006',
   ENTER: '\ue007',
   SHIFT: '\ue008',
+  CTRL: '\ue009',
   CONTROL: '\ue009',
   ALT: '\ue00a',
   OPT: '\ue00a',
