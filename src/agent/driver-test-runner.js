@@ -197,7 +197,9 @@ export class DriverTestRunner {
 
 export function validateKeysFromCommand(command) {
   const errors = [];
-  for (const { id } of command.keypresses) {
+  for (let { id } of command.keypresses) {
+    // PAGE_DOWN and PAGE_UP are the only commands that have the extra _ inside a key
+    id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
     if (/\//.test(id)) {
       errors.push(`'${id}' cannot contain '/'.`);
     }
@@ -210,7 +212,6 @@ export function validateKeysFromCommand(command) {
     if (/\bfollowed\b/.test(id)) {
       errors.push(`'${id}' cannot contain 'followed' or 'followed by'.`);
     }
-    id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
     for (const part of id.split('_')) {
       // Some old test plans have keys that contain indications of unspecified
       // instructions ('/') or additional instructions that are not standardized
