@@ -197,28 +197,30 @@ export class DriverTestRunner {
 
 export function validateKeysFromCommand(command) {
   const errors = [];
-  for (const { keystroke } of command.keypresses) {
-    // Some old test plans have keys that contain indications of unspecified
-    // instructions ('/') or additional instructions that are not standardized
-    // in test plans. These keys should be updated to be separate commands or
-    // use a standardized approach.
-    if (/\//.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain '/'.`);
+  for (const { id } of command.keypresses) {
+    if (/\//.test(id)) {
+      errors.push(`'${id}' cannot contain '/'.`);
     }
-    if (/[()]/.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain '(' or ')'.`);
+    if (/[()]/.test(id)) {
+      errors.push(`'${id}' cannot contain '(' or ')'.`);
     }
-    if (/\bor\b/.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain 'or'.`);
+    if (/\bor\b/.test(id)) {
+      errors.push(`'${id}' cannot contain 'or'.`);
     }
-    if (/\bfollowed\b/.test(keystroke)) {
-      errors.push(`'${keystroke}' cannot contain 'followed' or 'followed by'.`);
+    if (/\bfollowed\b/.test(id)) {
+      errors.push(`'${id}' cannot contain 'followed' or 'followed by'.`);
     }
+    for (const part of id.split('_')) {
+      // Some old test plans have keys that contain indications of unspecified
+      // instructions ('/') or additional instructions that are not standardized
+      // in test plans. These keys should be updated to be separate commands or
+      // use a standardized approach.
 
-    if (keystroke.length != 1 && !webDriverCodePoints[keystroke.toUpperCase()]) {
-      errors.push(
-        `'${keystroke}' is not a recognized key - use single characters or "Normalized" values from https://w3c.github.io/webdriver/#keyboard-actions`
-      );
+      if (part.length != 1 && !webDriverCodePoints[part.toUpperCase()]) {
+        errors.push(
+          `'${part}' of '${id}' is not a recognized key - use single characters or "Normalized" values from https://w3c.github.io/webdriver/#keyboard-actions`
+        );
+      }
     }
   }
 
@@ -233,16 +235,16 @@ export function validateKeysFromCommand(command) {
  */
 export function atKeysFromCommand(command) {
   return ATKey.sequence(
-    ...command.keypresses.map(({ keystroke }) =>
+    ...command.keypresses.map(({ id }) =>
       ATKey.chord(
-        ...keystroke
-          .split('+')
+        ...id
+          .split('_')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
           .map(key => key.replace(/\s?arrow\s?/g, ''))
           // remove whitespace for keys like 'page up'
           .map(key => key.replace(/\s/g, ''))
-          .map(key => ATKey.key(key))
+          .map(key => ATKey.key(key.toLowerCase()))
       )
     )
   );
