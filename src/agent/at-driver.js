@@ -115,9 +115,13 @@ export const webDriverCodePoints = {
   RETURN: '\ue006',
   ENTER: '\ue007',
   SHIFT: '\ue008',
+  CTRL: '\ue009',
   CONTROL: '\ue009',
   ALT: '\ue00a',
+  OPT: '\ue00a',
+  OPTION: '\ue00a',
   PAUSE: '\ue00b',
+  ESC: '\ue00c',
   ESCAPE: '\ue00c',
   SPACE: '\ue00d',
   ' ': '\ue00d',
@@ -135,8 +139,10 @@ export const webDriverCodePoints = {
   ARROWRIGHT: '\ue014',
   DOWN: '\ue015',
   ARROWDOWN: '\ue015',
+  INS: '\ue016',
   INSERT: '\ue016',
   DELETE: '\ue017',
+  DEL: '\ue017',
   SEMICOLON: '\ue018',
   EQUALS: '\ue019',
 
@@ -173,6 +179,18 @@ export const webDriverCodePoints = {
   META: '\ue03d',
   COMMAND: '\ue03d',
   ZENKAKU_HANKAKU: '\ue040',
+
+  ONE: '1',
+  TWO: '2',
+  THREE: '3',
+  FOUR: '4',
+  FIVE: '5',
+  SIX: '6',
+  SEVEN: '7',
+  EIGHT: '8',
+  NINE: '9',
+  ZERO: '0',
+  COMMA: ',',
 };
 
 export class ATKey {
