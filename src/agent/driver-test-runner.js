@@ -68,14 +68,16 @@ export class DriverTestRunner {
           .then(callback);
       });
 
-      const runTestSetup = await this.webDriver.wait(
+      // TODO: Replace loaded and timeout race with a deterministic signal that
+      // the page is ready. This likely needs a change in aria-at's process.
+      const pageReady = Promise.race([loaded, timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY)]);
+      const runTestButtonFound = this.webDriver.wait(
         until.elementLocated(By.className('button-run-test-setup')),
         RUN_TEST_SETUP_BUTTON_TIMEOUT
       );
-      // TODO: Replace loaded and timeout race with a deterministic signal that
-      // the page is ready. This likely needs a change in aria-at's process.
-      await Promise.race([loaded, timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY)]);
-      await runTestSetup.click();
+      const [runTestButton] = await Promise.all([runTestButtonFound, pageReady]);
+
+      await runTestButton.click();
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
     }
