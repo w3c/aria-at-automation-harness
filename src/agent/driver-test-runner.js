@@ -58,6 +58,7 @@ export class DriverTestRunner {
     await this.webDriver.navigate().to(url.toString());
 
     try {
+      const loadedTimeout = timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY);
       const loaded = this.webDriver.executeAsyncScript(function (callback) {
         new Promise(resolve => {
           window.addEventListener('load', () => resolve());
@@ -68,9 +69,9 @@ export class DriverTestRunner {
           .then(callback);
       });
 
-      // TODO: Replace loaded and timeout race with a deterministic signal that
+      // TODO: Replace `loaded` and timeout with a deterministic signal that
       // the page is ready. This likely needs a change in aria-at's process.
-      const pageReady = Promise.race([loaded, timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY)]);
+      const pageReady = loaded.catch(() => loadedTimeout);
       const runTestButtonFound = this.webDriver.wait(
         until.elementLocated(By.className('button-run-test-setup')),
         RUN_TEST_SETUP_BUTTON_TIMEOUT
