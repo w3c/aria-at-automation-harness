@@ -90,6 +90,26 @@ export class DriverTestRunner {
     await this.atDriver.sendKeys(sequence);
   }
 
+  async ensureMode(mode) {
+    const capabilities = await this.collectedCapabilities;
+    if (capabilities.atName == 'NVDA') {
+      const desiredResponse = mode === 'reading' ? 'Browse mode' : 'Focus mode';
+      const MODE_SWITCH_SPEECH_TIMEOUT = 500;
+      let speechResponse;
+      for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
+        speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
+          this.sendKeys(ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))))
+        );
+        speechResponse = speechResponse.join(' ').replace(/^\s+|\s+$/g, '');
+        if (speechResponse === desiredResponse) return;
+      }
+      this.log(AgentMessage.AT_DRIVER_COMMS, {
+        direction: 'modeSwitch',
+        message: `Unable to ensure proper mode ${desiredResponse} ${speechResponse}`,
+      });
+    }
+  }
+
   /**
    * @param {AriaATFile.CollectedTest} test
    */
@@ -115,6 +135,10 @@ export class DriverTestRunner {
             referencePage: test.target.referencePage,
           })
         );
+
+        if (test.target?.mode) {
+          await this.ensureMode(test.target.mode);
+        }
 
         const spokenOutput = await this._collectSpeech(AFTER_KEYS_DELAY, () =>
           this.sendKeys(atKeysFromCommand(validCommand))
