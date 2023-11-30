@@ -101,6 +101,7 @@ export class MockTestRunner {
             command: validCommand.id,
             expectation: assertion.expectation || assertion.assertionStatement,
             pass: await this.testAssertion(validCommand, assertion),
+            output: `mocked output for ${assertion.expectation}`,
           });
         }
       } else {
@@ -115,6 +116,7 @@ export class MockTestRunner {
           results.push({
             command: command.id,
             expectation: assertion.expectation,
+            output: `mocked output for ${assertion.expectation}`,
             pass: false,
           });
         }
