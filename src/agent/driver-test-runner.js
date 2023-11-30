@@ -15,7 +15,6 @@ import { AgentMessage } from './messages.js';
 
 const AFTER_NAVIGATION_DELAY = 1000;
 const AFTER_KEYS_DELAY = 5000;
-const AFTER_RUN_TEST_SETUP_BUTTON_DELAY = 5000;
 const RUN_TEST_SETUP_BUTTON_TIMEOUT = 1000;
 
 export class DriverTestRunner {
@@ -58,23 +57,25 @@ export class DriverTestRunner {
     await this.webDriver.navigate().to(url.toString());
 
     try {
-      const loaded = this.webDriver.executeAsyncScript(function (callback) {
-        new Promise(resolve => {
-          window.addEventListener('load', () => resolve());
-        })
-          // Wait until after any microtasks registered by other 'load' event
-          // handlers.
-          .then(() => Promise.resolve())
-          .then(callback);
+      await this.webDriver.executeAsyncScript(function (callback) {
+        if (document.readyState === 'complete') {
+          callback();
+        } else {
+          new Promise(resolve => {
+            window.addEventListener('load', () => resolve());
+          })
+            // Wait until after any microtasks registered by other 'load' event
+            // handlers.
+            .then(() => Promise.resolve())
+            .then(callback);
+        }
       });
 
       const runTestSetup = await this.webDriver.wait(
         until.elementLocated(By.className('button-run-test-setup')),
         RUN_TEST_SETUP_BUTTON_TIMEOUT
       );
-      // TODO: Replace loaded and timeout race with a deterministic signal that
-      // the page is ready. This likely needs a change in aria-at's process.
-      await Promise.race([loaded, timeout(AFTER_RUN_TEST_SETUP_BUTTON_DELAY)]);
+
       await runTestSetup.click();
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
