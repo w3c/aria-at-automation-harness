@@ -41,7 +41,8 @@
  * @property {string} [commands[].extraInstruction] human-readable additional instruction to follow
  * @property {object[]} assertions[]
  * @property {1 | 2} assertions[].priority
- * @property {string} assertions[].expectation
+ * @property {string} [assertions[].expectation] - Expected result, required if assertionStatement is not provided.
+ * @property {string} [assertions[].assertionStatement] - Assertion statement, required if expectation is not provided.
  */
 
 /**

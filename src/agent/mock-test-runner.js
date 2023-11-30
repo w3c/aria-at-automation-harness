@@ -58,7 +58,7 @@ export class MockTestRunner {
   async runAssertion(command, assertion) {
     return {
       command: command.id,
-      expectation: assertion.expectation,
+      expectation: assertion.expectation || assertion.assertionStatement,
       output: `mocked output for ${assertion.expectation}`,
       pass: await this.testAssertion(command, assertion),
     };

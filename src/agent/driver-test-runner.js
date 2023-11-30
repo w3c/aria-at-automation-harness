@@ -132,7 +132,7 @@ export class DriverTestRunner {
         for (const assertion of test.assertions) {
           results.push({
             command: command.id,
-            expectation: assertion.expectation,
+            expectation: assertion.expectation || assertion.assertionStatement,
             pass: true,
           });
         }
