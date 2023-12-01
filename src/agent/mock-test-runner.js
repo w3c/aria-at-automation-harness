@@ -97,11 +97,13 @@ export class MockTestRunner {
         });
 
         for (const assertion of task.assertions) {
+          const expectationText = assertion.expectation || assertion.assertionStatement;
+
           results.push({
             command: validCommand.id,
-            expectation: assertion.expectation || assertion.assertionStatement,
+            expectation: expectationText,
             pass: await this.testAssertion(validCommand, assertion),
-            output: `mocked output for ${assertion.expectation}`,
+            output: `mocked output for ${expectationText}`,
           });
         }
       } else {
@@ -113,10 +115,12 @@ export class MockTestRunner {
         });
 
         for (const assertion of task.assertions) {
+          const expectationText = assertion.expectation || assertion.assertionStatement;
+
           results.push({
             command: command.id,
-            expectation: assertion.expectation,
-            output: `mocked output for ${assertion.expectation}`,
+            expectation: expectationText,
+            output: `mocked output for ${expectationText}`,
             pass: false,
           });
         }

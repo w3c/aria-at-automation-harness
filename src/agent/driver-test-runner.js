@@ -208,6 +208,8 @@ export function validateKeysFromCommand(command) {
   for (let { id } of command.keypresses) {
     // PAGE_DOWN and PAGE_UP are the only commands that have the extra _ inside a key
     id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
+    // + is used to connect keys that are pressed simultaneously in v2 tests
+    id = id.replace('+', '_');
     if (/\//.test(id)) {
       errors.push(`'${id}' cannot contain '/'.`);
     }
@@ -249,6 +251,7 @@ export function atKeysFromCommand(command) {
       ATKey.chord(
         ...id
           .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
+          .replace('+', '_') // + is used to connect keys that are pressed simultaneously in v2 tests
           .split('_')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
