@@ -224,7 +224,7 @@ export function validateKeysFromCommand(command) {
     if (/\bfollowed\b/.test(id)) {
       errors.push(`'${id}' cannot contain 'followed' or 'followed by'.`);
     }
-    for (const part of id.split('_')) {
+    for (const part of id.split(/[_+,]/)) {
       // Some old test plans have keys that contain indications of unspecified
       // instructions ('/') or additional instructions that are not standardized
       // in test plans. These keys should be updated to be separate commands or
