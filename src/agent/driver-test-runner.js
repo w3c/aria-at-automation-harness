@@ -211,7 +211,7 @@ export function validateKeysFromCommand(command) {
     // + is used to connect keys that are pressed simultaneously in v2 tests
     id = id.replace('+', '_');
     // `UP_ARROW`, `DOWN_ARROW`, etc are sent as `up`, `down`, etc
-    id = command.id.replace(/_(ARROW)/, '');
+    id = command.id.replace(/_ARROW/g, '');
     if (/\//.test(id)) {
       errors.push(`'${id}' cannot contain '/'.`);
     }
