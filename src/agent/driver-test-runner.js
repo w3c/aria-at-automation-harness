@@ -210,6 +210,8 @@ export function validateKeysFromCommand(command) {
     id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
     // + is used to connect keys that are pressed simultaneously in v2 tests
     id = id.replace('+', '_');
+    // `UP_ARROW`, `DOWN_ARROW`, etc are sent as `up`, `down`, etc
+    id = command.id.replace(/_(ARROW)/, '');
     if (/\//.test(id)) {
       errors.push(`'${id}' cannot contain '/'.`);
     }
