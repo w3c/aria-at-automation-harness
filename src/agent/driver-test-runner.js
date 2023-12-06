@@ -91,12 +91,11 @@ export class DriverTestRunner {
   }
 
   /**
-   *
-   * @param {"reading" | "interactive" | undefined} mode
+   * @param {"reading" | "interactive"} mode
    */
   async ensureMode(mode) {
     const capabilities = await this.collectedCapabilities;
-    if (capabilities?.atName == 'NVDA') {
+    if (capabilities.atName == 'NVDA') {
       // disable the "beeps" when switching focus/browse mode, forces it to speak the mode after switching
       await this.atDriver._send({
         method: 'nvda:settings.setSettings',
