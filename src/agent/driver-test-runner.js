@@ -90,16 +90,20 @@ export class DriverTestRunner {
     await this.atDriver.sendKeys(sequence);
   }
 
+  /**
+   *
+   * @param {"reading" | "interactive" | undefined} mode
+   */
   async ensureMode(mode) {
     const capabilities = await this.collectedCapabilities;
-    if (capabilities.atName == 'NVDA') {
+    if (capabilities?.atName == 'NVDA') {
       // disable the "beeps" when switching focus/browse mode, forces it to speak the mode after switching
       await this.atDriver._send({
         method: 'nvda:settings.setSettings',
         params: { settings: [{ name: 'virtualBuffers.passThroughAudioIndication', value: false }] },
       });
       try {
-        const desiredResponse = mode === 'reading' ? 'Browse mode' : 'Focus mode';
+        const desiredResponse = mode.toLowerCase() === 'reading' ? 'Browse mode' : 'Focus mode';
         const MODE_SWITCH_SPEECH_TIMEOUT = 500;
         let speechResponse;
         for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
@@ -107,15 +111,14 @@ export class DriverTestRunner {
             this.sendKeys(ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))))
           );
           speechResponse = speechResponse.join(' ').replace(/^\s+|\s+$/g, '');
-          if (speechResponse === desiredResponse) {
+          if (speechResponse.toLowerCase() === desiredResponse.toLowerCase()) {
             // done ensuring mode
             return;
           }
         }
-        this.log(AgentMessage.AT_DRIVER_COMMS, {
-          direction: 'modeSwitch',
-          message: `Unable to ensure proper mode. Expected: "${desiredResponse}" Got: "${speechResponse}"`,
-        });
+        throw new Error(
+          `Unable to ensure proper mode. Expected: "${desiredResponse}" Got: "${speechResponse}"`
+        );
       } finally {
         // turn the "beeps" back on so mode switches won't be spoken (default setting)
         await this.atDriver._send({
@@ -125,7 +128,10 @@ export class DriverTestRunner {
           },
         });
       }
+    } else if (!capabilities.atName) {
+      return;
     }
+    throw new Error(`Unable to ensure proper mode. Unknown atName ${capabilities.atName}`);
   }
 
   /**
