@@ -4,7 +4,7 @@
 
 import path from 'path';
 import { Readable } from 'stream';
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 
 import yargs from 'yargs';
 import { pickAgentCliOptions } from '../agent/cli.js';
@@ -202,10 +202,20 @@ function mainFetchMiddleware(argv) {
     if (!argv.agentMock) {
       argv.fetch = fetch;
     } else {
-      argv.fetch = (...params) =>
+      argv.fetch = (url, ...params) =>
         new Promise(resolve => {
-          console.log('Callback Fetch Mocked: ', ...params);
-          resolve();
+          const { searchParams } = new URL(url);
+          const status = parseInt(searchParams.get('TEST-STATUS'), 10) || 200;
+          const response = new Response('a body', { status });
+
+          if (searchParams.has('TEST-BAD-BODY')) {
+            // Disturb the response body stream in order to trigger failure in
+            // any future attempt to read.
+            response.text();
+          }
+
+          console.log('Callback Fetch Mocked: ', url, ...params);
+          resolve(response);
         });
     }
   }

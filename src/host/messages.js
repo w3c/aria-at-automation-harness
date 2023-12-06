@@ -40,6 +40,8 @@ export const HostMessage = {
   AGENT_CRASHED: 'agentCrashed',
   /** @type {'startTest'} */
   START_TEST: 'startTest',
+  /** @type {'reportingError'} */
+  REPORTING_ERROR: 'reportingError',
 };
 
 export const HOST_TEMPLATES = {
@@ -60,6 +62,8 @@ export const HOST_TEMPLATES = {
   [HostMessage.AGENT_LOG]: ({ text }) => `[Agent]: ${text}`,
   [HostMessage.AGENT_CRASHED]: () => `Agent crashed.`,
   [HostMessage.START_TEST]: () => `Starting test.`,
+  [HostMessage.REPORTING_ERROR]: ({ status, body }) =>
+    `HTTP ${status} response received when reporting result: '${body}'.`,
 };
 
 /**
