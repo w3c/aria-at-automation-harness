@@ -51,6 +51,32 @@ test('plan3 with callback', async t => {
   );
 });
 
+test('plan3 with callback request which fails', async t => {
+  t.snapshot(
+    await spawnRunPlan([
+      '--plan-workingdir=fixtures/host-bin/plan3',
+      '"**"',
+      '--agent-mock',
+      '--debug',
+      '--callback-url=http://example.com/?TEST-STATUS=418',
+      '--callback-header=x:y',
+    ])
+  );
+});
+
+test('plan3 with callback request which fails with a faulty response body', async t => {
+  t.snapshot(
+    await spawnRunPlan([
+      '--plan-workingdir=fixtures/host-bin/plan3',
+      '"**"',
+      '--agent-mock',
+      '--debug',
+      '--callback-url="http://example.com/?TEST-STATUS=418&TEST-BAD-BODY"',
+      '--callback-header=x:y',
+    ])
+  );
+});
+
 async function spawnRunPlan(args) {
   const dirname = path.dirname(fileURLToPath(import.meta.url));
   const hostBin = path.join(dirname, '../../../bin/host.js');
