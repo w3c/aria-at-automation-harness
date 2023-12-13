@@ -206,12 +206,13 @@ export class DriverTestRunner {
 export function validateKeysFromCommand(command) {
   const errors = [];
   for (let { id } of command.keypresses) {
-    // PAGE_DOWN and PAGE_UP are the only commands that have the extra _ inside a key
-    id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
-    // + is used to connect keys that are pressed simultaneously in v2 tests
-    id = id.replace('+', '_');
-    // `UP_ARROW`, `DOWN_ARROW`, etc are sent as `up`, `down`, etc
-    id = command.id.replace(/_ARROW/g, '');
+    id = id
+      // PAGE_DOWN and PAGE_UP are the only commands that have the extra _ inside a key
+      .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
+      // + is used to connect keys that are pressed simultaneously in v2 tests
+      .replace('+', '_')
+      // `UP_ARROW`, `DOWN_ARROW`, etc are sent as `up`, `down`, etc
+      .replace(/_ARROW/g, '');
     if (/\//.test(id)) {
       errors.push(`'${id}' cannot contain '/'.`);
     }
