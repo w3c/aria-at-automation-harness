@@ -15,6 +15,19 @@ import {
 } from './plan-object.js';
 
 /**
+ * @param {AriaATCIHost.Log} log
+ * @param {Response} response
+ */
+const logUnsuccessfulHTTP = async (log, response) => {
+  if (!response.ok) {
+    const { status } = response;
+    const body = await response.text().catch(() => 'Unknown error - unable to read response body.');
+
+    log(HostMessage.REPORTING_ERROR, { status, body });
+  }
+};
+
+/**
  * @param {object} options
  * @param {AriaATCIHost.Log} options.log
  * @param {AsyncIterable<AriaATCIHost.TestPlan>} options.plans
@@ -84,7 +97,7 @@ export async function hostMain({
             method: 'post',
             body,
             headers,
-          })
+          }).then(logUnsuccessfulHTTP.bind(null, log))
         );
       }
       plan = addTestResultToTestPlan(plan, test.filepath, result);
