@@ -56,19 +56,6 @@ export class MockTestRunner {
    * @param {CollectedTestCommand} command
    * @param {CollectedTestAssertion} assertion
    */
-  async runAssertion(command, assertion) {
-    return {
-      command: command.id,
-      expectation: assertion.expectation || assertion.assertionStatement,
-      output: `mocked output for ${assertion.expectation}`,
-      pass: await this.testAssertion(command, assertion),
-    };
-  }
-
-  /**
-   * @param {CollectedTestCommand} command
-   * @param {CollectedTestAssertion} assertion
-   */
   async testAssertion(command, assertion) {
     return true;
   }
