@@ -175,6 +175,8 @@ export class DriverTestRunner {
         commandsOutput.push({
           command: command.id,
           output: spokenOutput.join('\n'),
+          // v2 property only
+          presentationNumber: command.presentationNumber,
         });
 
         for (const assertion of test.assertions) {
@@ -202,10 +204,11 @@ export class DriverTestRunner {
       }
     }
 
-    const testId = test.info.testId;
+    const { testId, presentationNumber } = test.info;
 
     return {
       testId,
+      presentationNumber,
       capabilities,
       commands: commandsOutput,
       results,
