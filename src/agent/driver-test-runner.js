@@ -140,7 +140,7 @@ export class DriverTestRunner {
     } else if (!atName) {
       return;
     }
-    throw new Error(`Unable to ensure proper settings. Unknown atName ${capabilities.atName}`);
+    throw new Error(`Unable to ensure proper settings. Unknown atName ${atName}`);
   }
 
   /**
