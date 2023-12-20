@@ -149,7 +149,7 @@ export class DriverTestRunner {
    */
   async ensureMode(mode) {
     const { atName } = await this.collectedCapabilities;
-    if (atName == 'NVDA') {
+    if (atName === 'NVDA') {
       return this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
     } else if (!atName) {
       return;
