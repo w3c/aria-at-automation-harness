@@ -8,6 +8,7 @@
 
 import { request } from 'http';
 import { AgentMessage } from './messages.js';
+import { validateKeysFromCommand } from './driver-test-runner.js';
 
 /**
  * @implements {AriaATCIAgent.TestRunner}
@@ -55,19 +56,6 @@ export class MockTestRunner {
    * @param {CollectedTestCommand} command
    * @param {CollectedTestAssertion} assertion
    */
-  async runAssertion(command, assertion) {
-    return {
-      command: command.id,
-      expectation: assertion.expectation,
-      output: `mocked output for ${assertion.expectation}`,
-      pass: await this.testAssertion(command, assertion),
-    };
-  }
-
-  /**
-   * @param {CollectedTestCommand} command
-   * @param {CollectedTestAssertion} assertion
-   */
   async testAssertion(command, assertion) {
     return true;
   }
@@ -82,6 +70,50 @@ export class MockTestRunner {
         this.baseUrl
       )
     );
+
+    const commandsOutput = [];
+    const results = [];
+
+    for (const command of task.commands) {
+      const { value: validCommand, errors } = validateKeysFromCommand(command);
+      if (validCommand) {
+        const mockOutput = `mocked output for ${command.id}`;
+        commandsOutput.push({
+          command: validCommand.id,
+          output: mockOutput,
+        });
+
+        for (const assertion of task.assertions) {
+          const expectationText = assertion.expectation || assertion.assertionStatement;
+
+          results.push({
+            command: validCommand.id,
+            expectation: expectationText,
+            pass: await this.testAssertion(validCommand, assertion),
+            output: `mocked output for ${expectationText}`,
+          });
+        }
+      } else {
+        await this.log(AgentMessage.INVALID_KEYS, { command, errors });
+
+        commandsOutput.push({
+          command: command.id,
+          errors,
+        });
+
+        for (const assertion of task.assertions) {
+          const expectationText = assertion.expectation || assertion.assertionStatement;
+
+          results.push({
+            command: command.id,
+            expectation: expectationText,
+            output: `mocked output for ${expectationText}`,
+            pass: false,
+          });
+        }
+      }
+    }
+
     return {
       testId: task.info.testId,
       capabilities: {
@@ -91,19 +123,8 @@ export class MockTestRunner {
         atVersion: '1.0',
         platformName: 'mock',
       },
-      commands: await task.commands.reduce(
-        async (carry, command) => [
-          ...(await carry),
-          ...(await task.assertions.reduce(
-            async (carry, assertion) => [
-              ...(await carry),
-              await this.runAssertion(command, assertion),
-            ],
-            Promise.resolve([])
-          )),
-        ],
-        Promise.resolve([])
-      ),
+      commands: commandsOutput,
+      results,
     };
   }
 }

@@ -180,7 +180,7 @@ export class DriverTestRunner {
         for (const assertion of test.assertions) {
           results.push({
             command: command.id,
-            expectation: assertion.expectation,
+            expectation: assertion.expectation || assertion.assertionStatement,
             pass: true,
           });
         }
@@ -253,8 +253,13 @@ export class DriverTestRunner {
 export function validateKeysFromCommand(command) {
   const errors = [];
   for (let { id } of command.keypresses) {
-    // PAGE_DOWN and PAGE_UP are the only commands that have the extra _ inside a key
-    id = id.replace(/(PAGE)_(DOWN|UP)/, '$1$2');
+    id = id
+      // PAGE_DOWN and PAGE_UP are the only commands that have the extra _ inside a key
+      .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
+      // + is used to connect keys that are pressed simultaneously in v2 tests
+      .replace('+', '_')
+      // `UP_ARROW`, `DOWN_ARROW`, etc are sent as `up`, `down`, etc
+      .replace(/_ARROW/g, '');
     if (/\//.test(id)) {
       errors.push(`'${id}' cannot contain '/'.`);
     }
@@ -267,7 +272,7 @@ export function validateKeysFromCommand(command) {
     if (/\bfollowed\b/.test(id)) {
       errors.push(`'${id}' cannot contain 'followed' or 'followed by'.`);
     }
-    for (const part of id.split('_')) {
+    for (const part of id.split(/[_+,]/)) {
       // Some old test plans have keys that contain indications of unspecified
       // instructions ('/') or additional instructions that are not standardized
       // in test plans. These keys should be updated to be separate commands or
@@ -296,6 +301,7 @@ export function atKeysFromCommand(command) {
       ATKey.chord(
         ...id
           .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
+          .replace('+', '_') // + is used to connect keys that are pressed simultaneously in v2 tests
           .split('_')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
