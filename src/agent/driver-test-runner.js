@@ -187,7 +187,7 @@ export class DriverTestRunner {
           // Ensure AT is in proper mode for tests.  V2 tests define "settings" per command.
           await this.ensureSettings(command.settings);
         } else if (test.target?.mode) {
-          // V1 tests define a "mode" of "reading" or "interactive" on the test.target
+          // V1 tests define a "mode" of "reading" or "interaction" on the test.target
           await this.ensureMode(test.target.mode);
         }
 
