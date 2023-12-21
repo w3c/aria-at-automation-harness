@@ -91,7 +91,7 @@ export class DriverTestRunner {
   }
 
   /**
-   * Used for v2 aria-at tests, "reading" and "interactive" map to various settings based on AT.
+   * Used for v2 tests to ensure proper settings.
    *
    * @param {string} settings - "browseMode" "focusMode" for NVDA, "pcCursor" "virtualCursor"
    *                 for JAWS., "defaultMode" for others.
@@ -118,8 +118,7 @@ export class DriverTestRunner {
           speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
             this.sendKeys(ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))))
           );
-          // convert from array of strings to single string and trim begin/end whitespace
-          speechResponse = speechResponse.join(' ').replace(/^\s+|\s+$/g, '');
+          speechResponse = speechResponse.join(' ').trim();
           if (speechResponse.toLowerCase() === desiredResponse.toLowerCase()) {
             // our mode is correct, we are done
             return;
@@ -150,7 +149,8 @@ export class DriverTestRunner {
   async ensureMode(mode) {
     const { atName } = await this.collectedCapabilities;
     if (atName === 'NVDA') {
-      return this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
+      await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
+      return;
     } else if (!atName) {
       return;
     }
