@@ -202,10 +202,11 @@ export class DriverTestRunner {
       }
     }
 
-    const testId = test.info.testId;
+    const { testId, presentationNumber } = test.info;
 
     return {
       testId,
+      presentationNumber,
       capabilities,
       commands: commandsOutput,
       results,

@@ -83,9 +83,10 @@ export async function hostMain({
           'Content-Type': 'application/json',
           ...(callbackHeader || {}),
         };
-        const { testId, capabilities, commands } = result;
+        const { testId, presentationNumber, capabilities, commands } = result;
         const body = JSON.stringify({
           testCsvRow: testId,
+          presentationNumber,
           capabilities,
           responses: commands.map(({ output }) => output),
           // a v2 of this API should allow the aria at app to parse the capabilities we are sending instead.
