@@ -91,27 +91,36 @@ export class DriverTestRunner {
   }
 
   /**
-   * @param {"reading" | "interactive"} mode
+   * Used for v2 tests to ensure proper settings.
+   *
+   * @param {string} settings - "browseMode" "focusMode" for NVDA, "pcCursor" "virtualCursor"
+   *                 for JAWS., "defaultMode" for others.
    */
-  async ensureMode(mode) {
-    const capabilities = await this.collectedCapabilities;
-    if (capabilities.atName == 'NVDA') {
+  async ensureSettings(settings) {
+    const { atName } = await this.collectedCapabilities;
+    if (atName == 'NVDA') {
       // disable the "beeps" when switching focus/browse mode, forces it to speak the mode after switching
       await this.atDriver._send({
         method: 'nvda:settings.setSettings',
         params: { settings: [{ name: 'virtualBuffers.passThroughAudioIndication', value: false }] },
       });
       try {
-        const desiredResponse = mode.toLowerCase() === 'reading' ? 'Browse mode' : 'Focus mode';
+        const desiredResponse = { browsemode: 'Browse mode', focusmode: 'Focus mode' }[
+          settings.toLowerCase()
+        ];
+        if (!desiredResponse) {
+          throw new Error(`Unknown command settings for NVDA "${settings}"`);
+        }
         const MODE_SWITCH_SPEECH_TIMEOUT = 500;
         let speechResponse;
+        // there are 2 modes, so we will try pressing mode switch up to twice
         for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
           speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
             this.sendKeys(ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))))
           );
-          speechResponse = speechResponse.join(' ').replace(/^\s+|\s+$/g, '');
+          speechResponse = speechResponse.join(' ').trim();
           if (speechResponse.toLowerCase() === desiredResponse.toLowerCase()) {
-            // done ensuring mode
+            // our mode is correct, we are done
             return;
           }
         }
@@ -127,7 +136,22 @@ export class DriverTestRunner {
           },
         });
       }
-    } else if (!capabilities.atName) {
+    } else if (!atName) {
+      return;
+    }
+    throw new Error(`Unable to ensure proper settings. Unknown atName ${atName}`);
+  }
+
+  /**
+   * Used for v1 aria-at tests, "reading" and "interaction" map to various settings based on AT.
+   * @param {"reading" | "interaction"} mode
+   */
+  async ensureMode(mode) {
+    const { atName } = await this.collectedCapabilities;
+    if (atName === 'NVDA') {
+      await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
+      return;
+    } else if (!atName) {
       return;
     }
     throw new Error(`Unable to ensure proper mode. Unknown atName ${capabilities.atName}`);
@@ -159,7 +183,11 @@ export class DriverTestRunner {
           })
         );
 
-        if (test.target?.mode) {
+        if (command.settings) {
+          // Ensure AT is in proper mode for tests.  V2 tests define "settings" per command.
+          await this.ensureSettings(command.settings);
+        } else if (test.target?.mode) {
+          // V1 tests define a "mode" of "reading" or "interaction" on the test.target
           await this.ensureMode(test.target.mode);
         }
 
