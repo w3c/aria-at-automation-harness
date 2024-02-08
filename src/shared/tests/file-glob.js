@@ -24,7 +24,7 @@ test('testGlob', t => {
   const assertGlobTrue = (glob, target, partial) =>
     t.true(
       matchGlob(glob, target, partial),
-      `'${partial ? 'partial ' : ''}${glob}' matches '${target}'`
+      `${partial ? 'partial ' : ''}'${glob}' matches '${target}'`
     );
   const assertGlobFalse = (glob, target, partial) =>
     t.false(
@@ -35,12 +35,12 @@ test('testGlob', t => {
     if (process.platform === 'win32') {
       return t.true(
         matchGlob(glob, target, partial),
-        `'${partial ? 'partial ' : ''}${glob}' matches '${target}' (Win32)`
+        `${partial ? 'partial ' : ''}'${glob}' matches '${target}' (Win32)`
       );
     } else {
       return t.false(
         matchGlob(glob, target, partial),
-        `'${partial ? 'partial ' : ''}${glob}' does not match '${target}' (not win32)`
+        `${partial ? 'partial ' : ''}'${glob}' does not match '${target}' (not win32)`
       );
     }
   };
