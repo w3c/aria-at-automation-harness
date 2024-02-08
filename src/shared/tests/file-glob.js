@@ -31,6 +31,20 @@ test('testGlob', t => {
       matchGlob(glob, target, partial),
       `${partial ? 'partial ' : ''}'${glob}' does not match '${target}'`
     );
+  const assertGlobTrueWin32 = (glob, target, partial) => {
+    if (process.platform === 'win32') {
+      return t.true(
+        matchGlob(glob, target, partial),
+        `'${partial ? 'partial ' : ''}${glob}' matches '${target}' (Win32)`
+      );
+    } else {
+      return t.false(
+        matchGlob(glob, target, partial),
+        `'${partial ? 'partial ' : ''}${glob}' does not match '${target}' (not win32)`
+      );
+    }
+  };
+
   assertGlobTrue('', '');
   assertGlobFalse('', 'a');
   assertGlobTrue('a', 'a');
@@ -42,7 +56,7 @@ test('testGlob', t => {
   assertGlobTrue('a/b', 'a', true);
   assertGlobFalse('a/b', 'a', false);
   assertGlobTrue('a/b', 'a/b');
-  assertGlobTrue('a/b', 'a\\b');
+  assertGlobTrueWin32('a/b', 'a\\b');
   assertGlobFalse('a/b', '');
   assertGlobFalse('a/b', 'b');
   assertGlobFalse('a/b', 'b/a');
@@ -52,9 +66,9 @@ test('testGlob', t => {
   assertGlobFalse('a/b/c', 'a', false);
   assertGlobTrue('a/b/c', 'a/b', true);
   assertGlobFalse('a/b/c', 'a/b', false);
-  assertGlobTrue('a/b/c', 'a\\b', true);
+  assertGlobTrueWin32('a/b/c', 'a\\b', true);
   assertGlobTrue('a/b/c', 'a/b/c');
-  assertGlobTrue('a/b/c', 'a\\b\\c');
+  assertGlobTrueWin32('a/b/c', 'a\\b\\c');
   assertGlobFalse('a/b/c', '');
   assertGlobFalse('a/b/c', 'b');
   assertGlobFalse('a/b/c', 'c');
@@ -70,15 +84,15 @@ test('testGlob', t => {
   assertGlobTrue('{a,b/c}', 'b', true);
   assertGlobFalse('{a,b/c}', 'b', false);
   assertGlobTrue('{a,b/c}', 'b/c');
-  assertGlobTrue('{a,b/c}', 'b\\c');
+  assertGlobTrueWin32('{a,b/c}', 'b\\c');
   assertGlobFalse('{a,b/c}', '');
   assertGlobFalse('{a,b/c}', 'a/c');
   assertGlobTrue('a/{b,c}', 'a', true);
   assertGlobFalse('a/{b,c}', 'a', false);
   assertGlobTrue('a/{b,c}', 'a/b');
-  assertGlobTrue('a/{b,c}', 'a\\b');
+  assertGlobTrueWin32('a/{b,c}', 'a\\b');
   assertGlobTrue('a/{b,c}', 'a/c');
-  assertGlobTrue('a/{b,c}', 'a\\c');
+  assertGlobTrueWin32('a/{b,c}', 'a\\c');
   assertGlobFalse('a/{b,c}', '');
   assertGlobFalse('a/{b,c}', 'b');
   assertGlobFalse('a/{b,c}', 'c');
