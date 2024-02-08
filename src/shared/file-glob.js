@@ -1,4 +1,5 @@
 import { last } from './array-util.js';
+import { Minimatch } from 'minimatch';
 
 /**
  * @module shared
@@ -23,42 +24,18 @@ import { last } from './array-util.js';
  * - '**' match everything
  *
  * @param {string} glob a fs-like glob to test paths with
- * @returns {function(string): boolean}
+ * @returns {function(string, boolean): boolean}
  */
 export function compileGlob(glob) {
-  const expr = new RegExp(
-    `^(${glob
-      .replace(/(?<=^|[{,])[^{},]+(?=$|[,{}])/g, match =>
-        match
-          .split(/[\\/]/g)
-          .reduce(
-            (carry, part) =>
-              carry.length ? [...carry, `${last(carry)}/`, `${last(carry)}/${part}`] : [part],
-            []
-          )
-          .join(',')
-      )
-      .replace(/\{|\}|,|\.|\/|\*{1,2}/g, match =>
-        match === '{'
-          ? '('
-          : match === '}'
-          ? ')'
-          : match === ','
-          ? '|'
-          : match === '.'
-          ? '\\.'
-          : match === '/'
-          ? '[\\\\/]'
-          : match === '*'
-          ? '[^\\\\/]+'
-          : '.*'
-      )})$`
-  );
-
-  return target => expr.test(target);
+  const match = new Minimatch(glob);
+  const partialMatch = new Minimatch(glob, { partial: true });
+  return (path, partial = false) => {
+    const result = (partial ? partialMatch : match).match(path);
+    return result;
+  };
 }
 
 /** */
-export function matchGlob(glob, target) {
-  return compileGlob(glob)(target);
+export function matchGlob(glob, target, partial) {
+  return compileGlob(glob)(target, partial);
 }

@@ -28,7 +28,8 @@ export const builder = yargs => {
 
 export async function handler({ workingdir: _workingdir, files, emitRecord }) {
   const workingdir = path.resolve(_workingdir);
-  await emitRecord(await host.read(workingdir, { glob: files.join(',') }));
+  const glob = files.length === 1 ? files[0] : `{${files.join(',')}}`;
+  await emitRecord(await host.read(workingdir, { glob }));
 }
 
 /**

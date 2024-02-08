@@ -86,7 +86,8 @@ planFromCommandFork.protocolName = 'fork';
 
 async function planFromDeveloperInterface({ workingdir, files }) {
   const host = createHost();
-  const record = await host.read(workingdir, { glob: files.join(',') });
+  const glob = files.length === 1 ? files[0] : `{${files.join(',')}}`;
+  const record = await host.read(workingdir, { glob });
   return { ...planFromRecord(record), source: 'developer' };
 }
 

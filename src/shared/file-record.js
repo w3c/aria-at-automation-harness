@@ -130,12 +130,23 @@ class FileSystemHost {
       const subpath = splitPath.join(this.path.sep);
       const rawRecord = await this.readFS(this.path.join(root, subpath));
       if (isDirectory(rawRecord)) {
+        const entries = [];
+        for (const { name } of rawRecord.entries) {
+          const path = this.path.join(subpath, name);
+          try {
+            const stat = await this.fs.stat(this.path.join(root, path));
+            if (matchesGlob(path, stat.isDirectory())) {
+              entries.push({ name });
+            }
+          } catch (error) {
+            console.error(`Error reading filesystem ${this.path.join(root, path)}: ${error}`);
+            throw error;
+          }
+        }
         return {
           ...record,
           ...rawRecord,
-          entries: rawRecord.entries.filter(({ name }) =>
-            matchesGlob(this.path.join(subpath, name))
-          ),
+          entries,
         };
       }
       return { ...record, ...rawRecord };
