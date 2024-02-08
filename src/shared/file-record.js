@@ -140,6 +140,7 @@ class FileSystemHost {
             }
           } catch (error) {
             console.error(`Error reading filesystem ${this.path.join(root, path)}: ${error}`);
+            throw error;
           }
         }
         return {

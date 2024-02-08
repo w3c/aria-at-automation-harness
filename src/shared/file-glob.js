@@ -27,9 +27,10 @@ import { Minimatch } from 'minimatch';
  * @returns {function(string, boolean): boolean}
  */
 export function compileGlob(glob) {
-  const mm = new Minimatch(glob);
+  const match = new Minimatch(glob);
+  const partialMatch = new Minimatch(glob, { partial: true });
   return (path, partial = false) => {
-    const result = mm.match(path, partial);
+    const result = (partial ? partialMatch : match).match(path);
     return result;
   };
 }
