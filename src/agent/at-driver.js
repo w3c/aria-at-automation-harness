@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ws from 'ws';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';

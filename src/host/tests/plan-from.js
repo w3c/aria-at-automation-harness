@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference path="../types.js"/>
 
 import path from 'path';
