@@ -44,7 +44,7 @@ export async function createRunner(options) {
       abortSignal: options.abortSignal,
       log: options.log,
     }).catch(cause => {
-      throw new Error('Rrror connecting to at-driver', { cause });
+      throw new Error('Error connecting to at-driver', { cause });
     }),
   ]);
   return new DriverTestRunner({ ...options, webDriver, atDriver });
