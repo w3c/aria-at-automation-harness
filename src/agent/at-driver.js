@@ -31,7 +31,11 @@ export class ATDriver {
   constructor({ socket, log }) {
     this.socket = socket;
     this.log = log;
-    this.ready = new Promise(resolve => socket.once('open', () => resolve())).then(() =>
+    const connected = new Promise((resolve, reject) => {
+      socket.once('open', () => resolve());
+      socket.once('error', err => reject(err));
+    });
+    this.ready = connected.then(() =>
       this._send({ method: 'session.new', params: { capabilities: {} } }).then(
         ({ result: { capabilities } }) => {
           this._capabilities = capabilities;

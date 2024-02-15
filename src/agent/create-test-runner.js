@@ -36,11 +36,15 @@ export async function createRunner(options) {
       browser: options.webDriverBrowser,
       abortSignal: options.abortSignal,
       log: options.log,
+    }).catch(cause => {
+      throw new Error('Error connecting to web-driver', { cause });
     }),
     createATDriver({
       url: options.atDriverUrl,
       abortSignal: options.abortSignal,
       log: options.log,
+    }).catch(cause => {
+      throw new Error('Error connecting to at-driver', { cause });
     }),
   ]);
   return new DriverTestRunner({ ...options, webDriver, atDriver });
