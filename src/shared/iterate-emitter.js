@@ -6,8 +6,8 @@
 /**
  * @param {EventEmitter} emitter
  * @param {string} nextEvent
- * @param {string} completeEvent
- * @param {string} errorEvent
+ * @param {string} [completeEvent]
+ * @param {string} [errorEvent]
  */
 export async function* iterateEmitter(emitter, nextEvent, completeEvent, errorEvent) {
   const values = [];
