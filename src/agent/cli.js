@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="types.js" />
 
 /**
@@ -48,7 +47,9 @@ export function buildAgentCliOptions(args = yargs) {
       },
       'reference-base-url': {
         description: 'Url to append reference page listed in tests to',
-        type: 'string',
+        coerce(arg) {
+          return new URL(arg);
+        },
         default: 'http://localhost:8000',
       },
       'web-driver-url': {
@@ -162,6 +163,14 @@ export function pickAgentCliOptions({
   };
 }
 
+/**
+ * @param {object} options
+ * @param {any} [options.signals]
+ * @param {any} [options.send]
+ * @param {any} [options.stdin]
+ * @param {any} [options.stdout]
+ * @param {any} [options.stderr]
+ */
 export async function createAgentCliParser({ signals, send, stdin, stdout, stderr }) {
   return /** @type {yargs} */ (await yargs())
     .middleware(argv => {
@@ -210,15 +219,18 @@ async function stopAfterMain(argv) {
  * Build and assign a test runner based on passed arguments.
  * @param {object} argv
  * @param {AriaATCIAgent.Log} argv.log
- * @param {AriaATCIAgent.MockOptions} [argv.mock]
+ * @param {AriaATCIShared.BaseURL} argv.referenceBaseUrl
+ * @param {boolean} [argv.mock]
  * @param {AriaATCIAgent.TestRunner} argv.runner
  * @param {AriaATCIAgent.Browser} [argv.webDriverBrowser]
  * @param {AriaATCIShared.BaseURL} argv.webDriverUrl
+ * @param {AriaATCIShared.BaseURL} argv.atDriverUrl
+ * @param {Promise<void>} argv.abortSignal
  */
 async function agentRunnerMiddleware(argv) {
   argv.runner = await createRunner({
     log: argv.log,
-    baseUrl: new URL(argv.referenceBaseUrl),
+    baseUrl: argv.referenceBaseUrl,
     mock: agentMockOptions(argv),
     webDriverUrl: argv.webDriverUrl,
     webDriverBrowser: argv.webDriverBrowser,
@@ -233,7 +245,7 @@ async function agentRunnerMiddleware(argv) {
  * @param {boolean} argv.debug
  * @param {boolean} argv.quiet
  * @param {string[]} argv.verbose
- * @param {boolean} argv.verbosity
+ * @param {string[]} argv.verbosity
  */
 async function agentVerboseMiddleware(argv) {
   if (argv.debug) {
@@ -261,6 +273,7 @@ async function agentAbortMiddleware(argv) {
  * @param {object} argv
  * @param {function(*): void} argv.send
  * @param {AriaATCIAgent.Log} argv.log
+ * @param {string[]} argv.verbosity
  */
 export function agentLoggerMiddleware(argv) {
   if (typeof argv.send !== 'function') {
@@ -286,7 +299,7 @@ export function agentLoggerMiddleware(argv) {
 /**
  * Build and assign main loop arguments based on passed protocol and other arguments.
  * @param {object} argv
- * @param {EventEmitter} argv.signals
+ * @param {import("events").EventEmitter} argv.signals
  * @param {AriaATCIAgent.TestIterable} argv.tests
  */
 export function agentTestsMiddleware(argv) {
