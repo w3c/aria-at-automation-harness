@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
 
@@ -28,7 +27,7 @@ export async function createRunner(options) {
     throw new Error('createRunner requires abortSignal option.');
   }
   if (options.mock) {
-    return new MockTestRunner(options);
+    return new MockTestRunner({ mock: options.mock, ...options });
   }
   await new Promise(resolve => setTimeout(resolve, 1000));
   const [webDriver, atDriver] = await Promise.all([
@@ -36,7 +35,6 @@ export async function createRunner(options) {
       url: options.webDriverUrl,
       browser: options.webDriverBrowser,
       abortSignal: options.abortSignal,
-      log: options.log,
     }).catch(cause => {
       throw new Error('Error connecting to web-driver', { cause });
     }),
