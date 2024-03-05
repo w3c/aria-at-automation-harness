@@ -22,7 +22,7 @@
  */
 
 /**
- * @typedef {Iterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
+ * @typedef {AsyncIterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
  */
 
 /**
@@ -53,7 +53,7 @@
  * @property {AriaATCIShared.BaseURL} [referenceBaseUrl]
  * @property {boolean} [mock]
  * @property {'request' | 'skip'} [mockOpenPage]
- * @property {URL} [webDriverUrl]
+ * @property {AriaATCIShared.BaseURL} [webDriverUrl]
  * @property {AriaATCIAgent.Browser} [webDriverBrowser]
- * @property {URL} [atDriverUrl]
+ * @property {AriaATCIShared.BaseURL} [atDriverUrl]
  */
