@@ -165,11 +165,11 @@ export function pickAgentCliOptions({
 
 /**
  * @param {object} options
- * @param {any} [options.signals]
- * @param {any} [options.send]
- * @param {any} [options.stdin]
- * @param {any} [options.stdout]
- * @param {any} [options.stderr]
+ * @param {import("events").EventEmitter} options.signals
+ * @param {function(*): void} [options.send]
+ * @param {import("events").EventEmitter} options.stdin
+ * @param {import("events").EventEmitter} options.stdout
+ * @param {import("events").EventEmitter} options.stderr
  */
 export async function createAgentCliParser({ signals, send, stdin, stdout, stderr }) {
   return /** @type {yargs} */ (await yargs())
@@ -190,7 +190,16 @@ export async function createAgentCliParser({ signals, send, stdin, stdout, stder
     ]);
 }
 
-export async function parseAgentCli({ argv = [], ...parserConfiguration } = {}) {
+/**
+ * @param {object} options
+ * @param {object} options.argv
+ * @param {import("events").EventEmitter} options.signals
+ * @param {function(*): void} [options.send]
+ * @param {import("events").EventEmitter} options.stdin
+ * @param {import("events").EventEmitter} options.stdout
+ * @param {import("events").EventEmitter} options.stderr
+ */
+export async function parseAgentCli({ argv, ...parserConfiguration }) {
   return await (await createAgentCliParser(parserConfiguration)).parse(hideBin(argv));
 }
 
