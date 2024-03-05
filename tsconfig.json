@@ -5,7 +5,7 @@
     "target": "ES6",
     "module": "es2020",
     "moduleResolution": "node",
-    "lib": ["es2018"]
+    "lib": ["es2022"]
   },
   "include": ["src/**/*"],
   "exclude": [
