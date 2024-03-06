@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
@@ -43,7 +42,9 @@ export class DriverTestRunner {
   }
 
   /**
-   * @param {URL} url
+   * @param {object} options
+   * @param {URL} options.url
+   * @param {string} options.referencePage
    */
   async openPage({ url, referencePage }) {
     await this.log(AgentMessage.OPEN_PAGE, { url });
@@ -59,10 +60,16 @@ export class DriverTestRunner {
 
     try {
       await this.webDriver.executeAsyncScript(function (callback) {
+        // @ts-expect-error (The TypeScript compiler cannot be configured to
+        // recognize that this function executes in another environment--one
+        // where `document` is defined globally.)
         if (document.readyState === 'complete') {
           callback();
         } else {
           new Promise(resolve => {
+            // @ts-expect-error (The TypeScript compiler cannot be configured
+            // to recognize that this function executes in another
+            // environment--one where `window` is defined globally.)
             window.addEventListener('load', () => resolve());
           })
             // Wait until after any microtasks registered by other 'load' event
@@ -84,7 +91,7 @@ export class DriverTestRunner {
   }
 
   /**
-   * @param {ATKeySequence} sequence
+   * @param {import('./at-driver').ATKeySequence} sequence
    */
   async sendKeys(sequence) {
     await this.log(AgentMessage.PRESS_KEYS, { keys: sequence });
@@ -155,11 +162,11 @@ export class DriverTestRunner {
     } else if (!atName) {
       return;
     }
-    throw new Error(`Unable to ensure proper mode. Unknown atName ${capabilities.atName}`);
+    throw new Error(`Unable to ensure proper mode. Unknown atName ${atName}`);
   }
 
   /**
-   * @param {AriaATFile.CollectedTest} test
+   * @param {AriaATCIData.CollectedTest} test
    */
   async run(test) {
     const capabilities = await this.collectedCapabilities;
@@ -270,10 +277,8 @@ export class DriverTestRunner {
   }
 
   _appendBaseUrl(pathname) {
-    return new URL(
-      `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`,
-      this.baseUrl
-    );
+    const base = `${this.baseUrl.protocol}://${this.baseUrl.hostname}:${this.baseUrl.port}/${this.baseUrl.pathname}`;
+    return new URL(`${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`, base);
   }
 }
 
