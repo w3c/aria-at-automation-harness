@@ -23,7 +23,7 @@
     "yargs": "^17.2.1"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "homepage": "https://github.com/bocoup/aria-at-harness",
   "scripts": {
