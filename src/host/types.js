@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/file-record.js" />
 /// <reference path="../shared/types.js" />

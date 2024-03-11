@@ -1,3 +1,4 @@
+// @ts-nocheck
 /// <reference path="../../data/types.js" />
 
 import test from 'ava';

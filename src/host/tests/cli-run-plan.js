@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { exec } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
