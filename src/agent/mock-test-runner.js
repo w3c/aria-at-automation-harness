@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
@@ -54,8 +53,8 @@ export class MockTestRunner {
   }
 
   /**
-   * @param {CollectedTestCommand} command
-   * @param {CollectedTestAssertion} assertion
+   * @param {AriaATCIData.CollectedTest["commands"][number]} command
+   * @param {AriaATCIData.CollectedTest["assertions"][number]} assertion
    */
   async testAssertion(command, assertion) {
     return true;
@@ -65,10 +64,11 @@ export class MockTestRunner {
    * @param {AriaATCIData.CollectedTest} task
    */
   async run(task) {
+    const base = `${this.baseUrl.protocol}//${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
     await this.openPage(
       new URL(
         `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${task.target.referencePage}`,
-        this.baseUrl
+        base
       )
     );
 
@@ -129,16 +129,3 @@ export class MockTestRunner {
     };
   }
 }
-
-/**
- * @typedef CollectedTestCommand
- * @property {string} id
- * @property {string} keystroke
- * @property {string} [extraInstructions]
- */
-
-/**
- * @typedef CollectedTestAssertion
- * @property {number} priority
- * @property {string} expectation
- */
