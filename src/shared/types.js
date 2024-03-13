@@ -2,10 +2,10 @@
 /** @namespace AriaATCIShared */
 
 /**
- * @callback AriaATCIShared.Log
+ * @template {string} Type
+ * @callback AriaATCIShared.Log<Type>
  * @param {Type} type
  * @param {*} [more]
- * @template {string} Type
  */
 
 /**

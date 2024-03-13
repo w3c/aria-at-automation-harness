@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 
@@ -14,6 +13,8 @@
  * | 'pressKeys'
  * | 'speechEvent'
  * | 'noRunTestSetup'
+ * | 'atDriverComms'
+ * | 'capabilities'
  * } AriaATCIAgent.Message
  */
 
