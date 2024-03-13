@@ -85,17 +85,17 @@ export class AgentController {
   }
 
   /**
-   * @param {AriaATCIAgent.CliOptions} options
+   * @param {AriaATCIAgent.CliOptions} [cliOptions]
    */
-  async start(options) {
+  async start(cliOptions) {
     try {
       const { log, protocol, config } = this._options;
-      options = { ...config, ...options };
-      this._activeConfig = options;
+      const mergedOptions = { ...config, ...cliOptions };
+      this._activeConfig = mergedOptions;
 
       const Protocol = AGENT_PROTOCOL[protocol];
       this._activeProtocol = new Protocol();
-      const ready = this._activeProtocol.start(options);
+      const ready = this._activeProtocol.start(mergedOptions);
       this._logEmitter.emit('log', this._activeProtocol);
       await ready;
       log(HostMessage.AGENT_PROTOCOL, { protocol: Protocol.protocolName });

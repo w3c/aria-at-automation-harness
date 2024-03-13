@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../../data/types.js" />
 
 import test from 'ava';
@@ -14,7 +13,7 @@ test('new AgentController(options)', async t => {
   t.timeout(60000);
   const TEST_DEFINITIONS = [];
   for (const tests of createTests()) {
-    for (const protocol of [undefined, 'fork', 'developer']) {
+    for (const protocol of /**@type {('fork'|'developer')[]}*/ ([undefined, 'fork', 'developer'])) {
       for (const config of [
         {},
         { debug: true },
@@ -100,7 +99,7 @@ function createTests() {
           mode: 'reading',
           referencePage: 'reference/index.html',
         },
-        instructions: { raw: '', user: '' },
+        instructions: { raw: '', user: [] },
         commands: [
           {
             id: 'UP_ARROW',
@@ -119,7 +118,7 @@ function createTests() {
           mode: 'reading',
           referencePage: 'reference/index.html',
         },
-        instructions: { raw: '', user: '' },
+        instructions: { raw: '', user: [] },
         commands: [
           {
             id: 'UP_ARROW',
@@ -136,7 +135,7 @@ function createTests() {
           mode: 'interaction',
           referencePage: 'reference/index.html',
         },
-        instructions: { raw: '', user: '' },
+        instructions: { raw: '', user: [] },
         commands: [
           {
             id: 'UP_ARROW,DOWN_ARROW',
