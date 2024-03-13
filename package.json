@@ -12,7 +12,6 @@
     "@types/text-encoding": "^0.0.38",
     "ava": "^4.1.0",
     "husky": "^7.0.2",
-    "jsdoc": "^3.6.7",
     "lint-staged": "^11.2.3",
     "prettier": "^2.4.1",
     "typescript": "^5.3.3"
@@ -30,8 +29,6 @@
   },
   "homepage": "https://github.com/bocoup/aria-at-harness",
   "scripts": {
-    "build": "npm run build:docs",
-    "build:docs": "jsdoc src -r -d docs",
     "test": "npm run test:types && npm run test:unit",
     "test:types": "tsc",
     "test:unit": "ava",
