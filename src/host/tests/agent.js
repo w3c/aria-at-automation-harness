@@ -21,12 +21,12 @@ test('new AgentController(options)', async t => {
         { verbose: [AgentMessage.START] },
         {
           referenceBaseUrl: {
-            protocol: 'http',
+            protocol: 'http:',
             hostname: 'localhost',
             port: 1234,
             pathname: '/path',
             toString() {
-              return `${this.protocol}://${this.hostname}:${this.port}${this.pathname}`;
+              return `${this.protocol}//${this.hostname}:${this.port}${this.pathname}`;
             },
           },
         },
