@@ -68,6 +68,22 @@ export async function hostMain({
 
     const callbackRequests = [];
 
+    const postCallback = body => {
+      // ignore if not in callback mode
+      if (!callbackUrl) return;
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(callbackHeader || {}),
+      };
+      callbackRequests.push(
+        fetch(callbackUrl, {
+          method: 'post',
+          body: JSON.stringify(body),
+          headers,
+        }).then(logUnsuccessfulHTTP.bind(null, log))
+      );
+    };
+
     for (const test of plan.tests) {
       log(HostMessage.START_TEST);
       const testLogJob = startJob(async function (signal) {
@@ -78,33 +94,35 @@ export async function hostMain({
       });
 
       const file = plan.files.find(({ name }) => name === test.filepath);
-      const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
-      if (callbackUrl) {
-        const headers = {
-          'Content-Type': 'application/json',
-          ...(callbackHeader || {}),
-        };
-        const { testId, presentationNumber, capabilities, commands } = result;
-        const body = JSON.stringify({
-          testCsvRow: testId,
-          presentationNumber,
+      const testSource = JSON.parse(textDecoder.decode(file.bufferData));
+
+      const { presentationNumber } = testSource;
+      const callbackBody = {
+        testCsvRow: testSource.task?.info?.testId,
+        presentationNumber,
+      };
+
+      let result, error;
+      try {
+        postCallback({ ...callbackBody, status: 'TEST_STARTED' });
+
+        result = await agent.run(testSource);
+
+        const { capabilities, commands } = result;
+        postCallback({
+          ...callbackBody,
           capabilities,
           responses: commands.map(({ output }) => output),
-          // a v2 of this API should allow the aria at app to parse the capabilities we are sending instead.
-          atVersionName: capabilities.atVersion,
-          browserVersionName: capabilities.browserVersion,
         });
-        callbackRequests.push(
-          fetch(callbackUrl, {
-            method: 'post',
-            body,
-            headers,
-          }).then(logUnsuccessfulHTTP.bind(null, log))
-        );
+
+        plan = addTestResultToTestPlan(plan, test.filepath, result);
+      } catch (exception) {
+        const error = `${exception.message ?? exception}`;
+        log(HostMessage.TEST_ERROR, { error });
+        postCallback({ ...callbackBody, error });
+      } finally {
+        await testLogJob.cancel();
       }
-      plan = addTestResultToTestPlan(plan, test.filepath, result);
-      await Promise.allSettled(callbackRequests);
-      await testLogJob.cancel();
     }
 
     server.removeFiles(serverDirectory);
@@ -112,7 +130,7 @@ export async function hostMain({
 
     log(HostMessage.STOP_AGENT);
     await agent.stop();
-
+    await Promise.allSettled(callbackRequests);
     await emitPlanResults(plan);
   }
 
