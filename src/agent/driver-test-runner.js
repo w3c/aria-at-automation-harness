@@ -279,8 +279,8 @@ export class DriverTestRunner {
   _appendBaseUrl(pathname) {
     // protocol ends with a ':' and pathname starts with a '/'
     const base = `${this.baseUrl.protocol}//${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
-    const urlPart = `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`;
-    return new URL(`${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`, base);
+    const newPath = `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`;
+    return new URL(newPath, base);
   }
 }
 
