@@ -96,19 +96,18 @@ export async function hostMain({
       const file = plan.files.find(({ name }) => name === test.filepath);
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
 
-      const { presentationNumber } = testSource;
       const callbackBody = {
-        testCsvRow: testSource.task?.info?.testId,
-        presentationNumber,
+        testCsvRow: testSource.info?.testId,
+        presentationNumber: testSource.info?.presentationNumber,
       };
 
-      let result, error;
       try {
         postCallback({ ...callbackBody, status: 'TEST_STARTED' });
 
-        result = await agent.run(testSource);
+        const result = await agent.run(testSource);
 
         const { capabilities, commands } = result;
+
         postCallback({
           ...callbackBody,
           capabilities,
