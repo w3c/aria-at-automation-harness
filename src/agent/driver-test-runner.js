@@ -119,21 +119,29 @@ export class DriverTestRunner {
         if (!desiredResponse) {
           throw new Error(`Unknown command settings for NVDA "${settings}"`);
         }
-        const MODE_SWITCH_SPEECH_TIMEOUT = 500;
-        let speechResponse;
+        // try to keep this short because it runs up to twice for every test
+        // have seen occasional timeout/misses at 500ms
+        const MODE_SWITCH_SPEECH_TIMEOUT = 750;
+
+        let unknownCollected = '';
         // there are 2 modes, so we will try pressing mode switch up to twice
         for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
-          speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
+          const speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
             this.sendKeys(ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))))
           );
-          speechResponse = speechResponse.join(' ').trim();
-          if (speechResponse.toLowerCase() === desiredResponse.toLowerCase()) {
-            // our mode is correct, we are done
-            return;
+          while (speechResponse.length) {
+            const lastMessage = speechResponse.shift().trim();
+            if (lastMessage.toLowerCase() === desiredResponse.toLowerCase()) {
+              // our mode is correct, we are done
+              return;
+            }
+
+            if (unknownCollected.length) unknownCollected += '\n';
+            unknownCollected += lastMessage;
           }
         }
         throw new Error(
-          `Unable to ensure proper mode. Expected: "${desiredResponse}" Got: "${speechResponse}"`
+          `Unable to ensure proper mode. Expected: "${desiredResponse}" Got: "${unknownCollected}"`
         );
       } finally {
         // turn the "beeps" back on so mode switches won't be spoken (default setting)
