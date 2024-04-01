@@ -119,8 +119,9 @@ export class DriverTestRunner {
         if (!desiredResponse) {
           throw new Error(`Unknown command settings for NVDA "${settings}"`);
         }
-        // try to keep this short because it runs up to twice for every test
-        // have seen occasional timeout/misses at 500ms
+        // This timeout may be reached as many as two times for every test.
+        // Delays of over 500ms have been observed during local testing in a
+        // Windows virtual machine.
         const MODE_SWITCH_SPEECH_TIMEOUT = 750;
 
         let unknownCollected = '';
