@@ -103,7 +103,7 @@ export async function hostMain({
       };
 
       try {
-        postCallbackWhenEnabled({ ...callbackBody, status: 'TEST_STARTED' });
+        postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
 
         const result = await agent.run(testSource);
 
@@ -119,7 +119,7 @@ export async function hostMain({
       } catch (exception) {
         const error = `${exception.message ?? exception}`;
         log(HostMessage.TEST_ERROR, { error });
-        postCallbackWhenEnabled({ ...callbackBody, error });
+        postCallbackWhenEnabled({ ...callbackBody, error, status: 'ERROR' });
       } finally {
         await testLogJob.cancel();
       }
