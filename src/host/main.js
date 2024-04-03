@@ -68,13 +68,14 @@ export async function hostMain({
 
     const callbackRequests = [];
 
-    const postCallback = body => {
+    const postCallbackWhenEnabled = async body => {
       // ignore if not in callback mode
       if (!callbackUrl) return;
       const headers = {
         'Content-Type': 'application/json',
         ...(callbackHeader || {}),
       };
+      await Promise.allSettled(callbackRequests);
       callbackRequests.push(
         fetch(callbackUrl, {
           method: 'post',
@@ -97,18 +98,18 @@ export async function hostMain({
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
 
       const callbackBody = {
-        testCsvRow: testSource.info?.testId,
-        presentationNumber: testSource.info?.presentationNumber,
+        testCsvRow: testSource.info.testId,
+        presentationNumber: testSource.info.presentationNumber,
       };
 
       try {
-        postCallback({ ...callbackBody, status: 'TEST_STARTED' });
+        postCallbackWhenEnabled({ ...callbackBody, status: 'TEST_STARTED' });
 
         const result = await agent.run(testSource);
 
         const { capabilities, commands } = result;
 
-        postCallback({
+        postCallbackWhenEnabled({
           ...callbackBody,
           capabilities,
           responses: commands.map(({ output }) => output),
@@ -118,7 +119,7 @@ export async function hostMain({
       } catch (exception) {
         const error = `${exception.message ?? exception}`;
         log(HostMessage.TEST_ERROR, { error });
-        postCallback({ ...callbackBody, error });
+        postCallbackWhenEnabled({ ...callbackBody, error });
       } finally {
         await testLogJob.cancel();
       }
