@@ -39,7 +39,7 @@ test('plan3', async t => {
   );
 });
 
-test('plan3 with callback', async t => {
+test('plan3 with callback no url param', async t => {
   t.snapshot(
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan3',
@@ -47,6 +47,19 @@ test('plan3 with callback', async t => {
       '--agent-mock',
       '--debug',
       '--callback-url=http://callback.url/',
+      '--callback-header=test:header:multiple:colon',
+    ])
+  );
+});
+
+test('plan3 with callback', async t => {
+  t.snapshot(
+    await spawnRunPlan([
+      '--plan-workingdir=fixtures/host-bin/plan3',
+      '"**"',
+      '--agent-mock',
+      '--debug',
+      '--callback-url=http://callback.url/:testRowNumber',
       '--callback-header=test:header:multiple:colon',
     ])
   );

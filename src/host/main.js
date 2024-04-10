@@ -66,18 +66,21 @@ export async function hostMain({
     log(HostMessage.START_AGENT);
     await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
 
-    const callbackRequests = [];
+    let lastCallbackRequest = Promise.resolve();
 
-    const postCallbackWhenEnabled = async body => {
+    const postCallbackWhenEnabled = body => {
       // ignore if not in callback mode
       if (!callbackUrl) return;
       const headers = {
         'Content-Type': 'application/json',
         ...(callbackHeader || {}),
       };
-      await Promise.allSettled(callbackRequests);
-      callbackRequests.push(
-        fetch(callbackUrl, {
+      const perTestUrl = callbackUrl.replace(
+        ':testRowNumber',
+        body.testCsvRow ?? body.presentationNumber
+      );
+      lastCallbackRequest = lastCallbackRequest.then(() =>
+        fetch(perTestUrl, {
           method: 'post',
           body: JSON.stringify(body),
           headers,
@@ -112,6 +115,7 @@ export async function hostMain({
         postCallbackWhenEnabled({
           ...callbackBody,
           capabilities,
+          status: 'COMPLETED',
           responses: commands.map(({ output }) => output),
         });
 
@@ -129,8 +133,8 @@ export async function hostMain({
     log(HostMessage.REMOVE_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
 
     log(HostMessage.STOP_AGENT);
+    await lastCallbackRequest;
     await agent.stop();
-    await Promise.allSettled(callbackRequests);
     await emitPlanResults(plan);
   }
 
