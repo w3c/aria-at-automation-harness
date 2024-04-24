@@ -66,7 +66,27 @@ export async function hostMain({
     log(HostMessage.START_AGENT);
     await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
 
-    const callbackRequests = [];
+    let lastCallbackRequest = Promise.resolve();
+
+    const postCallbackWhenEnabled = body => {
+      // ignore if not in callback mode
+      if (!callbackUrl) return;
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(callbackHeader || {}),
+      };
+      const perTestUrl = callbackUrl.replace(
+        ':testRowNumber',
+        body.testCsvRow ?? body.presentationNumber
+      );
+      lastCallbackRequest = lastCallbackRequest.then(() =>
+        fetch(perTestUrl, {
+          method: 'post',
+          body: JSON.stringify(body),
+          headers,
+        }).then(logUnsuccessfulHTTP.bind(null, log))
+      );
+    };
 
     for (const test of plan.tests) {
       log(HostMessage.START_TEST);
@@ -78,41 +98,43 @@ export async function hostMain({
       });
 
       const file = plan.files.find(({ name }) => name === test.filepath);
-      const result = await agent.run(JSON.parse(textDecoder.decode(file.bufferData)));
-      if (callbackUrl) {
-        const headers = {
-          'Content-Type': 'application/json',
-          ...(callbackHeader || {}),
-        };
-        const { testId, presentationNumber, capabilities, commands } = result;
-        const body = JSON.stringify({
-          testCsvRow: testId,
-          presentationNumber,
+      const testSource = JSON.parse(textDecoder.decode(file.bufferData));
+
+      const callbackBody = {
+        testCsvRow: testSource.info.testId,
+        presentationNumber: testSource.info.presentationNumber,
+      };
+
+      try {
+        postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
+
+        const result = await agent.run(testSource);
+
+        const { capabilities, commands } = result;
+
+        postCallbackWhenEnabled({
+          ...callbackBody,
           capabilities,
+          status: 'COMPLETED',
           responses: commands.map(({ output }) => output),
-          // a v2 of this API should allow the aria at app to parse the capabilities we are sending instead.
-          atVersionName: capabilities.atVersion,
-          browserVersionName: capabilities.browserVersion,
         });
-        callbackRequests.push(
-          fetch(callbackUrl, {
-            method: 'post',
-            body,
-            headers,
-          }).then(logUnsuccessfulHTTP.bind(null, log))
-        );
+
+        plan = addTestResultToTestPlan(plan, test.filepath, result);
+      } catch (exception) {
+        const error = `${exception.message ?? exception}`;
+        log(HostMessage.TEST_ERROR, { error });
+        postCallbackWhenEnabled({ ...callbackBody, error, status: 'ERROR' });
+      } finally {
+        await testLogJob.cancel();
       }
-      plan = addTestResultToTestPlan(plan, test.filepath, result);
-      await Promise.allSettled(callbackRequests);
-      await testLogJob.cancel();
     }
 
     server.removeFiles(serverDirectory);
     log(HostMessage.REMOVE_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
 
     log(HostMessage.STOP_AGENT);
+    await lastCallbackRequest;
     await agent.stop();
-
     await emitPlanResults(plan);
   }
 
