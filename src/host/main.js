@@ -123,6 +123,8 @@ export async function hostMain({
         const error = `${exception.message ?? exception}`;
         log(HostMessage.TEST_ERROR, { error });
         postCallbackWhenEnabled({ ...callbackBody, error, status: 'ERROR' });
+        await lastCallbackRequest;
+        throw exception;
       } finally {
         await testLogJob.cancel();
       }
