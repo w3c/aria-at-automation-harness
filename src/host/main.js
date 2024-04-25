@@ -77,7 +77,7 @@ export async function hostMain({
       };
       const perTestUrl = callbackUrl.replace(
         ':testRowNumber',
-        body.testCsvRow ?? body.presentationNumber
+        body.presentationNumber ?? body.testCsvRow
       );
       lastCallbackRequest = lastCallbackRequest.then(() =>
         fetch(perTestUrl, {
@@ -100,10 +100,9 @@ export async function hostMain({
       const file = plan.files.find(({ name }) => name === test.filepath);
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
 
-      const callbackBody = {
-        testCsvRow: testSource.info.testId,
-        presentationNumber: testSource.info.presentationNumber,
-      };
+      const { presentationNumber, testId: testCsvRow } = testSource.info;
+
+      const callbackBody = presentationNumber ? { presentationNumber } : { testCsvRow };
 
       try {
         postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
