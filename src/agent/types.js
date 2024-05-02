@@ -43,7 +43,7 @@
  */
 
 /**
- * @typedef {'chrome' | 'firefox'} AriaATCIAgent.Browser
+ * @typedef {'chrome' | 'firefox' | 'safari'} AriaATCIAgent.Browser
  */
 
 /**
