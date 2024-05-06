@@ -153,6 +153,11 @@ export class DriverTestRunner {
           },
         });
       }
+    } else if (atName == 'Voiceover') {
+      if (settings !== 'defaultMode') {
+        throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
+      }
+      return;
     } else if (!atName) {
       return;
     }
