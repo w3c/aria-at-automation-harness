@@ -349,7 +349,7 @@ export function atKeysFromCommand(command) {
       ATKey.chord(
         ...id
           .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
-          .replace('+', '_') // + is used to connect keys that are pressed simultaneously in v2 tests
+          .replace(/\+/g, '_') // + is used to connect keys that are pressed simultaneously in v2 tests
           .split('_')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc
