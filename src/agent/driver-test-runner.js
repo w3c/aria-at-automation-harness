@@ -46,8 +46,9 @@ export class DriverTestRunner {
     await this.log(AgentMessage.OPEN_PAGE, { url });
     await this.browserDriver.navigate(url.toString());
 
+    await this.browserDriver.documentReady();
+
     try {
-      await this.browserDriver.documentReady();
       await this.browserDriver.clickWhenPresent(
         '.button-run-test-setup',
         RUN_TEST_SETUP_BUTTON_TIMEOUT
