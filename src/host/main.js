@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="types.js" />
 
 /**
@@ -35,6 +34,9 @@ const logUnsuccessfulHTTP = async (log, response) => {
  * @param {AriaATCIHost.ReferenceFileServer} options.server
  * @param {AriaATCIHost.Agent} options.agent
  * @param {AriaATCIHost.EmitPlanResults} options.emitPlanResults
+ * @param {string} [options.callbackUrl]
+ * @param {Record<string, string>} [options.callbackHeader]
+ * @param {typeof fetch} options.fetch
  */
 export async function hostMain({
   log,

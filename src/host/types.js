@@ -25,6 +25,8 @@
  * | 'agentLog'
  * | 'agentCrashed'
  * | 'startTest'
+ * | 'reportingError'
+ * | 'testError'
  * } AriaATCIHost.HostLogType
  */
 
@@ -54,7 +56,9 @@
  * @typedef AriaATCIHost.ReferenceFileServer
  * @property {function(FileRecord.NamedRecord[]): AriaATCIHost.ReferenceFileServerSlice} addFiles
  * @property {function(AriaATCIHost.ReferenceFileServerSlice): void} removeFiles
+ * @property {function(): Promise<voice>} close
  * @property {Promise<void>} ready
+ * @property {string} baseUrl
  */
 
 /**
@@ -66,6 +70,7 @@
 /**
  * @typedef AriaATCIHost.Agent
  * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run
+ * @property {function(): AsyncGenerator<AriaATCIData.Log>} logs
  * @property {function(AriaATCIAgent.CliOptions): Promise<void>} start
  * @property {function(): Promise<void>} stop
  */
