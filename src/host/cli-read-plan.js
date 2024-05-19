@@ -1,9 +1,8 @@
-// @ts-nocheck
 /**
  * @module host
  */
 
-import path from 'path';
+import * as path from 'path';
 
 import { host } from '../shared/file-record.js';
 
