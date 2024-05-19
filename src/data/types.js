@@ -83,6 +83,7 @@
  * @property {string} commands[].command id of input command sent to system
  * @property {string} [commands[].output] speech emitted
  * @property {string[]} [commands[].errors] errors that occured while during command
+ * @property {Record<string, string>} capabilities Information about the system under test
  * @property {object[]} results permutation of input commands and assertions passing or not passing
  * @property {string} results[].command id of input command sent to system
  * @property {string} results[].expectation description of expected assertion
