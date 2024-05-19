@@ -24,7 +24,7 @@ import { Minimatch } from 'minimatch';
  * - '**' match everything
  *
  * @param {string} glob a fs-like glob to test paths with
- * @returns {function(string, boolean): boolean}
+ * @returns {(path: string, partial?: boolean) => boolean}
  */
 export function compileGlob(glob) {
   const match = new Minimatch(glob);

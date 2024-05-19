@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../shared/file-record-types.js" />
 /// <reference path="types.js" />
 
@@ -6,8 +5,8 @@
  * @module host
  */
 
-import child_process from 'child_process';
-import path from 'path';
+import * as child_process from 'child_process';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 import { compileGlob } from '../shared/file-glob.js';
@@ -39,7 +38,7 @@ function planFromRecord(record) {
  * @param {string} options.pattern
  * @returns {AriaATCIHost.TestPlan}
  */
-function planSelectTests(plan, { pattern = '{,**/}test*' } = {}) {
+function planSelectTests(plan, { pattern = '{,**/}test*' }) {
   const isTestFile = compileGlob(pattern);
   for (const { name } of plan.files) {
     if (isTestFile(name)) {
