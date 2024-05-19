@@ -1,9 +1,8 @@
-// @ts-nocheck
 /**
  * @module host
  */
 
-import path from 'path';
+import * as path from 'path';
 import { Readable } from 'stream';
 import fetch, { Response } from 'node-fetch';
 
