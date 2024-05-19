@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="types.js" />
 
 /**
@@ -7,7 +6,7 @@
 
 import { createSharedLogger } from '../shared/messages.js';
 
-/** @enum {AriaATCIHost.Message} */
+/** @enum {AriaATCIHost.HostLogType} */
 export const HostMessage = {
   /** @type {'start'} */
   START: 'start',
@@ -72,7 +71,7 @@ export const HOST_TEMPLATES = {
 
 /**
  * @param {*} messages
- * @returns {{log: AriaATCIHost.Log, emitter: EventEmitter}}
+ * @returns {{log: AriaATCIHost.Log, emitter: import("events").EventEmitter}}
  */
 export function createHostLogger(messages = HOST_TEMPLATES) {
   return createSharedLogger(messages);
