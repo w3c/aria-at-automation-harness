@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
@@ -7,10 +6,10 @@
  * @module host
  */
 
-import child_process from 'child_process';
+import * as child_process from 'child_process';
 import { EventEmitter } from 'events';
 import { constants as osConstants } from 'os';
-import path from 'path';
+import * as path from 'path';
 import { fileURLToPath, URL } from 'url';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';
@@ -34,7 +33,7 @@ export class AgentController {
    * @param {'fork' | 'developer'} [options.protocol]
    * @param {AriaATCIAgent.CliOptions} [options.config]
    */
-  constructor({ config = {}, ...otherOptions } = {}) {
+  constructor({ config = {}, ...otherOptions }) {
     this._options = {
       ...this._defaultOptions(),
       ...otherOptions,
@@ -323,14 +322,14 @@ class AgentDeveloperProtocol extends AgentProtocol {
       }),
       log,
       tests: iterateEmitter(this._testEmitter, 'message', 'stop'),
-      reportResult: result => {
+      reportResult: async result => {
         this._resultEmitter.emit('result', result);
       },
     })
       .then(() => {
         this.stop();
       })
-      .then(() => ({ code: 0 }));
+      .then(() => ({ code: 0, signal: null }));
     this.ready = Promise.resolve();
 
     await this.ready;
