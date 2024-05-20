@@ -121,7 +121,7 @@ export class DriverTestRunner {
           },
         });
       }
-    } else if (atName == 'Voiceover') {
+    } else if (atName == 'VoiceOver') {
       if (settings !== 'defaultMode') {
         throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
       }
@@ -140,6 +140,8 @@ export class DriverTestRunner {
     const { atName } = await this.collectedCapabilities;
     if (atName === 'NVDA') {
       await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
+      return;
+    } else if (atName === 'VoiceOver') {
       return;
     } else if (!atName) {
       return;
