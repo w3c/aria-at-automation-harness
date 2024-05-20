@@ -2,8 +2,6 @@
 /// <reference path="../shared/types.js" />
 /// <reference path="types.js" />
 
-import { WebDriver, until, By } from 'selenium-webdriver';
-
 import { startJob } from '../shared/job.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
@@ -22,21 +20,19 @@ export class DriverTestRunner {
    * @param {object} options
    * @param {AriaATCIShared.BaseURL} options.baseUrl
    * @param {AriaATCIAgent.Log} options.log
-   * @param {WebDriver} options.webDriver
+   * @param {BrowserDriver} options.browserDriver
    * @param {ATDriver} options.atDriver
    */
-  constructor({ baseUrl, log, webDriver, atDriver }) {
+  constructor({ baseUrl, log, browserDriver, atDriver }) {
     this.baseUrl = baseUrl;
     this.log = log;
-    this.webDriver = webDriver;
+    this.browserDriver = browserDriver;
     this.atDriver = atDriver;
     this.collectedCapabilities = this.getCapabilities();
   }
 
   async getCapabilities() {
-    const capabilities = await this.webDriver.getCapabilities();
-    const browserName = capabilities.get('browserName');
-    const browserVersion = capabilities.get('browserVersion');
+    const { browserName, browserVersion } = await this.browserDriver.getCapabilities();
     const { atName, atVersion, platformName } = await this.atDriver.getCapabilities();
     return { atName, atVersion, browserName, browserVersion, platformName };
   }
@@ -48,43 +44,15 @@ export class DriverTestRunner {
    */
   async openPage({ url, referencePage }) {
     await this.log(AgentMessage.OPEN_PAGE, { url });
-    await this.webDriver.switchTo().defaultContent();
-    // Minimizing then restoring the window is recommended to trick the window
-    // manager on the OS to put focus in the browser. This is needed to
-    // steal focus away from a terminal/powershell tab if you launch the tests
-    // locally.
-    await this.webDriver.manage().window().minimize();
-    await this.webDriver.manage().window().setRect({ x: 0, y: 0 });
-    await this.webDriver.switchTo().defaultContent();
-    await this.webDriver.navigate().to(url.toString());
+    await this.browserDriver.navigate(url.toString());
+
+    await this.browserDriver.documentReady();
 
     try {
-      await this.webDriver.executeAsyncScript(function (callback) {
-        // @ts-expect-error (The TypeScript compiler cannot be configured to
-        // recognize that this function executes in another environment--one
-        // where `document` is defined globally.)
-        if (document.readyState === 'complete') {
-          callback();
-        } else {
-          new Promise(resolve => {
-            // @ts-expect-error (The TypeScript compiler cannot be configured
-            // to recognize that this function executes in another
-            // environment--one where `window` is defined globally.)
-            window.addEventListener('load', () => resolve());
-          })
-            // Wait until after any microtasks registered by other 'load' event
-            // handlers.
-            .then(() => Promise.resolve())
-            .then(callback);
-        }
-      });
-
-      const runTestSetup = await this.webDriver.wait(
-        until.elementLocated(By.className('button-run-test-setup')),
+      await this.browserDriver.clickWhenPresent(
+        '.button-run-test-setup',
         RUN_TEST_SETUP_BUTTON_TIMEOUT
       );
-
-      await runTestSetup.click();
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
     }
@@ -153,6 +121,11 @@ export class DriverTestRunner {
           },
         });
       }
+    } else if (atName == 'Voiceover') {
+      if (settings !== 'defaultMode') {
+        throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
+      }
+      return;
     } else if (!atName) {
       return;
     }
@@ -184,7 +157,7 @@ export class DriverTestRunner {
     await this.log(AgentMessage.START_TEST, { id: test.info.testId, title: test.info.task });
 
     await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
-    await this.webDriver.navigate().to('about:blank');
+    await this.browserDriver.navigate('about:blank');
 
     const commandsOutput = [];
     const results = [];
@@ -214,7 +187,7 @@ export class DriverTestRunner {
 
         await this._collectSpeech(AFTER_NAVIGATION_DELAY, async () => {
           await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
-          await this.webDriver.navigate().to('about:blank');
+          await this.browserDriver.navigate('about:blank');
         });
 
         commandsOutput.push({
@@ -344,7 +317,7 @@ export function atKeysFromCommand(command) {
       ATKey.chord(
         ...id
           .replace(/(PAGE)_(DOWN|UP)/, '$1$2')
-          .replace('+', '_') // + is used to connect keys that are pressed simultaneously in v2 tests
+          .replace(/\+/g, '_') // + is used to connect keys that are pressed simultaneously in v2 tests
           .split('_')
           .map(key => key.trim().toLowerCase())
           // `up arrow`, `down arrow`, etc are sent as `up`, `down`, etc

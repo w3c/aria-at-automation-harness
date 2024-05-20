@@ -59,7 +59,7 @@ export function buildAgentCliOptions(args = yargs) {
         default: 'http://localhost:4444',
       },
       'web-driver-browser': {
-        choices: ['chrome', 'firefox'],
+        choices: ['chrome', 'firefox', 'safari'],
         default: 'firefox',
       },
       'at-driver-url': {

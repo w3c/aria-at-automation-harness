@@ -84,7 +84,7 @@ export const builder = (args = yargs) =>
         default: 'http://localhost:4444',
       },
       'agent-web-driver-browser': {
-        choices: ['chrome', 'firefox'],
+        choices: ['chrome', 'firefox', 'safari'],
         default: 'firefox',
       },
       'agent-at-driver-url': {

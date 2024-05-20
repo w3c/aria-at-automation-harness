@@ -43,7 +43,7 @@
  */
 
 /**
- * @typedef {'chrome' | 'firefox'} AriaATCIAgent.Browser
+ * @typedef {'chrome' | 'firefox' | 'safari'} AriaATCIAgent.Browser
  */
 
 /**
@@ -57,4 +57,19 @@
  * @property {AriaATCIShared.BaseURL} [webDriverUrl]
  * @property {AriaATCIAgent.Browser} [webDriverBrowser]
  * @property {AriaATCIShared.BaseURL} [atDriverUrl]
+ */
+
+/**
+ * @typedef {object} BrowserCapabilities
+ * @property {string} browserName
+ * @property {string} browserVersion
+ */
+
+/**
+ * @typedef {object} BrowserDriver
+ * @property {(url: string) => Promise<void>} navigate
+ * @property {() => Promise<void>} documentReady
+ * @property {(selector: string, timeout: number) => Promise<void>} clickWhenPresent
+ * @property {() => Promise<BrowserCapabilities>} getCapabilities
+ * @property {() => Promise<void>} quit
  */

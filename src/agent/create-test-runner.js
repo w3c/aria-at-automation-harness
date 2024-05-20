@@ -7,7 +7,7 @@
 
 import { MockTestRunner } from './mock-test-runner.js';
 import { DriverTestRunner } from './driver-test-runner.js';
-import { createWebDriver } from './web-driver.js';
+import { createBrowserDriver } from './browser-driver/create.js';
 import { createATDriver } from './at-driver.js';
 import { AgentMessage } from './messages.js';
 
@@ -30,13 +30,13 @@ export async function createRunner(options) {
     return new MockTestRunner({ mock: options.mock, ...options });
   }
   await new Promise(resolve => setTimeout(resolve, 1000));
-  const [webDriver, atDriver] = await Promise.all([
-    createWebDriver({
+  const [browserDriver, atDriver] = await Promise.all([
+    createBrowserDriver({
       url: options.webDriverUrl,
       browser: options.webDriverBrowser,
       abortSignal: options.abortSignal,
     }).catch(cause => {
-      throw new Error('Error connecting to web-driver', { cause });
+      throw new Error('Error initializing browser driver', { cause });
     }),
     createATDriver({
       url: options.atDriverUrl,
@@ -46,5 +46,5 @@ export async function createRunner(options) {
       throw new Error('Error connecting to at-driver', { cause });
     }),
   ]);
-  return new DriverTestRunner({ ...options, webDriver, atDriver });
+  return new DriverTestRunner({ ...options, browserDriver, atDriver });
 }
