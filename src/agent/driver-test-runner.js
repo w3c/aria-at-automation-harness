@@ -121,7 +121,7 @@ export class DriverTestRunner {
       });
 
       try {
-        await this.pressKeysToToggleSetting(
+        return await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
           desiredResponse
         );
