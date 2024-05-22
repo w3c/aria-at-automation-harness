@@ -70,7 +70,7 @@ export class DriverTestRunner {
    * @param {import('./at-driver').ATKeySequence} sequence
    * @param {string} desiredResponse
    */
-  async pressKeysToChangeSetting(sequence, desiredResponse) {
+  async pressKeysToToggleSetting(sequence, desiredResponse) {
     // This timeout may be reached as many as two times for every test.
     // Delays of over 500ms have been observed during local testing in a
     // Windows virtual machine.
@@ -121,7 +121,7 @@ export class DriverTestRunner {
       });
 
       try {
-        await this.pressKeysToChangeSetting(
+        await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
           desiredResponse
         );
@@ -136,22 +136,22 @@ export class DriverTestRunner {
       }
     } else if (atName == 'VoiceOver') {
       if (settings === 'quickNavOn' || settings === 'arrowQuickKeyNavOn') {
-        await this.pressKeysToChangeSetting(
+        await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
           'quick nav on'
         );
       } else if (settings === 'quickNavOff' || settings === 'arrowQuickKeyNavOff') {
-        await this.pressKeysToChangeSetting(
+        await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
           'quick nav off'
         );
       } else if (settings === 'singleQuickKeyNavOn') {
-        await this.pressKeysToChangeSetting(
+        await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
           'single-key quick nav on'
         );
       } else if (settings === 'singleQuickKeyNavOff') {
-        await this.pressKeysToChangeSetting(
+        await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
           'single-key quick nav off'
         );
