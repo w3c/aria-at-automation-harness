@@ -67,6 +67,38 @@ export class DriverTestRunner {
   }
 
   /**
+   * @param {import('./at-driver').ATKeySequence} sequence
+   * @param {string} desiredResponse
+   */
+  async pressKeysToToggleSetting(sequence, desiredResponse) {
+    // This timeout may be reached as many as two times for every test.
+    // Delays of over 500ms have been observed during local testing in a
+    // Windows virtual machine.
+    const MODE_SWITCH_SPEECH_TIMEOUT = 750;
+
+    let unknownCollected = '';
+    // there are 2 modes, so we will try pressing mode switch up to twice
+    for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
+      const speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
+        this.sendKeys(sequence)
+      );
+      while (speechResponse.length) {
+        const lastMessage = speechResponse.shift().trim();
+        if (lastMessage.toLowerCase() === desiredResponse.toLowerCase()) {
+          // our mode is correct, we are done
+          return;
+        }
+
+        if (unknownCollected.length) unknownCollected += '\n';
+        unknownCollected += lastMessage;
+      }
+    }
+    throw new Error(
+      `Unable to apply setting. Expected: "${desiredResponse}" Got: "${unknownCollected}"`
+    );
+  }
+
+  /**
    * Used for v2 tests to ensure proper settings.
    *
    * @param {string} settings - "browseMode" "focusMode" for NVDA, "pcCursor" "virtualCursor"
@@ -75,42 +107,23 @@ export class DriverTestRunner {
   async ensureSettings(settings) {
     const { atName } = await this.collectedCapabilities;
     if (atName == 'NVDA') {
+      const desiredResponse = { browsemode: 'Browse mode', focusmode: 'Focus mode' }[
+        settings.toLowerCase()
+      ];
+      if (!desiredResponse) {
+        throw new Error(`Unknown command settings for NVDA "${settings}"`);
+      }
+
       // disable the "beeps" when switching focus/browse mode, forces it to speak the mode after switching
       await this.atDriver._send({
         method: 'nvda:settings.setSettings',
         params: { settings: [{ name: 'virtualBuffers.passThroughAudioIndication', value: false }] },
       });
+
       try {
-        const desiredResponse = { browsemode: 'Browse mode', focusmode: 'Focus mode' }[
-          settings.toLowerCase()
-        ];
-        if (!desiredResponse) {
-          throw new Error(`Unknown command settings for NVDA "${settings}"`);
-        }
-        // This timeout may be reached as many as two times for every test.
-        // Delays of over 500ms have been observed during local testing in a
-        // Windows virtual machine.
-        const MODE_SWITCH_SPEECH_TIMEOUT = 750;
-
-        let unknownCollected = '';
-        // there are 2 modes, so we will try pressing mode switch up to twice
-        for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
-          const speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
-            this.sendKeys(ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))))
-          );
-          while (speechResponse.length) {
-            const lastMessage = speechResponse.shift().trim();
-            if (lastMessage.toLowerCase() === desiredResponse.toLowerCase()) {
-              // our mode is correct, we are done
-              return;
-            }
-
-            if (unknownCollected.length) unknownCollected += '\n';
-            unknownCollected += lastMessage;
-          }
-        }
-        throw new Error(
-          `Unable to ensure proper mode. Expected: "${desiredResponse}" Got: "${unknownCollected}"`
+        await this.pressKeysToToggleSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
+          desiredResponse
         );
       } finally {
         // turn the "beeps" back on so mode switches won't be spoken (default setting)
@@ -122,7 +135,27 @@ export class DriverTestRunner {
         });
       }
     } else if (atName == 'VoiceOver') {
-      if (settings !== 'defaultMode') {
+      if (settings === 'quickNavOn' || settings === 'arrowQuickKeyNavOn') {
+        await this.pressKeysToToggleSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
+          'quick nav on'
+        );
+      } else if (settings === 'quickNavOff' || settings === 'arrowQuickKeyNavOff') {
+        await this.pressKeysToToggleSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
+          'quick nav off'
+        );
+      } else if (settings === 'singleQuickKeyNavOn') {
+        await this.pressKeysToToggleSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
+          'single-key quick nav on'
+        );
+      } else if (settings === 'singleQuickKeyNavOff') {
+        await this.pressKeysToToggleSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
+          'single-key quick nav off'
+        );
+      } else if (settings !== 'defaultMode') {
         throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
       }
       return;
