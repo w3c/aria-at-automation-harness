@@ -121,7 +121,7 @@ export class DriverTestRunner {
       });
 
       try {
-        return await this.pressKeysToToggleSetting(
+        await this.pressKeysToToggleSetting(
           ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
           desiredResponse
         );
@@ -161,8 +161,9 @@ export class DriverTestRunner {
       return;
     } else if (!atName) {
       return;
+    } else {
+      throw new Error(`Unable to ensure proper settings. Unknown atName ${atName}`);
     }
-    throw new Error(`Unable to ensure proper settings. Unknown atName ${atName}`);
   }
 
   /**
