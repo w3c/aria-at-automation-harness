@@ -135,7 +135,27 @@ export class DriverTestRunner {
         });
       }
     } else if (atName == 'VoiceOver') {
-      if (settings !== 'defaultMode') {
+      if (settings === 'quickNavOn' || settings === 'arrowQuickKeyNavOn') {
+        await this.pressKeysToChangeSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
+          'quick nav on'
+        );
+      } else if (settings === 'quickNavOff' || settings === 'arrowQuickKeyNavOff') {
+        await this.pressKeysToChangeSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
+          'quick nav off'
+        );
+      } else if (settings === 'singleQuickKeyNavOn') {
+        await this.pressKeysToChangeSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
+          'single-key quick nav on'
+        );
+      } else if (settings === 'singleQuickKeyNavOff') {
+        await this.pressKeysToChangeSetting(
+          ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
+          'single-key quick nav off'
+        );
+      } else if (settings !== 'defaultMode') {
         throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
       }
       return;
