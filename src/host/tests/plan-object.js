@@ -1,14 +1,16 @@
-// @ts-nocheck
 import test from 'ava';
 
 import * as planObject from '../plan-object.js';
 
 test('planObject', t => {
   t.plan(13);
-  const plan0 = planObject.blankTestPlan();
+  const plan0 = planObject.blankTestPlan('fake name for testing');
   t.snapshot(plan0);
   t.snapshot(planObject.setServerOptionsInTestPlan(plan0, {}));
-  t.throws(() => planObject.setServerOptionsInTestPlan(plan0, { notAnOption: true }));
+  t.throws(() => {
+    // @ts-expect-error
+    planObject.setServerOptionsInTestPlan(plan0, { notAnOption: true });
+  });
   t.snapshot(
     planObject.setServerOptionsInTestPlan(plan0, {
       baseUrl: { protocol: 'http', hostname: 'host', port: 1234, pathname: '/path' },
