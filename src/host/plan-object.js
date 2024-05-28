@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../shared/file-record.js" />
 /// <reference path="types.js" />
 
@@ -21,7 +20,7 @@ export function blankTestPlan(name) {
         protocol: 'unknown',
         hostname: 'unknown',
         port: 0xffff,
-        path: '',
+        pathname: '',
       },
     },
     tests: [],
@@ -92,7 +91,7 @@ export function addTestLogToTestPlan(testPlan, { filepath: testFilepath }) {
  * @param {AriaATCIHost.TestPlan} testPlan
  * @param {string} testFilepath
  * @param {*} result
- * @param {AriaATCIHost.TestPlan}
+ * @returns {AriaATCIHost.TestPlan}
  */
 export function addTestResultToTestPlan(testPlan, testFilepath, result) {
   const test = testPlan.tests.find(({ filepath }) => filepath === testFilepath);
@@ -104,7 +103,7 @@ export function addTestResultToTestPlan(testPlan, testFilepath, result) {
 
 /**
  * @param {*} serverOptions
- * @returns {TestPlanServerOptionsPartial}
+ * @returns {AriaATCIHost.TestPlanServerOptionsPartial}
  */
 function validateTestPlanServerOptionsPartial(serverOptions) {
   invariant(typeof serverOptions === 'object' && serverOptions !== null);
