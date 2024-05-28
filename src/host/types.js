@@ -53,6 +53,11 @@
  */
 
 /**
+ * @typedef AriaATCIHost.TestPlanServerOptionsPartial
+ * @property {AriaATCIShared.BaseURL} baseUrl
+ */
+
+/**
  * @typedef AriaATCIHost.ReferenceFileServer
  * @property {function(FileRecord.NamedRecord[]): AriaATCIHost.ReferenceFileServerSlice} addFiles
  * @property {function(AriaATCIHost.ReferenceFileServerSlice): void} removeFiles
