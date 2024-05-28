@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/file-record.js" />
 /// <reference path="../shared/types.js" />
@@ -61,14 +60,14 @@
  * @typedef AriaATCIHost.ReferenceFileServer
  * @property {function(FileRecord.NamedRecord[]): AriaATCIHost.ReferenceFileServerSlice} addFiles
  * @property {function(AriaATCIHost.ReferenceFileServerSlice): void} removeFiles
- * @property {function(): Promise<voice>} close
+ * @property {function(): Promise<void>} close
  * @property {Promise<void>} ready
  * @property {string} baseUrl
  */
 
 /**
  * @typedef AriaATCIHost.ReferenceFileServerSlice
- * @property {string} {id}
+ * @property {string} id
  * @property {AriaATCIShared.BaseURL} baseUrl
  */
 
