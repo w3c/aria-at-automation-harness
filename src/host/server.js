@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="types.js" />
 
 /**
@@ -148,7 +147,7 @@ class HostServerBaseURL {
    * @param {object} url
    * @param {string} url.protocol
    * @param {string} url.hostname
-   * @param {number} url.port
+   * @param {string|number} url.port
    * @param {string} url.pathname
    */
   constructor({ protocol, hostname, port, pathname }) {
