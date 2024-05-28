@@ -53,7 +53,7 @@
 
 /**
  * @typedef AriaATCIHost.TestPlanServerOptionsPartial
- * @property {AriaATCIShared.BaseURL} baseUrl
+ * @property {AriaATCIShared.BaseURL} [baseUrl]
  */
 
 /**
