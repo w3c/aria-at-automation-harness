@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * @namespace FileRecord
  */
@@ -17,7 +16,9 @@ FileRecord.Host = {
    * @param {string} [options.glob] a glob pattern to filter what is read
    * @returns {Promise<FileRecord.Record>} a graph of directories and files read
    */
-  async read(root, options) {},
+  async read(root, options) {
+    throw new Error('Not implemented.');
+  },
 
   /**
    * Collapse a record graph into a flat list of only bufferData records.
@@ -25,7 +26,9 @@ FileRecord.Host = {
    * @param {FileRecord.Record} record
    * @returns {FileRecord.NamedRecord[]}
    */
-  collapse(record) {},
+  collapse(record) {
+    throw new Error('Not implemented.');
+  },
 };
 
 /**
