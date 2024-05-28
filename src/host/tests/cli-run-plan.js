@@ -1,6 +1,5 @@
-// @ts-nocheck
 import { exec } from 'child_process';
-import path from 'path';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 import test from 'ava';
@@ -98,7 +97,7 @@ async function spawnRunPlan(args) {
   const { stdout, stderr } = await new Promise((resolve, reject) =>
     exec(
       ['node', hostBin, 'run-plan', ...args].join(' '),
-      { cwd: dirname, shell: false },
+      { cwd: dirname },
       (error, stdout, stderr) => {
         if (error) {
           reject(error);
