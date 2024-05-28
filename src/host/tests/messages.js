@@ -1,4 +1,3 @@
-// @ts-nocheck
 import test from 'ava';
 
 import { HostMessage, createHostLogger } from '../messages.js';
@@ -6,10 +5,10 @@ import { HostMessage, createHostLogger } from '../messages.js';
 test('log', async t => {
   t.plan(16);
   const { log, emitter } = createHostLogger();
-  const logAndResolveMessage = async (...args) => {
+  const logAndResolveMessage = async (type, more) => {
     const message = await new Promise(resolve => {
       emitter.once('message', resolve);
-      log(...args);
+      log(type, more);
     });
     // Remove non-determinstic date from the log data.
     delete message.data.date;
