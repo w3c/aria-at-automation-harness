@@ -1,7 +1,6 @@
-// @ts-nocheck
 /// <reference path="../types.js"/>
 
-import path from 'path';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 import test from 'ava';
@@ -28,7 +27,11 @@ test('plansFrom', async t => {
       ['tests/**', '*.{html,js}'],
       ['tests/**', 'reference/**'],
     ]) {
-      for (const protocol of [undefined, 'fork', 'developer']) {
+      for (const protocol of /**@type {('fork'|'developer')[]}*/ ([
+        undefined,
+        'fork',
+        'developer',
+      ])) {
         for (const testPattern of [undefined, '*.json', 'tests/*']) {
           for (const log of [undefined, () => {}]) {
             for await (const plan of plansFrom(
