@@ -66,10 +66,10 @@ export class ATDriver {
   }
 
   async *_messages() {
+    if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
       const message = rawMessage.toString();
       this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
-      if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
       yield JSON.parse(message);
     }
   }
