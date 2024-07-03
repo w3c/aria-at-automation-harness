@@ -81,7 +81,6 @@ export class ATDriver {
     if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     this.socket.send(rawMessage);
     for await (const message of this._messages()) {
-      if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
       if (message.id === id) {
         if (message.error) {
           throw new Error(message.error);
@@ -110,8 +109,8 @@ export class ATDriver {
    * @returns {AsyncGenerator<string>}
    */
   async *speeches() {
+    if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     for await (const message of this._messages()) {
-      if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
       if (message.method === 'interaction.capturedOutput') {
         yield message.params.data;
       }
