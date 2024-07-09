@@ -1,4 +1,3 @@
-// @ts-nocheck
 /// <reference path="./types.js" />
 
 /**
