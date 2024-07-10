@@ -2,10 +2,8 @@
  * @module shared
  */
 
-import { EventEmitter } from 'events';
-
 /**
- * @param {EventEmitter} emitter
+ * @param {import("events").EventEmitter} emitter
  * @param {string} nextEvent
  * @param {string} [completeEvent]
  * @param {string} [errorEvent]
