@@ -1,10 +1,9 @@
-// @ts-nocheck
 /**
  * @module shared
  */
 
 /**
- * @param {EventEmitter} emitter
+ * @param {import("events").EventEmitter} emitter
  * @param {string} nextEvent
  * @param {string} [completeEvent]
  * @param {string} [errorEvent]
@@ -13,7 +12,7 @@ export async function* iterateEmitter(emitter, nextEvent, completeEvent, errorEv
   const values = [];
   let open = true;
   let error = null;
-  let resolve = () => {};
+  let resolve = (_any = undefined) => {};
   const onnext = function (value) {
     if (open) {
       values.push(value);

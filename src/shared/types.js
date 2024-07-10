@@ -1,4 +1,3 @@
-// @ts-nocheck
 /** @namespace AriaATCIShared */
 
 /**
@@ -30,21 +29,21 @@
  * Canceling the job will stop any loops of async iterables that have been
  * wrapped with AriaATCIShared.JobBinding#cancelable.
  *
+ * @template T
  * @typedef AriaATCIShared.Job
  * @property {function(): Promise<T>} cancel
- * @template T
  */
 
 /**
+ * @template T
  * @typedef AriaATCIShared.JobBinding
  * @property {function(AsyncIterable<T>): AsyncIterable<T>} cancelable finish
  *   the iterable if the job is canceled
- * @template T
  */
 
 /**
+ * @template T
  * @callback AriaATCIShared.JobWork
  * @param {AriaATCIShared.JobBinding<*>} binding
  * @returns {Promise<T>}
- * @template T
  */
