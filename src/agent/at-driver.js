@@ -78,8 +78,12 @@ export class ATDriver {
     const id = this._nextId++;
     const rawMessage = JSON.stringify({ id, ...command });
     this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
-    if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
-    this.socket.send(rawMessage);
+    await new Promise((resolve, reject) => {
+      this.socket.send(rawMessage, error => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
     for await (const message of this._messages()) {
       if (message.id === id) {
         if (message.error) {
@@ -109,7 +113,6 @@ export class ATDriver {
    * @returns {AsyncGenerator<string>}
    */
   async *speeches() {
-    if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     for await (const message of this._messages()) {
       if (message.method === 'interaction.capturedOutput') {
         yield message.params.data;
