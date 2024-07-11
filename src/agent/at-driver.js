@@ -43,7 +43,14 @@ export class ATDriver {
         }
       )
     );
-    this.closed = new Promise(resolve => socket.once('close', () => resolve()));
+    this.hasClosed = false;
+    this.closed = new Promise(resolve =>
+      socket.once('close', () => {
+        this.hasClosed = true;
+        this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'closed' });
+        resolve();
+      })
+    );
     this._nextId = 0;
   }
 
@@ -59,6 +66,7 @@ export class ATDriver {
   }
 
   async *_messages() {
+    if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
       const message = rawMessage.toString();
       this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
@@ -70,7 +78,12 @@ export class ATDriver {
     const id = this._nextId++;
     const rawMessage = JSON.stringify({ id, ...command });
     this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
-    this.socket.send(rawMessage);
+    await new Promise((resolve, reject) => {
+      this.socket.send(rawMessage, error => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
     for await (const message of this._messages()) {
       if (message.id === id) {
         if (message.error) {
