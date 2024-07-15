@@ -1,77 +1,60 @@
 # aria-at-automation-harness
 
-A command-line utility for executing test plans from [w3c/aria-at](https://github.com/w3c/aria-at) without human intervention using [the aria-at-automation-driver](https://github.com/w3c/aria-at-automation-driver)
+A command-line utility for executing test plans from [w3c/aria-at](https://github.com/w3c/aria-at). It operates by communicating with an [AT Driver](https://github.com/w3c/at-driver) server and (in some environments) a [WebDriver](https://github.com/w3c/webdriver) server.
 
 **[aria-at-automation](https://github.com/w3c/aria-at-automation)** &middot; aria-at-automation-harness &middot; [aria-at-automation-driver](https://github.com/w3c/aria-at-automation-driver) &middot; [aria-at-automation-results-viewer](https://github.com/w3c/aria-at-automation-results-viewer)
 
-## Tools
+## Usage instructions
 
-- `aria-at-harness-agent` - run tests individually read from an input stream
-- `aria-at-harness-host` - run a test plan, a collection of reference files and test files, read from a client
-- `aria-at-harness-client` - (coming soon) read a test plan from disk, run it in a host, report result to aria-at-app
+### Installation
 
-## `aria-at-harness-agent`
+1. Install the software under test
+   - an assistive technology (currently limited to [the NVDA screen reader](https://www.nvaccess.org/about-nvda/) and [the VoiceOver screenreader](https://www.apple.com/accessibility/vision/))
+   - an [AT Driver](https://w3c.github.io/at-driver/) server for the assistive technology under test (e.g. [the NVDA AT Driver server](https://github.com/Prime-Access-Consulting/nvda-at-automation/) for NVDA or [macOS AT Driver server](https://github.com/bocoup/at-driver-servers) for VoiceOver)
+   - a web browser (e.g. [Mozilla Firefox](https://mozilla.org/firefox), [Google Chrome](https://www.google.com/chrome/index.html), or [Apple Safari](https://www.apple.com/safari/))
+   - a WebDriver server for the browser under test (e.g. [GeckoDriver](https://github.com/mozilla/geckodriver) for Firefox or [ChromeDriver](https://developer.chrome.com/docs/chromedriver/downloads) for Chrome--this project does not currently require SafariDriver to test Safari)
+2. Install [Node.js](https://nodejs.org)
+3. Download ARIA-AT and build the tests:
+   ```
+   $ git clone https://github.com/w3c/aria-at
+   $ cd aria-at && npm install && npm run build
+   ```
+4. Download this project's source code and install its dependencies:
+   ```
+   $ git clone https://github.com/w3c/aria-at-automation-harness.git
+   $ cd aria-at-automation-harness && npm install
+   ```
 
-```
-$ bin/agent.js --help
-agent.js
+### Environment configuration
 
-Run tests from input
+1. Run the AT Driver server for the assistive technology under test
+2. Run the appropriate WebDriver server (if testing with Firefox or Chrome)
+3. Run the assistive technology under test
 
-Options:
-  --help                Show help                                      [boolean]
-  --version             Show version number                            [boolean]
-  --quiet               Disable all logging
-  --debug               Enable all logging
-  --verbose             Enable a subset of logging messages
-  --reference-base-url  Url to append reference page listed in tests to
-                                     [string] [default: "http://localhost:8000"]
-  --web-driver-url                            [default: "http://localhost:4444"]
-  --web-driver-browser       [choices: "chrome", "firefox"] [default: "firefox"]
-  --at-driver-url                               [default: "ws://localhost:4382"]
-  --show-hidden         Show hidden options                            [boolean]
-```
+### Execution
 
-## `aria-at-harness-host`
+With the required software in place and the environment correctly configured,
+the `host.js` command-line application can be used to run ARIA-AT test plans.
+Execute the following command to review the available arguments:
 
 ```
 $ bin/host.js run-plan --help --show-hidden
-host.js run-plan [plan-files..]
-
-Run test plans
-
-Positionals:
-  plan-files  Files in a test plan                         [array] [default: []]
-
-Options:
-  --help                      Show help                                [boolean]
-  --version                   Show version number                      [boolean]
-  --quiet                     Disable all logging
-  --debug                     Enable all logging
-  --verbose                   Enable a subset of logging messages
-  --tests-match               Files matching pattern in a test plan will be test
-                              ed          [string] [default: "{,**/}test*.json"]
-  --reference-hostname                                    [default: "localhost"]
-  --plan-workingdir           Directory "plan-files" are relative to
-                                                                  [default: "."]
-  --plan-protocol               [choices: "fork", "developer"] [default: "fork"]
-  --agent-web-driver-url                      [default: "http://localhost:4444"]
-  --agent-web-driver-browser [choices: "chrome", "firefox"] [default: "firefox"]
-  --agent-at-driver-url                       [default: "http://localhost:4382"]
-  --agent-protocol              [choices: "fork", "developer"] [default: "fork"]
-  --agent-quiet               Disable all logging
-  --agent-debug               Enable all logging
-  --agent-verbose             Enable a subset of logging messages
-  --agent-mock                                                         [boolean]
-  --agent-mock-open-page                            [choices: "request", "skip"]
-  --callback-url              URL to POST test results to as they complete
-  --callback-header           Header to send with callback request
-  --show-hidden               Show hidden options                      [boolean]
 ```
 
----
+For example, to run ARIA-AT's "Horizontal slider" test plan using NVDA and
+Firefox, execute the following command in a terminal:
 
-### [aria-at-automation](https://github.com/w3c/aria-at-automation)
+```
+$ node aria-at-automation-harness/bin/host.js run-plan \
+    --plan-workingdir aria-at/build/tests/horizontal-slider \
+    '{reference/**,test-*-nvda.*}' \
+    --agent-web-driver-url=http://127.0.0.1:4444 \
+    --agent-at-driver-url=ws://127.0.0.1:4382/session \
+    --reference-hostname=127.0.0.1 \
+    --agent-web-driver-browser=firefox
+```
+
+## [aria-at-automation](https://github.com/w3c/aria-at-automation)
 
 A collection of projects for automating assistive technology tests from [w3c/aria-at](https://github.com/w3c/aria-at) and beyond
 
