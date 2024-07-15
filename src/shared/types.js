@@ -47,3 +47,12 @@
  * @param {AriaATCIShared.JobBinding<*>} binding
  * @returns {Promise<T>}
  */
+
+/**
+ * @typedef AriaATCIShared.timesOption
+ * @property {Number} afterNav Timeout used after navigation to collect and discard speech.
+ * @property {Number} afterKeys Timeout used to wait for speech to finish after pressing keys.
+ * @property {Number} testSetup Timeout used after pressing test setup button to collect and discard speech.
+ * @property {Number} modeSwitch Timeout used after switching modes to check resulting speech (NVDA).
+ * @property {Number} docReady Timeout used waiting for document ready (Safari).
+ */

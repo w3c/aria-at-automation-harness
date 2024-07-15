@@ -1,9 +1,12 @@
-// modeSwitch - After switching modes, delay this long to receive speech.
-// afterNav - Delay this long after a navigation to receive and clear speech.
-// afterKeys - After pressing a key, delay this long to receive and record speech.
-// testSetup - Delay this long after pressing the test setup to receive and clear speech.
-// docReady - Wait this long for document to be ready (safari only).
+/// <reference path="./types.js" />
 
+/**
+ * @module shared
+ */
+
+/**
+ * @type AriaATCIShared.timesOption
+ */
 export const timesOption = {
   afterNav: 1000,
   afterKeys: 5000,
@@ -14,12 +17,20 @@ export const timesOption = {
 
 const timesDefaults = { ...timesOption };
 
+/**
+ * Convert the times dictionary to a string to pass to args printout.
+ * @param {AriaATCIShared.timesOption} opts
+ * @returns String
+ */
 export function timesArgs(opts = timesOption) {
   return Object.entries(opts)
     .map(([key, value]) => `${key}:${value}`)
     .join(',');
 }
 
+/**
+ * the yargs setup for the times option
+ */
 export const timesOptionDescription = {
   // hidden by default because it's a really long one
   hidden: true,
