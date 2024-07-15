@@ -1,7 +1,5 @@
 import { execFile } from 'child_process';
-
-/** Number of milliseconds to wait for document to be ready before giving up. */
-const DOCUMENT_READY_TIMEOUT = 2000;
+import { timesOption } from '../../shared/times-option.js';
 
 /**
  * @param {string} source
@@ -60,7 +58,7 @@ export default async () => {
     async documentReady() {
       const start = Date.now();
 
-      while (Date.now() - start < DOCUMENT_READY_TIMEOUT) {
+      while (Date.now() - start < timesOption.docReady) {
         const readyState = await evalJavaScript('document.readyState');
         if (readyState === 'complete') {
           return;

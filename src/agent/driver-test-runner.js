@@ -3,6 +3,7 @@
 /// <reference path="types.js" />
 
 import { startJob } from '../shared/job.js';
+import { timesOption } from '../shared/times-option.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
 import { AgentMessage } from './messages.js';
@@ -10,10 +11,6 @@ import { AgentMessage } from './messages.js';
 /**
  * @module agent
  */
-
-const AFTER_NAVIGATION_DELAY = 1000;
-const AFTER_KEYS_DELAY = 5000;
-const RUN_TEST_SETUP_BUTTON_TIMEOUT = 1000;
 
 export class DriverTestRunner {
   /**
@@ -49,10 +46,7 @@ export class DriverTestRunner {
     await this.browserDriver.documentReady();
 
     try {
-      await this.browserDriver.clickWhenPresent(
-        '.button-run-test-setup',
-        RUN_TEST_SETUP_BUTTON_TIMEOUT
-      );
+      await this.browserDriver.clickWhenPresent('.button-run-test-setup', timesOption.testSetup);
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
     }
@@ -71,15 +65,10 @@ export class DriverTestRunner {
    * @param {string} desiredResponse
    */
   async pressKeysToToggleSetting(sequence, desiredResponse) {
-    // This timeout may be reached as many as two times for every test.
-    // Delays of over 500ms have been observed during local testing in a
-    // Windows virtual machine.
-    const MODE_SWITCH_SPEECH_TIMEOUT = 750;
-
     let unknownCollected = '';
     // there are 2 modes, so we will try pressing mode switch up to twice
     for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
-      const speechResponse = await this._collectSpeech(MODE_SWITCH_SPEECH_TIMEOUT, () =>
+      const speechResponse = await this._collectSpeech(timesOption.modeSwitch, () =>
         this.sendKeys(sequence)
       );
       while (speechResponse.length) {
@@ -202,7 +191,7 @@ export class DriverTestRunner {
       const { value: validCommand, errors } = validateKeysFromCommand(command);
 
       if (validCommand) {
-        await this._collectSpeech(AFTER_NAVIGATION_DELAY, () =>
+        await this._collectSpeech(timesOption.afterNav, () =>
           this.openPage({
             url: this._appendBaseUrl(test.target.referencePage),
             referencePage: test.target.referencePage,
@@ -217,11 +206,11 @@ export class DriverTestRunner {
           await this.ensureMode(test.target.mode);
         }
 
-        const spokenOutput = await this._collectSpeech(AFTER_KEYS_DELAY, () =>
+        const spokenOutput = await this._collectSpeech(timesOption.afterKeys, () =>
           this.sendKeys(atKeysFromCommand(validCommand))
         );
 
-        await this._collectSpeech(AFTER_NAVIGATION_DELAY, async () => {
+        await this._collectSpeech(timesOption.afterNav, async () => {
           await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
           await this.browserDriver.navigate('about:blank');
         });

@@ -12,6 +12,7 @@ import { iterateEmitter } from '../shared/iterate-emitter.js';
 import { createRunner } from './create-test-runner.js';
 import { agentMain } from './main.js';
 import { AgentMessage, createAgentLogger } from './messages.js';
+import { timesArgs, timesOptionDescription } from '../shared/times-option.js';
 
 /** @param {yargs} args */
 export function buildAgentCliOptions(args = yargs) {
@@ -76,6 +77,7 @@ export function buildAgentCliOptions(args = yargs) {
         choices: ['request', 'skip'],
         hidden: true,
       },
+      times: timesOptionDescription,
     })
     .showHidden('show-hidden');
 }
@@ -86,6 +88,7 @@ export function buildAgentCliOptions(args = yargs) {
  */
 export function agentCliArgsFromOptionsMap(options) {
   const args = [];
+  args.push('--times', timesArgs());
   for (const key of Object.keys(options)) {
     const value = options[key];
     switch (key) {
