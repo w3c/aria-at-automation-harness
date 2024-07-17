@@ -50,9 +50,9 @@
 
 /**
  * @typedef AriaATCIShared.timesOption
- * @property {Number} afterNav Timeout used after navigation to collect and discard speech.
- * @property {Number} afterKeys Timeout used to wait for speech to finish after pressing keys.
- * @property {Number} testSetup Timeout used after pressing test setup button to collect and discard speech.
- * @property {Number} modeSwitch Timeout used after switching modes to check resulting speech (NVDA).
- * @property {Number} docReady Timeout used waiting for document ready (Safari).
+ * @property {number} afterNav Timeout used after navigation to collect and discard speech.
+ * @property {number} afterKeys Timeout used to wait for speech to finish after pressing keys.
+ * @property {number} testSetup Timeout used after pressing test setup button to collect and discard speech.
+ * @property {number} modeSwitch Timeout used after switching modes to check resulting speech (NVDA).
+ * @property {number} docReady Timeout used waiting for document ready (Safari).
  */

@@ -23,7 +23,7 @@ const timesDefaults = { ...timesOption };
 /**
  * Convert from 'afterNav' to 'time-after-nav'.
  * @param {keyof AriaATCIShared.timesOption} optionName
- * @returns String
+ * @returns string
  */
 function makeSnakeCasedOption(optionName) {
   const snakeCased = optionName.replace(/[A-Z]/g, cap => '-' + cap.toLowerCase());
@@ -34,7 +34,7 @@ function makeSnakeCasedOption(optionName) {
 /**
  * Create a yargs description for the specified timesOption.
  * @param {keyof AriaATCIShared.timesOption} optionName Key from timesOption
- * @param {String} describe Description to be used in --show-help
+ * @param {string} describe Description to be used in --show-help
  */
 function addOptionConfig(optionName, describe) {
   timesOptionsConfig[makeSnakeCasedOption(optionName)] = {
