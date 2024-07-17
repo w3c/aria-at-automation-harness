@@ -15,14 +15,27 @@ export const timesOption = {
   docReady: 2000,
 };
 
+/**
+ * @type AriaATCIShared.timesOption
+ */
 const timesDefaults = { ...timesOption };
 
-function makeSnakeCasedOption(optionName, description) {
+/**
+ * Convert from 'afterNav' to 'time-after-nav'.
+ * @param {keyof AriaATCIShared.timesOption} optionName
+ * @returns String
+ */
+function makeSnakeCasedOption(optionName) {
   const snakeCased = optionName.replace(/[A-Z]/g, cap => '-' + cap.toLowerCase());
   const optionText = `time-${snakeCased}`;
   return optionText;
 }
 
+/**
+ * Create a yargs description for the specified timesOption.
+ * @param {keyof AriaATCIShared.timesOption} optionName Key from timesOption
+ * @param {String} describe Description to be used in --show-help
+ */
 function addOptionConfig(optionName, describe) {
   timesOptionsConfig[makeSnakeCasedOption(optionName)] = {
     hidden: true,
@@ -61,10 +74,18 @@ addOptionConfig('docReady', 'Timeout used waiting for document ready (Safari).')
 /**
  * Convert the times dictionary to an array of strings to pass back to args.
  * @param {AriaATCIShared.timesOption} opts
- * @returns [String]
+ * @returns [string]
  */
 export function timesArgs(opts = timesOption) {
-  return Object.entries(opts).flatMap(([key, value]) =>
-    value === timesDefaults[key] ? [] : ['--' + makeSnakeCasedOption(key), String(value)]
-  );
+  const args = [];
+  for (const key of Object.keys(timesOption)) {
+    const value = timesOption[key];
+    // no need to pass on "default" value
+    if (value === timesDefaults[key]) continue;
+    // casting in jsdoc syntax is complicated - the extra () around key are
+    // required to make the type annotation work.
+    args.push(makeSnakeCasedOption(/** @type {keyof AriaATCIShared.timesOption} */ (key)));
+    args.push(String(value));
+  }
+  return args;
 }
