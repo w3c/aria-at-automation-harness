@@ -21,23 +21,14 @@ export const timesOption = {
 const timesDefaults = { ...timesOption };
 
 /**
- * Convert from 'afterNav' to 'time-after-nav'.
- * @param {keyof AriaATCIShared.timesOption} optionName
- * @returns string
- */
-function makeSnakeCasedOption(optionName) {
-  const snakeCased = optionName.replace(/[A-Z]/g, cap => '-' + cap.toLowerCase());
-  const optionText = `time-${snakeCased}`;
-  return optionText;
-}
-
-/**
  * Create a yargs description for the specified timesOption.
  * @param {keyof AriaATCIShared.timesOption} optionName Key from timesOption
+ * @param {string} argName The text used for the argument (without leading --)
  * @param {string} describe Description to be used in --show-help
  */
-function addOptionConfig(optionName, describe) {
-  timesOptionsConfig[makeSnakeCasedOption(optionName)] = {
+function addOptionConfig(optionName, argName, describe) {
+  timesOptionsArgNameMap.set(optionName, argName);
+  timesOptionsConfig[argName] = {
     hidden: true,
     default: timesOption[optionName],
     describe,
@@ -51,25 +42,45 @@ function addOptionConfig(optionName, describe) {
         throw new Error('time must be positive and non-zero');
       }
       timesOption[optionName] = time;
+      return time;
     },
   };
 }
 
 /**
+ * @type Map<string, string>
+ */
+const timesOptionsArgNameMap = new Map();
+
+/**
  * the yargs configuration for the time options
  */
 export const timesOptionsConfig = {};
-addOptionConfig('afterNav', 'Timeout used after navigation to collect and discard speech.');
-addOptionConfig('afterKeys', 'Timeout used to wait for speech to finish after pressing keys.');
+addOptionConfig(
+  'afterNav',
+  'time-after-nav',
+  'Timeout used after navigation to collect and discard speech.'
+);
+addOptionConfig(
+  'afterKeys',
+  'time-after-keys',
+  'Timeout used to wait for speech to finish after pressing keys.'
+);
 addOptionConfig(
   'testSetup',
+  'time-test-setup',
   'Timeout used after pressing test setup button to collect and discard speech.'
 );
 addOptionConfig(
   'modeSwitch',
+  'time-mode-switch',
   'Timeout used after switching modes to check resulting speech (NVDA).'
 );
-addOptionConfig('docReady', 'Timeout used waiting for document ready (Safari).');
+addOptionConfig(
+  'docReady',
+  'time-mode-switch',
+  'Timeout used waiting for document ready (Safari).'
+);
 
 /**
  * Convert the times dictionary to an array of strings to pass back to args.
@@ -84,7 +95,8 @@ export function timesArgs(opts = timesOption) {
     if (value === timesDefaults[key]) continue;
     // casting in jsdoc syntax is complicated - the extra () around key are
     // required to make the type annotation work.
-    args.push(makeSnakeCasedOption(/** @type {keyof AriaATCIShared.timesOption} */ (key)));
+    const argName = timesOptionsArgNameMap.get(key);
+    args.push('--' + argName);
     args.push(String(value));
   }
   return args;
