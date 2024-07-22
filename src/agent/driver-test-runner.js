@@ -3,7 +3,6 @@
 /// <reference path="types.js" />
 
 import { startJob } from '../shared/job.js';
-import { timesOption } from '../shared/times-option.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
 import { AgentMessage } from './messages.js';
@@ -19,13 +18,15 @@ export class DriverTestRunner {
    * @param {AriaATCIAgent.Log} options.log
    * @param {BrowserDriver} options.browserDriver
    * @param {ATDriver} options.atDriver
+   * @param {AriaATCIShared.timesOption} options.timesOption
    */
-  constructor({ baseUrl, log, browserDriver, atDriver }) {
+  constructor({ baseUrl, log, browserDriver, atDriver, timesOption }) {
     this.baseUrl = baseUrl;
     this.log = log;
     this.browserDriver = browserDriver;
     this.atDriver = atDriver;
     this.collectedCapabilities = this.getCapabilities();
+    this.timesOption = timesOption;
   }
 
   async getCapabilities() {
@@ -46,7 +47,10 @@ export class DriverTestRunner {
     await this.browserDriver.documentReady();
 
     try {
-      await this.browserDriver.clickWhenPresent('.button-run-test-setup', timesOption.testSetup);
+      await this.browserDriver.clickWhenPresent(
+        '.button-run-test-setup',
+        this.timesOption.testSetup
+      );
     } catch ({}) {
       await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
     }
@@ -68,7 +72,7 @@ export class DriverTestRunner {
     let unknownCollected = '';
     // there are 2 modes, so we will try pressing mode switch up to twice
     for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
-      const speechResponse = await this._collectSpeech(timesOption.modeSwitch, () =>
+      const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
         this.sendKeys(sequence)
       );
       while (speechResponse.length) {
@@ -191,7 +195,7 @@ export class DriverTestRunner {
       const { value: validCommand, errors } = validateKeysFromCommand(command);
 
       if (validCommand) {
-        await this._collectSpeech(timesOption.afterNav, () =>
+        await this._collectSpeech(this.timesOption.afterNav, () =>
           this.openPage({
             url: this._appendBaseUrl(test.target.referencePage),
             referencePage: test.target.referencePage,
@@ -206,11 +210,11 @@ export class DriverTestRunner {
           await this.ensureMode(test.target.mode);
         }
 
-        const spokenOutput = await this._collectSpeech(timesOption.afterKeys, () =>
+        const spokenOutput = await this._collectSpeech(this.timesOption.afterKeys, () =>
           this.sendKeys(atKeysFromCommand(validCommand))
         );
 
-        await this._collectSpeech(timesOption.afterNav, async () => {
+        await this._collectSpeech(this.timesOption.afterNav, async () => {
           await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
           await this.browserDriver.navigate('about:blank');
         });

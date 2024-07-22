@@ -15,7 +15,7 @@ import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { HostServer } from './server.js';
-import { timesOptionsConfig } from '../shared/times-option.js';
+import { getTimesOption, timesOptionsConfig } from '../shared/times-option.js';
 
 export const command = 'run-plan [plan-files..]';
 
@@ -274,6 +274,8 @@ function mainAgentMiddleware(argv) {
     agentMockOpenPage,
   } = argv;
 
+  const timesOption = getTimesOption(argv);
+
   argv.agent = new Agent({
     log,
     protocol,
@@ -286,6 +288,7 @@ function mainAgentMiddleware(argv) {
       atDriverUrl: agentAtDriverUrl,
       mock: agentMock,
       mockOpenPage: agentMockOpenPage,
+      timesOption: timesOption,
     }),
   });
 }

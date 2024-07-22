@@ -19,6 +19,7 @@ import { AgentMessage } from './messages.js';
  * @param {AriaATCIAgent.Log} options.log
  * @param {AriaATCIAgent.MockOptions} [options.mock]
  * @param {AriaATCIAgent.Browser} [options.webDriverBrowser]
+ * @param {AriaATCIShared.timesOption} options.timesOption
  * @param {{toString: function(): string}} options.webDriverUrl
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
@@ -30,11 +31,13 @@ export async function createRunner(options) {
     return new MockTestRunner({ mock: options.mock, ...options });
   }
   await new Promise(resolve => setTimeout(resolve, 1000));
+  const { timesOption } = options;
   const [browserDriver, atDriver] = await Promise.all([
     createBrowserDriver({
       url: options.webDriverUrl,
       browser: options.webDriverBrowser,
       abortSignal: options.abortSignal,
+      timesOption,
     }).catch(cause => {
       throw new Error('Error initializing browser driver', { cause });
     }),
@@ -46,5 +49,5 @@ export async function createRunner(options) {
       throw new Error('Error connecting to at-driver', { cause });
     }),
   ]);
-  return new DriverTestRunner({ ...options, browserDriver, atDriver });
+  return new DriverTestRunner({ ...options, browserDriver, atDriver, timesOption });
 }

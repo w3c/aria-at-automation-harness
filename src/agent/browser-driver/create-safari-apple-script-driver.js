@@ -1,5 +1,4 @@
 import { execFile } from 'child_process';
-import { timesOption } from '../../shared/times-option.js';
 
 /**
  * @param {string} source
@@ -41,7 +40,10 @@ const evalJavaScript = source => {
   end tell`);
 };
 
-export default async () => {
+/**
+ * @param {AriaATCIShared.timesOption} timesOption
+ */
+export default async timesOption => {
   await execScript(`tell application "Safari"
     if documents = {} then make new document
     activate

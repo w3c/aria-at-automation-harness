@@ -319,6 +319,7 @@ class AgentDeveloperProtocol extends AgentProtocol {
         atDriverUrl: options.atDriverUrl,
         webDriverBrowser: options.webDriverBrowser,
         webDriverUrl: options.webDriverUrl,
+        timesOption: options.timesOption,
       }),
       log,
       tests: iterateEmitter(this._testEmitter, 'message', 'stop'),

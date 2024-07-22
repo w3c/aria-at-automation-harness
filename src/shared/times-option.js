@@ -7,18 +7,13 @@
 /**
  * @type AriaATCIShared.timesOption
  */
-export const timesOption = {
+const timesDefaults = {
   afterNav: 1000,
   afterKeys: 5000,
   testSetup: 1000,
   modeSwitch: 750,
   docReady: 2000,
 };
-
-/**
- * @type AriaATCIShared.timesOption
- */
-const timesDefaults = { ...timesOption };
 
 /**
  * Create a yargs description for the specified timesOption.
@@ -30,7 +25,7 @@ function addOptionConfig(optionName, argName, describe) {
   timesOptionsArgNameMap.set(optionName, argName);
   timesOptionsConfig[argName] = {
     hidden: true,
-    default: timesOption[optionName],
+    default: timesDefaults[optionName],
     describe,
     coerce(arg) {
       const isNumber = typeof arg === 'number';
@@ -41,14 +36,13 @@ function addOptionConfig(optionName, argName, describe) {
       if (time <= 0) {
         throw new Error('time must be positive and non-zero');
       }
-      timesOption[optionName] = time;
       return time;
     },
   };
 }
 
 /**
- * @type Map<string, string>
+ * @type Map<keyof AriaATCIShared.timesOption, string>
  */
 const timesOptionsArgNameMap = new Map();
 
@@ -76,28 +70,40 @@ addOptionConfig(
   'time-mode-switch',
   'Timeout used after switching modes to check resulting speech (NVDA).'
 );
-addOptionConfig(
-  'docReady',
-  'time-mode-switch',
-  'Timeout used waiting for document ready (Safari).'
-);
+addOptionConfig('docReady', 'time-doc-ready', 'Timeout used waiting for document ready (Safari).');
 
 /**
  * Convert the times dictionary to an array of strings to pass back to args.
  * @param {AriaATCIShared.timesOption} opts
  * @returns [string]
  */
-export function timesArgs(opts = timesOption) {
+export function timesArgs(opts) {
   const args = [];
-  for (const key of Object.keys(timesOption)) {
-    const value = timesOption[key];
+  for (const key of Object.keys(opts)) {
+    const value = opts[key];
     // no need to pass on "default" value
-    if (value === timesDefaults[key]) continue;
+    if (value == timesDefaults[key]) continue;
     // casting in jsdoc syntax is complicated - the extra () around key are
     // required to make the type annotation work.
-    const argName = timesOptionsArgNameMap.get(key);
+    const argName = timesOptionsArgNameMap.get(/** @type keyof AriaATCIShared.timesOption */ (key));
     args.push('--' + argName);
     args.push(String(value));
   }
   return args;
+}
+
+/**
+ * Convert the arguments parse result into a timesOption object.
+ * @param {any} args The parsed arguments
+ * @returns {AriaATCIShared.timesOption}
+ */
+export function getTimesOption(args) {
+  const result = { ...timesDefaults };
+  for (const key in result) {
+    const mapped = timesOptionsArgNameMap.get(/** @type keyof AriaATCIShared.timesOption */ (key));
+    if (mapped) {
+      if (args[mapped]) result[key] = args[mapped];
+    }
+  }
+  return result;
 }
