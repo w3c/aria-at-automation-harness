@@ -22,7 +22,7 @@ export class MockTestRunner {
    */
   constructor({ baseUrl, log, mock: config }) {
     this.baseUrl = baseUrl;
-    this.log = log;
+    this.log = console.log;
     this.config = config;
   }
 
@@ -62,14 +62,12 @@ export class MockTestRunner {
 
   /**
    * @param {AriaATCIData.CollectedTest} task
+   * @param {AriaATCIShared.BaseURL} baseUrl
    */
-  async run(task) {
-    const base = `${this.baseUrl.protocol}//${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
+  async run(task, baseUrl) {
+    const base = `${baseUrl.protocol}://${baseUrl.hostname}:${baseUrl.port}${baseUrl.pathname}`;
     await this.openPage(
-      new URL(
-        `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${task.target.referencePage}`,
-        base
-      )
+      new URL(`${baseUrl.pathname ? `${baseUrl.pathname}/` : ''}${task.target.referencePage}`, base)
     );
 
     const commandsOutput = [];

@@ -32,7 +32,7 @@ const logUnsuccessfulHTTP = async (log, response) => {
  * @param {AriaATCIHost.Log} options.log
  * @param {AsyncIterable<AriaATCIHost.TestPlan>} options.plans
  * @param {AriaATCIHost.ReferenceFileServer} options.server
- * @param {AriaATCIHost.Agent} options.agent
+ * @param {AriaATCIAgent.TestRunner} options.runner
  * @param {AriaATCIHost.EmitPlanResults} options.emitPlanResults
  * @param {string} [options.callbackUrl]
  * @param {Record<string, string>} [options.callbackHeader]
@@ -42,7 +42,7 @@ export async function hostMain({
   log,
   plans,
   server,
-  agent,
+  runner,
   emitPlanResults,
   callbackUrl,
   callbackHeader,
@@ -50,11 +50,11 @@ export async function hostMain({
 }) {
   log(HostMessage.START);
 
-  const hostLogJob = startJob(async function (signal) {
-    for await (const agentLog of signal.cancelable(agent.logs())) {
-      log(HostMessage.AGENT_LOG, agentLog);
-    }
-  });
+  // const hostLogJob = startJob(async function (signal) {
+  //   for await (const agentLog of signal.cancelable(agent.logs())) {
+  //     log(HostMessage.AGENT_LOG, agentLog);
+  //   }
+  // });
 
   await server.ready;
   log(HostMessage.SERVER_LISTENING, { url: server.baseUrl });
@@ -66,7 +66,7 @@ export async function hostMain({
     setServerOptionsInTestPlan(plan, { baseUrl: serverDirectory.baseUrl });
 
     log(HostMessage.START_AGENT);
-    await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
+    // await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
 
     let lastCallbackRequest = Promise.resolve();
 
@@ -92,12 +92,12 @@ export async function hostMain({
 
     for (const test of plan.tests) {
       log(HostMessage.START_TEST);
-      const testLogJob = startJob(async function (signal) {
-        for await (const testLog of signal.cancelable(agent.logs())) {
-          plan = addLogToTestPlan(plan, testLog);
-          plan = addTestLogToTestPlan(plan, test);
-        }
-      });
+      // const testLogJob = startJob(async function (signal) {
+      //   for await (const testLog of signal.cancelable(agent.logs())) {
+      //     plan = addLogToTestPlan(plan, testLog);
+      //     plan = addTestLogToTestPlan(plan, test);
+      //   }
+      // });
 
       const file = plan.files.find(({ name }) => name === test.filepath);
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
@@ -109,7 +109,7 @@ export async function hostMain({
       try {
         postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
 
-        const result = await agent.run(testSource);
+        const result = await runner.run(testSource, serverDirectory.baseUrl);
 
         const { capabilities, commands } = result;
 
@@ -128,7 +128,7 @@ export async function hostMain({
         await lastCallbackRequest;
         throw exception;
       } finally {
-        await testLogJob.cancel();
+        // await testLogJob.cancel();
       }
     }
 
@@ -137,11 +137,11 @@ export async function hostMain({
 
     log(HostMessage.STOP_AGENT);
     await lastCallbackRequest;
-    await agent.stop();
+    // await agent.stop();
     await emitPlanResults(plan);
   }
 
-  await hostLogJob.cancel();
+  // await hostLogJob.cancel();
 
   log(HostMessage.STOP_SERVER);
   await server.close();

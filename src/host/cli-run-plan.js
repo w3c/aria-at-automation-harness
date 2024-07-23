@@ -16,6 +16,9 @@ import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { HostServer } from './server.js';
 
+import { createRunner } from '../agent/create-test-runner.js';
+import { agentMockOptions } from '../agent/cli.js';
+
 export const command = 'run-plan [plan-files..]';
 
 export const describe = 'Run test plans';
@@ -193,7 +196,7 @@ function mainMiddleware(argv) {
   mainLoggerMiddleware(argv);
   mainTestPlanMiddleware(argv);
   mainServerMiddleware(argv);
-  mainAgentMiddleware(argv);
+  mainRunnerMiddleware(argv);
   mainResultMiddleware(argv);
 }
 
@@ -258,13 +261,9 @@ function mainServerMiddleware(argv) {
   argv.server = new HostServer({ log, baseUrl: { hostname: argv.referenceHostname } });
 }
 
-function mainAgentMiddleware(argv) {
+async function mainRunnerMiddleware(argv) {
   const {
     log,
-    agentProtocol: protocol,
-    agentDebug,
-    agentQuiet,
-    agentVerbose,
     agentWebDriverUrl,
     agentWebDriverBrowser,
     agentAtDriverUrl,
@@ -272,19 +271,16 @@ function mainAgentMiddleware(argv) {
     agentMockOpenPage,
   } = argv;
 
-  argv.agent = new Agent({
+  argv.runner = await createRunner({
     log,
-    protocol,
-    config: pickAgentCliOptions({
-      debug: agentDebug,
-      quiet: agentQuiet,
-      verbose: agentVerbose,
-      webDriverUrl: agentWebDriverUrl,
-      webDriverBrowser: agentWebDriverBrowser,
-      atDriverUrl: agentAtDriverUrl,
+    baseUrl: argv.server.baseUrl,
+    mock: agentMockOptions({
       mock: agentMock,
       mockOpenPage: agentMockOpenPage,
     }),
+    webDriverUrl: agentWebDriverUrl,
+    webDriverBrowser: agentWebDriverBrowser,
+    atDriverUrl: agentAtDriverUrl,
   });
 }
 

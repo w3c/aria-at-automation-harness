@@ -13,7 +13,6 @@ import { AgentMessage } from './messages.js';
 
 /**
  * @param {object} options
- * @param {Promise<void>} options.abortSignal resolves when runner should stop
  * @param {{hostname: string, port: number | string, pathname: string}} options.atDriverUrl
  * @param {AriaATCIShared.BaseURL} options.baseUrl
  * @param {AriaATCIAgent.Log} options.log
@@ -23,9 +22,9 @@ import { AgentMessage } from './messages.js';
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {
-  if (!options.abortSignal) {
-    throw new Error('createRunner requires abortSignal option.');
-  }
+  // stubbing this out for now
+  const abortSignal = new Promise(resolve => resolve());
+
   if (options.mock) {
     return new MockTestRunner({ mock: options.mock, ...options });
   }
@@ -34,13 +33,13 @@ export async function createRunner(options) {
     createBrowserDriver({
       url: options.webDriverUrl,
       browser: options.webDriverBrowser,
-      abortSignal: options.abortSignal,
+      abortSignal,
     }).catch(cause => {
       throw new Error('Error initializing browser driver', { cause });
     }),
     createATDriver({
       url: options.atDriverUrl,
-      abortSignal: options.abortSignal,
+      abortSignal,
       log: options.log,
     }).catch(cause => {
       throw new Error('Error connecting to at-driver', { cause });
