@@ -75,7 +75,7 @@ addOptionConfig('docReady', 'time-doc-ready', 'Timeout used waiting for document
 /**
  * Convert the times dictionary to an array of strings to pass back to args.
  * @param {AriaATCIShared.timesOption} opts
- * @returns [string]
+ * @returns {string[]}
  */
 export function timesArgs(opts) {
   const args = [];
