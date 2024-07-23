@@ -12,6 +12,7 @@ import { iterateEmitter } from '../shared/iterate-emitter.js';
 import { createRunner } from './create-test-runner.js';
 import { agentMain } from './main.js';
 import { AgentMessage, createAgentLogger } from './messages.js';
+import { getTimesOption, timesArgs, timesOptionsConfig } from '../shared/times-option.js';
 
 /** @param {yargs} args */
 export function buildAgentCliOptions(args = yargs) {
@@ -76,6 +77,7 @@ export function buildAgentCliOptions(args = yargs) {
         choices: ['request', 'skip'],
         hidden: true,
       },
+      ...timesOptionsConfig,
     })
     .showHidden('show-hidden');
 }
@@ -128,6 +130,9 @@ export function agentCliArgsFromOptionsMap(options) {
       case 'mockOpenPage':
         args.push(`--mock-open-page=${value}`);
         break;
+      case 'timesOption':
+        args.push(...timesArgs(value));
+        break;
       default:
         throw new Error(`unknown agent cli argument ${key}`);
     }
@@ -149,6 +154,7 @@ export function pickAgentCliOptions({
   atDriverUrl,
   mock,
   mockOpenPage,
+  timesOption,
 }) {
   return {
     ...(debug === undefined ? {} : { debug }),
@@ -160,6 +166,7 @@ export function pickAgentCliOptions({
     ...(atDriverUrl === undefined ? {} : { atDriverUrl }),
     ...(mock === undefined ? {} : { mock }),
     ...(mockOpenPage === undefined ? {} : { mockOpenPage }),
+    timesOption,
   };
 }
 
@@ -245,6 +252,7 @@ async function agentRunnerMiddleware(argv) {
     webDriverBrowser: argv.webDriverBrowser,
     atDriverUrl: argv.atDriverUrl,
     abortSignal: argv.abortSignal,
+    timesOption: getTimesOption(argv),
   });
 }
 
