@@ -24,19 +24,18 @@ import { AgentMessage } from './messages.js';
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {
-  // stubbing this out for now
-  const abortSignal = options.abortSignal;
+  const { abortSignal, timesOption } = options;
 
   if (options.mock) {
     return new MockTestRunner({ mock: options.mock, ...options });
   }
   await new Promise(resolve => setTimeout(resolve, 1000));
-  const { timesOption } = options;
+
   const [browserDriver, atDriver] = await Promise.all([
     createBrowserDriver({
       url: options.webDriverUrl,
       browser: options.webDriverBrowser,
-      abortSignal: options.abortSignal,
+      abortSignal,
       timesOption,
     }).catch(cause => {
       throw new Error('Error initializing browser driver', { cause });

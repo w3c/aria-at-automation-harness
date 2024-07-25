@@ -16,6 +16,7 @@ import {
   addTestLogToTestPlan,
   addTestResultToTestPlan,
 } from './plan-object.js';
+import { getTimesOption } from '../shared/times-option.js';
 
 /**
  * @param {AriaATCIHost.Log} log
@@ -78,12 +79,15 @@ export async function hostMain(options) {
     log(HostMessage.ADD_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
     setServerOptionsInTestPlan(plan, { baseUrl: serverDirectory.baseUrl });
 
+    const timesOption = getTimesOption(options);
+
     const emitter = new EventEmitter();
     const runner = await createRunner({
       log: console.log,
       abortSignal: new Promise(resolve => {
         emitter.on(HostMessage.STOP_RUNNER, () => resolve());
       }),
+      timesOption,
       baseUrl: serverDirectory.baseUrl,
       mock: agentMockOptions({
         mock: agentMock,
