@@ -168,7 +168,7 @@ async function verboseMiddleware(argv) {
 
   let verbosity;
   if (debug) {
-    verbosity = Object.values(HostMessage);
+    verbosity = Object.values({ ...HostMessage, ...AgentMessage });
   } else if (quiet) {
     verbosity = [];
   } else {
@@ -181,6 +181,8 @@ async function verboseMiddleware(argv) {
           HostMessage.SERVER_LISTENING,
           HostMessage.ADD_SERVER_DIRECTORY,
           HostMessage.REMOVE_SERVER_DIRECTORY,
+          AgentMessage.OPEN_PAGE,
+          AgentMessage.UNCAUGHT_ERROR,
         ];
   }
 

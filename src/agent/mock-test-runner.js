@@ -22,7 +22,7 @@ export class MockTestRunner {
    */
   constructor({ baseUrl, log, mock: config }) {
     this.baseUrl = baseUrl;
-    this.log = console.log;
+    this.log = log;
     this.config = config;
   }
 
