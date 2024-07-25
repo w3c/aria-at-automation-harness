@@ -13,7 +13,7 @@ import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { HostServer } from './server.js';
-import { getTimesOption, timesOptionsConfig } from '../shared/times-option.js';
+import { timesOptionsConfig } from '../shared/times-option.js';
 
 export const command = 'run-plan [plan-files..]';
 

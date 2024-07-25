@@ -64,12 +64,6 @@ export async function hostMain(options) {
   } = options;
   log(HostMessage.START);
 
-  // const hostLogJob = startJob(async function (signal) {
-  //   for await (const agentLog of signal.cancelable(agent.logs())) {
-  //     log(HostMessage.AGENT_LOG, agentLog);
-  //   }
-  // });
-
   await server.ready;
   log(HostMessage.SERVER_LISTENING, { url: server.baseUrl });
 
@@ -83,7 +77,7 @@ export async function hostMain(options) {
 
     const emitter = new EventEmitter();
     const runner = await createRunner({
-      log: console.log,
+      log,
       abortSignal: new Promise(resolve => {
         emitter.on(HostMessage.STOP_RUNNER, () => resolve());
       }),
@@ -122,12 +116,6 @@ export async function hostMain(options) {
 
     for (const test of plan.tests) {
       log(HostMessage.START_TEST);
-      // const testLogJob = startJob(async function (signal) {
-      //   for await (const testLog of signal.cancelable(agent.logs())) {
-      //     plan = addLogToTestPlan(plan, testLog);
-      //     plan = addTestLogToTestPlan(plan, test);
-      //   }
-      // });
 
       const file = plan.files.find(({ name }) => name === test.filepath);
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
@@ -157,8 +145,6 @@ export async function hostMain(options) {
         postCallbackWhenEnabled({ ...callbackBody, error, status: 'ERROR' });
         await lastCallbackRequest;
         throw exception;
-      } finally {
-        // await testLogJob.cancel();
       }
     }
 
@@ -172,8 +158,6 @@ export async function hostMain(options) {
 
     await emitPlanResults(plan);
   }
-
-  // await hostLogJob.cancel();
 
   log(HostMessage.STOP_SERVER);
   await server.close();

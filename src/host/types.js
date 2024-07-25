@@ -26,6 +26,13 @@
  * | 'startTest'
  * | 'reportingError'
  * | 'testError'
+ * | 'atDriverComms'
+ * | 'openPage'
+ * | 'pressKeys'
+ * | 'speechEvent'
+ * | 'invalidKeys'
+ * | 'noRunTestSetup'
+ * | 'capabilities'
  * } AriaATCIHost.HostLogType
  */
 

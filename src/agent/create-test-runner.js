@@ -24,7 +24,7 @@ import { AgentMessage } from './messages.js';
  * @returns {Promise<AriaATCIAgent.TestRunner>}
  */
 export async function createRunner(options) {
-  const { abortSignal, timesOption } = options;
+  const { abortSignal, log, timesOption } = options;
 
   if (options.mock) {
     return new MockTestRunner({ mock: options.mock, ...options });
@@ -43,7 +43,7 @@ export async function createRunner(options) {
     createATDriver({
       url: options.atDriverUrl,
       abortSignal,
-      log: console.log,
+      log,
     }).catch(cause => {
       throw new Error('Error connecting to at-driver', { cause });
     }),

@@ -10,7 +10,7 @@ import { AgentMessage } from './messages.js';
  * @param {string} [options.url.pathname]
  * @param {number | string} [options.url.port]
  * @param {Promise<void>} [options.abortSignal]
- * @param {AriaATCIAgent.Log} [options.log]
+ * @param {AriaATCIHost.Log} [options.log]
  * @returns {Promise<ATDriver>}
  */
 export async function createATDriver({
