@@ -57,6 +57,7 @@
  * @property {AriaATCIShared.BaseURL} [webDriverUrl]
  * @property {AriaATCIAgent.Browser} [webDriverBrowser]
  * @property {AriaATCIShared.BaseURL} [atDriverUrl]
+ * @property {AriaATCIShared.timesOption} [timesOption]
  */
 
 /**

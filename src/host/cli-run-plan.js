@@ -13,6 +13,7 @@ import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { HostServer } from './server.js';
+import { getTimesOption, timesOptionsConfig } from '../shared/times-option.js';
 
 export const command = 'run-plan [plan-files..]';
 
@@ -154,6 +155,7 @@ export const builder = (args = yargs) =>
           return { [name]: value };
         },
       },
+      ...timesOptionsConfig,
     })
     .showHidden('show-hidden')
     .middleware(verboseMiddleware)

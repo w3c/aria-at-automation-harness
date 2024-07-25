@@ -1,8 +1,5 @@
 import { execFile } from 'child_process';
 
-/** Number of milliseconds to wait for document to be ready before giving up. */
-const DOCUMENT_READY_TIMEOUT = 2000;
-
 /**
  * @param {string} source
  * @returns {Promise<string>}
@@ -43,7 +40,10 @@ const evalJavaScript = source => {
   end tell`);
 };
 
-export default async () => {
+/**
+ * @param {AriaATCIShared.timesOption} timesOption
+ */
+export default async timesOption => {
   await execScript(`tell application "Safari"
     if documents = {} then make new document
     activate
@@ -60,7 +60,7 @@ export default async () => {
     async documentReady() {
       const start = Date.now();
 
-      while (Date.now() - start < DOCUMENT_READY_TIMEOUT) {
+      while (Date.now() - start < timesOption.docReady) {
         const readyState = await evalJavaScript('document.readyState');
         if (readyState === 'complete') {
           return;
