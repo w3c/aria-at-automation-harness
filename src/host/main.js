@@ -4,6 +4,9 @@
  * @module host
  */
 
+import { EventEmitter } from 'events';
+import { agentMockOptions } from '../agent/cli.js';
+import { createRunner } from '../agent/create-test-runner.js';
 import { startJob } from '../shared/job.js';
 
 import { HostMessage } from './messages.js';
@@ -37,17 +40,27 @@ const logUnsuccessfulHTTP = async (log, response) => {
  * @param {string} [options.callbackUrl]
  * @param {Record<string, string>} [options.callbackHeader]
  * @param {typeof fetch} options.fetch
+ * @param options.agentMock
+ * @param options.agentMockOpenPage
+ * @param options.agentWebDriverUrl
+ * @param options.agentWebDriverBrowser
+ * @param options.agentAtDriverUrl
  */
-export async function hostMain({
-  log,
-  plans,
-  server,
-  runner,
-  emitPlanResults,
-  callbackUrl,
-  callbackHeader,
-  fetch,
-}) {
+export async function hostMain(options) {
+  const {
+    log,
+    plans,
+    server,
+    emitPlanResults,
+    callbackUrl,
+    callbackHeader,
+    fetch,
+    agentMock,
+    agentMockOpenPage,
+    agentWebDriverUrl,
+    agentWebDriverBrowser,
+    agentAtDriverUrl,
+  } = options;
   log(HostMessage.START);
 
   // const hostLogJob = startJob(async function (signal) {
@@ -65,8 +78,21 @@ export async function hostMain({
     log(HostMessage.ADD_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
     setServerOptionsInTestPlan(plan, { baseUrl: serverDirectory.baseUrl });
 
-    log(HostMessage.START_AGENT);
-    // await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
+    const emitter = new EventEmitter();
+    const runner = await createRunner({
+      log: console.log,
+      abortSignal: new Promise(resolve => {
+        emitter.on(HostMessage.STOP_RUNNER, () => resolve());
+      }),
+      baseUrl: serverDirectory.baseUrl,
+      mock: agentMockOptions({
+        mock: agentMock,
+        mockOpenPage: agentMockOpenPage,
+      }),
+      webDriverUrl: agentWebDriverUrl,
+      webDriverBrowser: agentWebDriverBrowser,
+      atDriverUrl: agentAtDriverUrl,
+    });
 
     let lastCallbackRequest = Promise.resolve();
 
@@ -137,7 +163,9 @@ export async function hostMain({
 
     log(HostMessage.STOP_AGENT);
     await lastCallbackRequest;
-    // await agent.stop();
+
+    emitter.emit(HostMessage.STOP_RUNNER);
+
     await emitPlanResults(plan);
   }
 

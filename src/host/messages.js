@@ -34,6 +34,8 @@ export const HostMessage = {
   AGENT_PROTOCOL: 'agentProtocol',
   /** @type {'stopAgent'} */
   STOP_AGENT: 'stopAgent',
+  /** @type {'stopRunner'} */
+  STOP_RUNNER: 'stopRunner',
   /** @type {'agentLog'} */
   AGENT_LOG: 'agentLog',
   /** @type {'agentCrashed'} */

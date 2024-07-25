@@ -15,7 +15,8 @@ import { AgentMessage } from './messages.js';
  * @param {object} options
  * @param {{hostname: string, port: number | string, pathname: string}} options.atDriverUrl
  * @param {AriaATCIShared.BaseURL} options.baseUrl
- * @param {AriaATCIAgent.Log} options.log
+ * @param {AriaATCIHost.Log} options.log
+ * @param {Promise} options.abortSignal
  * @param {AriaATCIAgent.MockOptions} [options.mock]
  * @param {AriaATCIAgent.Browser} [options.webDriverBrowser]
  * @param {{toString: function(): string}} options.webDriverUrl
@@ -23,7 +24,7 @@ import { AgentMessage } from './messages.js';
  */
 export async function createRunner(options) {
   // stubbing this out for now
-  const abortSignal = new Promise(resolve => resolve());
+  const abortSignal = options.abortSignal;
 
   if (options.mock) {
     return new MockTestRunner({ mock: options.mock, ...options });
@@ -40,7 +41,7 @@ export async function createRunner(options) {
     createATDriver({
       url: options.atDriverUrl,
       abortSignal,
-      log: options.log,
+      log: console.log,
     }).catch(cause => {
       throw new Error('Error connecting to at-driver', { cause });
     }),

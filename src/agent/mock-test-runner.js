@@ -17,7 +17,7 @@ export class MockTestRunner {
   /**
    * @param {object} options
    * @param {AriaATCIShared.BaseURL} options.baseUrl
-   * @param {AriaATCIAgent.Log} options.log
+   * @param {AriaATCIHost.Log} options.log
    * @param {AriaATCIAgent.MockOptions} options.mock
    */
   constructor({ baseUrl, log, mock: config }) {

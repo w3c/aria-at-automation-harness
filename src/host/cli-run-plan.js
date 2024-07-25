@@ -7,17 +7,12 @@ import { Readable } from 'stream';
 import fetch, { Response } from 'node-fetch';
 
 import yargs from 'yargs';
-import { pickAgentCliOptions } from '../agent/cli.js';
 import { AgentMessage } from '../agent/messages.js';
 
-import { AgentController as Agent } from './agent.js';
 import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { HostServer } from './server.js';
-
-import { createRunner } from '../agent/create-test-runner.js';
-import { agentMockOptions } from '../agent/cli.js';
 
 export const command = 'run-plan [plan-files..]';
 
@@ -196,7 +191,6 @@ function mainMiddleware(argv) {
   mainLoggerMiddleware(argv);
   mainTestPlanMiddleware(argv);
   mainServerMiddleware(argv);
-  mainRunnerMiddleware(argv);
   mainResultMiddleware(argv);
 }
 
@@ -259,29 +253,6 @@ function mainServerMiddleware(argv) {
   const { log } = argv;
 
   argv.server = new HostServer({ log, baseUrl: { hostname: argv.referenceHostname } });
-}
-
-async function mainRunnerMiddleware(argv) {
-  const {
-    log,
-    agentWebDriverUrl,
-    agentWebDriverBrowser,
-    agentAtDriverUrl,
-    agentMock,
-    agentMockOpenPage,
-  } = argv;
-
-  argv.runner = await createRunner({
-    log,
-    baseUrl: argv.server.baseUrl,
-    mock: agentMockOptions({
-      mock: agentMock,
-      mockOpenPage: agentMockOpenPage,
-    }),
-    webDriverUrl: agentWebDriverUrl,
-    webDriverBrowser: agentWebDriverBrowser,
-    atDriverUrl: agentAtDriverUrl,
-  });
 }
 
 function mainResultMiddleware(argv) {
