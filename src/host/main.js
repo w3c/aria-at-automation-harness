@@ -7,7 +7,6 @@
 import { EventEmitter } from 'events';
 import { agentMockOptions } from '../agent/cli.js';
 import { createRunner } from '../agent/create-test-runner.js';
-import { startJob } from '../shared/job.js';
 
 import { HostMessage } from './messages.js';
 import {
@@ -42,11 +41,11 @@ const logUnsuccessfulHTTP = async (log, response) => {
  * @param {string} [options.callbackUrl]
  * @param {Record<string, string>} [options.callbackHeader]
  * @param {typeof fetch} options.fetch
- * @param options.agentMock
- * @param options.agentMockOpenPage
- * @param options.agentWebDriverUrl
- * @param options.agentWebDriverBrowser
- * @param options.agentAtDriverUrl
+ * @param {boolean} options.agentMock
+ * @param {'request' | 'skip'} options.agentMockOpenPage
+ * @param {AriaATCIShared.BaseURL}  options.agentWebDriverUrl
+ * @param {AriaATCIAgent.Browser} options.agentWebDriverBrowser
+ * @param {AriaATCIShared.BaseURL} options.agentAtDriverUrl
  */
 export async function hostMain(options) {
   const {
@@ -56,7 +55,6 @@ export async function hostMain(options) {
     emitPlanResults,
     callbackUrl,
     callbackHeader,
-    fetch,
     agentMock,
     agentMockOpenPage,
     agentWebDriverUrl,
@@ -108,11 +106,13 @@ export async function hostMain(options) {
         body.presentationNumber ?? body.testCsvRow
       );
       lastCallbackRequest = lastCallbackRequest.then(() =>
-        fetch(perTestUrl, {
-          method: 'post',
-          body: JSON.stringify(body),
-          headers,
-        }).then(logUnsuccessfulHTTP.bind(null, log))
+        options
+          .fetch(perTestUrl, {
+            method: 'post',
+            body: JSON.stringify(body),
+            headers,
+          })
+          .then(logUnsuccessfulHTTP.bind(null, log))
       );
     };
 
@@ -136,7 +136,7 @@ export async function hostMain(options) {
       try {
         postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
 
-        const result = await runner.run(testSource, serverDirectory.baseUrl);
+        const result = await runner.run(testSource);
 
         const { capabilities, commands } = result;
 

@@ -62,12 +62,14 @@ export class MockTestRunner {
 
   /**
    * @param {AriaATCIData.CollectedTest} task
-   * @param {AriaATCIShared.BaseURL} baseUrl
    */
-  async run(task, baseUrl) {
-    const base = `${baseUrl.protocol}://${baseUrl.hostname}:${baseUrl.port}${baseUrl.pathname}`;
+  async run(task) {
+    const base = `${this.baseUrl.protocol}://${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
     await this.openPage(
-      new URL(`${baseUrl.pathname ? `${baseUrl.pathname}/` : ''}${task.target.referencePage}`, base)
+      new URL(
+        `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${task.target.referencePage}`,
+        base
+      )
     );
 
     const commandsOutput = [];
