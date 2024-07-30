@@ -17,6 +17,7 @@ import {
   addTestResultToTestPlan,
 } from './plan-object.js';
 import { getTimesOption } from '../shared/times-option.js';
+import { AGENT_TEMPLATES } from '../agent/messages.js';
 
 /**
  * @param {AriaATCIHost.Log} log
@@ -33,7 +34,7 @@ const logUnsuccessfulHTTP = async (log, response) => {
 
 /**
  * @param {object} options
- * @param {AriaATCIHost.Log} options.log
+ * @param {AriaATCIHost.Logger} options.logger
  * @param {AsyncIterable<AriaATCIHost.TestPlan>} options.plans
  * @param {AriaATCIHost.ReferenceFileServer} options.server
  * @param {AriaATCIAgent.TestRunner} options.runner
@@ -49,7 +50,7 @@ const logUnsuccessfulHTTP = async (log, response) => {
  */
 export async function hostMain(options) {
   const {
-    log,
+    logger,
     plans,
     server,
     emitPlanResults,
@@ -62,6 +63,7 @@ export async function hostMain(options) {
     agentWebDriverBrowser,
     agentAtDriverUrl,
   } = options;
+  const { log } = logger;
   log(HostMessage.START);
 
   await server.ready;
@@ -115,14 +117,21 @@ export async function hostMain(options) {
     };
 
     for (const test of plan.tests) {
-      log(HostMessage.START_TEST);
-
       const file = plan.files.find(({ name }) => name === test.filepath);
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
 
       const { presentationNumber, testId: testCsvRow } = testSource.info;
 
       const callbackBody = presentationNumber ? { presentationNumber } : { testCsvRow };
+
+      log(HostMessage.START_TEST, { id: testSource.info.testId, title: testSource.info.title });
+      const addLogtoPlan = message => {
+        if (Object.keys(AGENT_TEMPLATES).includes(message.data.type)) {
+          plan = addLogToTestPlan(plan, message);
+          plan = addTestLogToTestPlan(plan, test);
+        }
+      };
+      logger.emitter.on('message', addLogtoPlan);
 
       try {
         postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
@@ -145,13 +154,14 @@ export async function hostMain(options) {
         postCallbackWhenEnabled({ ...callbackBody, error, status: 'ERROR' });
         await lastCallbackRequest;
         throw exception;
+      } finally {
+        logger.emitter.off('message', addLogtoPlan);
       }
     }
 
     server.removeFiles(serverDirectory);
     log(HostMessage.REMOVE_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
 
-    log(HostMessage.STOP_AGENT);
     await lastCallbackRequest;
 
     emitter.emit(HostMessage.STOP_RUNNER);

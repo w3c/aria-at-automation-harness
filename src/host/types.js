@@ -41,6 +41,12 @@
  */
 
 /**
+ * @typedef AriaATCIHost.Logger
+ * @property {AriaATCIHost.Log} log
+ * @property {import("events").EventEmitter} emitter
+ */
+
+/**
  * @typedef {AriaATCIAgent.Log} AriaATCIHost.AgentLog
  */
 
