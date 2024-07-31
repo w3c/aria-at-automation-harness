@@ -35,7 +35,6 @@ export const AgentMessage = {
 
 export const AGENT_TEMPLATES = {
   [AgentMessage.START]: () => `Starting...`,
-  [AgentMessage.UNCAUGHT_ERROR]: ({ error }) => `Uncaught error: ${error.stack || error.message}`,
   [AgentMessage.WILL_STOP]: () => `Stopping...`,
   [AgentMessage.START_TEST]: ({ id, title }) => `Starting test #${id} '${title}'.`,
   [AgentMessage.OPEN_PAGE]: ({ url }) => `Open page: '${url}'.`,
