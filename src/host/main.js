@@ -5,8 +5,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { agentMockOptions } from '../agent/cli.js';
-import { createRunner } from '../agent/create-test-runner.js';
+import { createRunner } from '../runner/create-test-runner.js';
 
 import { HostMessage } from './messages.js';
 import {
@@ -16,7 +15,8 @@ import {
   addTestResultToTestPlan,
 } from './plan-object.js';
 import { getTimesOption } from '../shared/times-option.js';
-import { AGENT_TEMPLATES } from '../agent/messages.js';
+import { AGENT_TEMPLATES } from '../runner/messages.js';
+import { runnerMockOptions } from '../runner/mock-test-runner.js';
 
 /**
  * @param {AriaATCIHost.Log} log
@@ -36,16 +36,16 @@ const logUnsuccessfulHTTP = async (log, response) => {
  * @param {AriaATCIHost.Logger} options.logger
  * @param {AsyncIterable<AriaATCIHost.TestPlan>} options.plans
  * @param {AriaATCIHost.ReferenceFileServer} options.server
- * @param {AriaATCIAgent.TestRunner} options.runner
+ * @param {AriaATCIRunner.TestRunner} options.runner
  * @param {AriaATCIHost.EmitPlanResults} options.emitPlanResults
  * @param {string} [options.callbackUrl]
  * @param {Record<string, string>} [options.callbackHeader]
  * @param {typeof fetch} options.fetch
- * @param {boolean} options.agentMock
- * @param {'request' | 'skip'} options.agentMockOpenPage
- * @param {AriaATCIShared.BaseURL}  options.agentWebDriverUrl
- * @param {AriaATCIAgent.Browser} options.agentWebDriverBrowser
- * @param {AriaATCIShared.BaseURL} options.agentAtDriverUrl
+ * @param {boolean} options.runnerMock
+ * @param {'request' | 'skip'} options.runnerMockOpenPage
+ * @param {AriaATCIShared.BaseURL}  options.webDriverUrl
+ * @param {AriaATCIRunner.Browser} options.webDriverBrowser
+ * @param {AriaATCIShared.BaseURL} options.atDriverUrl
  */
 export async function hostMain(options) {
   const {
@@ -55,11 +55,11 @@ export async function hostMain(options) {
     emitPlanResults,
     callbackUrl,
     callbackHeader,
-    agentMock,
-    agentMockOpenPage,
-    agentWebDriverUrl,
-    agentWebDriverBrowser,
-    agentAtDriverUrl,
+    runnerMock,
+    runnerMockOpenPage,
+    webDriverUrl,
+    webDriverBrowser,
+    atDriverUrl,
   } = options;
   const { log } = logger;
   log(HostMessage.START);
@@ -83,13 +83,13 @@ export async function hostMain(options) {
       }),
       timesOption,
       baseUrl: serverDirectory.baseUrl,
-      mock: agentMockOptions({
-        mock: agentMock,
-        mockOpenPage: agentMockOpenPage,
+      mock: runnerMockOptions({
+        mock: runnerMock,
+        mockOpenPage: runnerMockOpenPage,
       }),
-      webDriverUrl: agentWebDriverUrl,
-      webDriverBrowser: agentWebDriverBrowser,
-      atDriverUrl: agentAtDriverUrl,
+      webDriverUrl,
+      webDriverBrowser,
+      atDriverUrl,
     });
 
     let lastCallbackRequest = Promise.resolve();

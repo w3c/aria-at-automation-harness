@@ -7,7 +7,7 @@
 
 import { createSharedLogger } from '../shared/messages.js';
 
-/** @enum {AriaATCIAgent.Message} */
+/** @enum {AriaATCIRunner.Message} */
 export const AgentMessage = {
   /** @type {'start'} */
   START: 'start',

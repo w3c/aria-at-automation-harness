@@ -7,7 +7,7 @@ import { Readable } from 'stream';
 import fetch, { Response } from 'node-fetch';
 
 import yargs from 'yargs';
-import { AgentMessage } from '../agent/messages.js';
+import { AgentMessage } from '../runner/messages.js';
 
 import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
@@ -75,65 +75,27 @@ export const builder = (args = yargs) =>
         default: 'fork',
         hidden: true,
       },
-      'agent-web-driver-url': {
+      'web-driver-url': {
         coerce(arg) {
           return new URL(arg);
         },
         default: 'http://localhost:4444',
       },
-      'agent-web-driver-browser': {
+      'web-driver-browser': {
         choices: ['chrome', 'firefox', 'safari'],
         default: 'firefox',
       },
-      'agent-at-driver-url': {
+      'at-driver-url': {
         coerce(arg) {
           return new URL(arg);
         },
         default: 'http://localhost:4382',
       },
-      'agent-protocol': {
-        choices: ['fork', 'developer'],
-        default: 'fork',
-        hidden: true,
-      },
-      'agent-quiet': {
-        conflicts: ['agent-debug', 'agent-verbose'],
-        describe: 'Disable all logging',
-        hidden: true,
-      },
-      'agent-debug': {
-        conflicts: ['agent-quiet', 'agent-verbose'],
-        describe: 'Enable all logging',
-        hidden: true,
-      },
-      'agent-verbose': {
-        coerce(arg) {
-          if (!arg) {
-            return;
-          }
-          const messageValues = Object.values(AgentMessage);
-          const verbosity = arg.split(',');
-          for (const name of verbosity) {
-            if (!messageValues.includes(name)) {
-              throw new Error(
-                `--verbose must be a comma separated list including: ${Object.values(
-                  AgentMessage
-                ).join(', ')}`
-              );
-            }
-          }
-          return verbosity;
-        },
-        conflicts: ['agent-debug', 'agent-quiet'],
-        describe: 'Enable a subset of logging messages',
-        nargs: 1,
-        hidden: true,
-      },
-      'agent-mock': {
+      'runner-mock': {
         type: 'boolean',
         hidden: true,
       },
-      'agent-mock-open-page': {
+      'runner-mock-open-page': {
         choices: ['request', 'skip'],
         hidden: true,
       },
@@ -200,7 +162,7 @@ function mainMiddleware(argv) {
 
 function mainFetchMiddleware(argv) {
   if (!argv.fetch) {
-    if (!argv.agentMock) {
+    if (!argv.runnerMock) {
       argv.fetch = fetch;
     } else {
       argv.fetch = (url, ...params) =>

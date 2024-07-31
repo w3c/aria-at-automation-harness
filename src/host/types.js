@@ -1,7 +1,7 @@
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/file-record.js" />
 /// <reference path="../shared/types.js" />
-/// <reference path="../agent/types.js" />
+/// <reference path="../runner/types.js" />
 
 /**
  * @namespace AriaATCIHost
@@ -47,10 +47,6 @@
  */
 
 /**
- * @typedef {AriaATCIAgent.Log} AriaATCIHost.AgentLog
- */
-
-/**
  * @typedef AriaATCIHost.TestPlan
  * @property {string} name
  * @property {'fork' | 'developer' | 'unknown'} source
@@ -82,14 +78,6 @@
  * @typedef AriaATCIHost.ReferenceFileServerSlice
  * @property {string} id
  * @property {AriaATCIShared.BaseURL} baseUrl
- */
-
-/**
- * @typedef AriaATCIHost.Agent
- * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run
- * @property {function(): AsyncGenerator<AriaATCIData.Log>} logs
- * @property {function(AriaATCIAgent.CliOptions): Promise<void>} start
- * @property {function(): Promise<void>} stop
  */
 
 /**

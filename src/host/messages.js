@@ -4,7 +4,7 @@
  * @module host
  */
 
-import { AGENT_TEMPLATES } from '../agent/messages.js';
+import { AGENT_TEMPLATES } from '../runner/messages.js';
 import { createSharedLogger } from '../shared/messages.js';
 
 /** @enum {AriaATCIHost.HostLogType} */

@@ -57,7 +57,7 @@ export class DriverTestRunner {
   }
 
   /**
-   * @param {import('./at-driver').ATKeySequence} sequence
+   * @param {import('./at-driver.js').ATKeySequence} sequence
    */
   async sendKeys(sequence) {
     await this.log(AgentMessage.PRESS_KEYS, { keys: sequence });
@@ -65,7 +65,7 @@ export class DriverTestRunner {
   }
 
   /**
-   * @param {import('./at-driver').ATKeySequence} sequence
+   * @param {import('./at-driver.js').ATKeySequence} sequence
    * @param {string} desiredResponse
    */
   async pressKeysToToggleSetting(sequence, desiredResponse) {

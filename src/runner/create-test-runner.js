@@ -17,11 +17,11 @@ import { AgentMessage } from './messages.js';
  * @param {AriaATCIShared.BaseURL} options.baseUrl
  * @param {AriaATCIHost.Log} options.log
  * @param {Promise<void>} options.abortSignal
- * @param {AriaATCIAgent.MockOptions} [options.mock]
- * @param {AriaATCIAgent.Browser} [options.webDriverBrowser]
+ * @param {AriaATCIRunner.MockOptions} [options.mock]
+ * @param {AriaATCIRunner.Browser} [options.webDriverBrowser]
  * @param {AriaATCIShared.timesOption} options.timesOption
  * @param {{toString: function(): string}} options.webDriverUrl
- * @returns {Promise<AriaATCIAgent.TestRunner>}
+ * @returns {Promise<AriaATCIRunner.TestRunner>}
  */
 export async function createRunner(options) {
   const { abortSignal, log, timesOption } = options;

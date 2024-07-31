@@ -48,10 +48,10 @@ Firefox, execute the following command in a terminal:
 $ node aria-at-automation-harness/bin/host.js run-plan \
     --plan-workingdir aria-at/build/tests/horizontal-slider \
     '{reference/**,test-*-nvda.*}' \
-    --agent-web-driver-url=http://127.0.0.1:4444 \
-    --agent-at-driver-url=ws://127.0.0.1:4382/session \
+    --web-driver-url=http://127.0.0.1:4444 \
+    --at-driver-url=ws://127.0.0.1:4382/session \
     --reference-hostname=127.0.0.1 \
-    --agent-web-driver-browser=firefox
+    --web-driver-browser=firefox
 ```
 
 ## [aria-at-automation](https://github.com/w3c/aria-at-automation)

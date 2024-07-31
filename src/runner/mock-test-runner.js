@@ -11,14 +11,14 @@ import { AgentMessage } from './messages.js';
 import { validateKeysFromCommand } from './driver-test-runner.js';
 
 /**
- * @implements {AriaATCIAgent.TestRunner}
+ * @implements {AriaATCIRunner.TestRunner}
  */
 export class MockTestRunner {
   /**
    * @param {object} options
    * @param {AriaATCIShared.BaseURL} options.baseUrl
    * @param {AriaATCIHost.Log} options.log
-   * @param {AriaATCIAgent.MockOptions} options.mock
+   * @param {AriaATCIRunner.MockOptions} options.mock
    */
   constructor({ baseUrl, log, mock: config }) {
     this.baseUrl = baseUrl;
@@ -128,4 +128,21 @@ export class MockTestRunner {
       results,
     };
   }
+}
+
+/**
+ * Summarize cli options as mock options for creating a test runner.
+ * @param {object} options
+ * @param {boolean} options.mock
+ * @param {'request' | 'skip'} options.mockOpenPage
+ * @returns {AriaATCIRunner.MockOptions}
+ */
+export function runnerMockOptions({ mock, mockOpenPage }) {
+  if (mock === undefined && mockOpenPage) {
+    mock = true;
+  }
+  if (mock) {
+    return { openPage: mockOpenPage ? mockOpenPage : 'request' };
+  }
+  return undefined;
 }
