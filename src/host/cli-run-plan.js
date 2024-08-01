@@ -7,7 +7,7 @@ import { Readable } from 'stream';
 import fetch, { Response } from 'node-fetch';
 
 import yargs from 'yargs';
-import { AgentMessage } from '../runner/messages.js';
+import { RunnerMessage } from '../runner/messages.js';
 
 import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
@@ -130,7 +130,7 @@ async function verboseMiddleware(argv) {
 
   let verbosity;
   if (debug) {
-    verbosity = Object.values({ ...HostMessage, ...AgentMessage });
+    verbosity = Object.values({ ...HostMessage, ...RunnerMessage });
   } else if (quiet) {
     verbosity = [];
   } else {
@@ -143,8 +143,8 @@ async function verboseMiddleware(argv) {
           HostMessage.SERVER_LISTENING,
           HostMessage.ADD_SERVER_DIRECTORY,
           HostMessage.REMOVE_SERVER_DIRECTORY,
-          AgentMessage.OPEN_PAGE,
-          AgentMessage.UNCAUGHT_ERROR,
+          HostMessage.UNCAUGHT_ERROR,
+          RunnerMessage.OPEN_PAGE,
         ];
   }
 

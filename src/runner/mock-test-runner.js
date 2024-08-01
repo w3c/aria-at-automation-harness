@@ -7,7 +7,7 @@
  */
 
 import { request } from 'http';
-import { AgentMessage } from './messages.js';
+import { RunnerMessage } from './messages.js';
 import { validateKeysFromCommand } from './driver-test-runner.js';
 
 /**
@@ -49,7 +49,7 @@ export class MockTestRunner {
       );
     }
 
-    this.log(AgentMessage.OPEN_PAGE, { url });
+    this.log(RunnerMessage.OPEN_PAGE, { url });
   }
 
   /**
@@ -95,7 +95,7 @@ export class MockTestRunner {
           });
         }
       } else {
-        await this.log(AgentMessage.INVALID_KEYS, { command, errors });
+        await this.log(RunnerMessage.INVALID_KEYS, { command, errors });
 
         commandsOutput.push({
           command: command.id,

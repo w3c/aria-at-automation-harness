@@ -4,7 +4,7 @@
  * @module host
  */
 
-import { AGENT_TEMPLATES } from '../runner/messages.js';
+import { RUNNER_TEMPLATES } from '../runner/messages.js';
 import { createSharedLogger } from '../shared/messages.js';
 
 /** @enum {AriaATCIHost.HostLogType} */
@@ -76,6 +76,6 @@ export const HOST_TEMPLATES = {
  * @param {*} messages
  * @returns {{log: AriaATCIHost.Log, emitter: import("events").EventEmitter}}
  */
-export function createHostLogger(messages = { ...HOST_TEMPLATES, ...AGENT_TEMPLATES }) {
+export function createHostLogger(messages = { ...HOST_TEMPLATES, ...RUNNER_TEMPLATES }) {
   return createSharedLogger(messages);
 }

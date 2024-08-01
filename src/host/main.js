@@ -15,7 +15,7 @@ import {
   addTestResultToTestPlan,
 } from './plan-object.js';
 import { getTimesOption } from '../shared/times-option.js';
-import { AGENT_TEMPLATES } from '../runner/messages.js';
+import { RUNNER_TEMPLATES } from '../runner/messages.js';
 import { runnerMockOptions } from '../runner/mock-test-runner.js';
 
 /**
@@ -126,7 +126,7 @@ export async function hostMain(options) {
 
       log(HostMessage.START_TEST, { id: testSource.info.testId, title: testSource.info.title });
       const addLogtoPlan = message => {
-        if (Object.keys(AGENT_TEMPLATES).includes(message.data.type)) {
+        if (Object.keys(RUNNER_TEMPLATES).includes(message.data.type)) {
           plan = addLogToTestPlan(plan, message);
           plan = addTestLogToTestPlan(plan, test);
         }

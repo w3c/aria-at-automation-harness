@@ -2,19 +2,13 @@
 /// <reference path="types.js" />
 
 /**
- * @module agent
+ * @module runner
  */
 
 import { createSharedLogger } from '../shared/messages.js';
 
 /** @enum {AriaATCIRunner.Message} */
-export const AgentMessage = {
-  /** @type {'start'} */
-  START: 'start',
-  /** @type {'uncaughtError'} */
-  UNCAUGHT_ERROR: 'uncaughtError',
-  /** @type {'willStop'} */
-  WILL_STOP: 'willStop',
+export const RunnerMessage = {
   /** @type {'startTest'} */
   START_TEST: 'startTest',
   /** @type {'openPage'} */
@@ -33,22 +27,21 @@ export const AgentMessage = {
   CAPABILITIES: 'capabilities',
 };
 
-export const AGENT_TEMPLATES = {
-  [AgentMessage.START]: () => `Starting...`,
-  [AgentMessage.WILL_STOP]: () => `Stopping...`,
-  [AgentMessage.START_TEST]: ({ id, title }) => `Starting test #${id} '${title}'.`,
-  [AgentMessage.OPEN_PAGE]: ({ url }) => `Open page: '${url}'.`,
-  [AgentMessage.INVALID_KEYS]: ({ command, errors }) =>
+export const RUNNER_TEMPLATES = {
+  [RunnerMessage.START_TEST]: ({ id, title }) => `Starting test #${id} '${title}'.`,
+  [RunnerMessage.OPEN_PAGE]: ({ url }) => `Open page: '${url}'.`,
+  [RunnerMessage.INVALID_KEYS]: ({ command, errors }) =>
     `Keys in '${command.id}' have issues:\n${errors.map(error => `- ${error}`).join('\n')}`,
-  [AgentMessage.PRESS_KEYS]: ({ keys }) => `Press keys: '${keys.toString()}'.`,
-  [AgentMessage.SPEECH_EVENT]: ({ spokenText }) => `Speech event: '${spokenText}'.`,
-  [AgentMessage.NO_RUN_TEST_SETUP]: ({ referencePage }) =>
+  [RunnerMessage.PRESS_KEYS]: ({ keys }) => `Press keys: '${keys.toString()}'.`,
+  [RunnerMessage.SPEECH_EVENT]: ({ spokenText }) => `Speech event: '${spokenText}'.`,
+  [RunnerMessage.NO_RUN_TEST_SETUP]: ({ referencePage }) =>
     `Test reference, ${referencePage}, does not have a Run Test Setup button.`,
-  [AgentMessage.AT_DRIVER_COMMS]: ({ direction, message }) => `AT-Driver: ${direction}: ${message}`,
-  [AgentMessage.CAPABILITIES]: ({ capabilities }) =>
+  [RunnerMessage.AT_DRIVER_COMMS]: ({ direction, message }) =>
+    `AT-Driver: ${direction}: ${message}`,
+  [RunnerMessage.CAPABILITIES]: ({ capabilities }) =>
     `Capabilities: ${JSON.stringify(capabilities)}`,
 };
 
-export function createAgentLogger(messages = AGENT_TEMPLATES) {
+export function createRunnerLogger(messages = RUNNER_TEMPLATES) {
   return createSharedLogger(messages);
 }

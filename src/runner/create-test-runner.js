@@ -9,7 +9,6 @@ import { MockTestRunner } from './mock-test-runner.js';
 import { DriverTestRunner } from './driver-test-runner.js';
 import { createBrowserDriver } from './browser-driver/create.js';
 import { createATDriver } from './at-driver.js';
-import { AgentMessage } from './messages.js';
 
 /**
  * @param {object} options
