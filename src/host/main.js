@@ -82,7 +82,7 @@ export async function hostMain(options) {
         emitter.on(HostMessage.STOP_RUNNER, () => resolve());
       }),
       timesOption,
-      baseUrl: serverDirectory.baseUrl,
+      baseUrl: new URL(serverDirectory.baseUrl.toString()),
       mock: runnerMockOptions({
         mock: runnerMock,
         mockOpenPage: runnerMockOpenPage,

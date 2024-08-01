@@ -14,7 +14,7 @@ import { RunnerMessage } from './messages.js';
 export class DriverTestRunner {
   /**
    * @param {object} options
-   * @param {AriaATCIShared.BaseURL} options.baseUrl
+   * @param {URL} options.baseUrl
    * @param {AriaATCIHost.Log} options.log
    * @param {BrowserDriver} options.browserDriver
    * @param {ATDriver} options.atDriver
@@ -288,10 +288,8 @@ export class DriverTestRunner {
   }
 
   _appendBaseUrl(pathname) {
-    // protocol ends with a ':' and pathname starts with a '/'
-    const base = `${this.baseUrl.protocol}://${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
     const newPath = `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`;
-    return new URL(newPath, base);
+    return new URL(newPath, this.baseUrl.toString());
   }
 }
 

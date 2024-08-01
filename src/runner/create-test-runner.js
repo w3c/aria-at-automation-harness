@@ -13,7 +13,7 @@ import { createATDriver } from './at-driver.js';
 /**
  * @param {object} options
  * @param {{hostname: string, port: number | string, pathname: string}} options.atDriverUrl
- * @param {AriaATCIShared.BaseURL} options.baseUrl
+ * @param {URL} options.baseUrl
  * @param {AriaATCIHost.Log} options.log
  * @param {Promise<void>} options.abortSignal
  * @param {AriaATCIRunner.MockOptions} [options.mock]

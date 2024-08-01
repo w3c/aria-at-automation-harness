@@ -16,7 +16,7 @@ import { validateKeysFromCommand } from './driver-test-runner.js';
 export class MockTestRunner {
   /**
    * @param {object} options
-   * @param {AriaATCIShared.BaseURL} options.baseUrl
+   * @param {URL} options.baseUrl
    * @param {AriaATCIHost.Log} options.log
    * @param {AriaATCIRunner.MockOptions} options.mock
    */
@@ -64,11 +64,10 @@ export class MockTestRunner {
    * @param {AriaATCIData.CollectedTest} task
    */
   async run(task) {
-    const base = `${this.baseUrl.protocol}://${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
     await this.openPage(
       new URL(
         `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${task.target.referencePage}`,
-        base
+        this.baseUrl.toString()
       )
     );
 
