@@ -12,7 +12,6 @@ import { fileURLToPath } from 'url';
 import { compileGlob } from '../shared/file-glob.js';
 import { createHost } from '../shared/file-record.js';
 import { iterateEmitter } from '../shared/iterate-emitter.js';
-import { startJob } from '../shared/job.js';
 import { processExited, collectProcessPipe } from '../shared/process-util.js';
 
 import { HostMessage } from './messages.js';
