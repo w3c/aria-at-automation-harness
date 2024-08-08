@@ -23,6 +23,8 @@ export const HostMessage = {
   SERVER_LISTENING: 'serverListening',
   /** @type {'stopServer'} */
   STOP_SERVER: 'stopServer',
+  /** @type {'stopDrivers'} */
+  STOP_DRIVERS: 'stopDrivers',
   /** @type {'addServerDirectory'} */
   ADD_SERVER_DIRECTORY: 'addServerDirectory',
   /** @type {'removeServerDirectory'} */
@@ -46,6 +48,7 @@ export const HOST_TEMPLATES = {
   [HostMessage.START_SERVER]: () => `Starting reference server.`,
   [HostMessage.SERVER_LISTENING]: ({ url }) => `Reference server listening on '${url}'.`,
   [HostMessage.STOP_SERVER]: () => `Stopping reference server.`,
+  [HostMessage.STOP_DRIVERS]: () => `Stopping drivers.`,
   [HostMessage.ADD_SERVER_DIRECTORY]: ({ url }) => `Reference available on '${url}'.`,
   [HostMessage.REMOVE_SERVER_DIRECTORY]: ({ url }) => `Removing reference from '${url}'.`,
   [HostMessage.SERVER_LOG]: ({ text }) => `[Server]: ${text}`,

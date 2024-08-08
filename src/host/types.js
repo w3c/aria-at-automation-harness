@@ -15,6 +15,7 @@
  * | 'planRead'
  * | 'serverListening'
  * | 'stopServer'
+ * | 'stopDrivers'
  * | 'addServerDirectory'
  * | 'removeServerDirectory'
  * | 'serverLog'

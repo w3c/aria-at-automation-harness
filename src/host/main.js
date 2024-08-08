@@ -75,7 +75,8 @@ export async function hostMain(options) {
 
     const timesOption = getTimesOption(options);
 
-    let stopDrivers = v => {};
+    let stopDrivers = any => log(HostMessage.STOP_DRIVERS);
+
     const abortSignal = new Promise(resolve => {
       stopDrivers = resolve;
     });
