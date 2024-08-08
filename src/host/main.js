@@ -75,12 +75,13 @@ export async function hostMain(options) {
 
     const timesOption = getTimesOption(options);
 
-    const emitter = new EventEmitter();
+    let stopDrivers = v => {};
+    const abortSignal = new Promise(resolve => {
+      stopDrivers = resolve;
+    });
     const runner = await createRunner({
       log,
-      abortSignal: new Promise(resolve => {
-        emitter.on(HostMessage.STOP_RUNNER, () => resolve());
-      }),
+      abortSignal,
       timesOption,
       baseUrl: new URL(serverDirectory.baseUrl.toString()),
       mock: runnerMockOptions({
@@ -164,7 +165,7 @@ export async function hostMain(options) {
 
     await lastCallbackRequest;
 
-    emitter.emit(HostMessage.STOP_RUNNER);
+    stopDrivers();
 
     await emitPlanResults(plan);
   }
