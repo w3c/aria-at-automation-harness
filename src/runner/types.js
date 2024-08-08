@@ -38,11 +38,6 @@
  */
 
 /**
- * @typedef AriaATCIRunner.MockOptions
- * @property {'request' | 'skip'} [openPage]
- */
-
-/**
  * @typedef {'chrome' | 'firefox' | 'safari'} AriaATCIRunner.Browser
  */
 
@@ -53,7 +48,6 @@
  * @property {AriaATCIRunner.Message[]} [verbose]
  * @property {AriaATCIShared.BaseURL} [referenceBaseUrl]
  * @property {boolean} [mock]
- * @property {'request' | 'skip'} [mockOpenPage]
  * @property {AriaATCIShared.BaseURL} [webDriverUrl]
  * @property {AriaATCIRunner.Browser} [webDriverBrowser]
  * @property {AriaATCIShared.BaseURL} [atDriverUrl]

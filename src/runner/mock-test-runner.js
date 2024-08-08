@@ -18,36 +18,32 @@ export class MockTestRunner {
    * @param {object} options
    * @param {URL} options.baseUrl
    * @param {AriaATCIHost.Log} options.log
-   * @param {AriaATCIRunner.MockOptions} options.mock
    */
-  constructor({ baseUrl, log, mock: config }) {
+  constructor({ baseUrl, log }) {
     this.baseUrl = baseUrl;
     this.log = log;
-    this.config = config;
   }
 
   async openPage(url) {
-    if (this.config.openPage === 'request') {
-      await new Promise((resolve, reject) =>
-        request(url.toString(), res => {
-          try {
-            res
-              .on('data', () => {})
-              .on('error', reject)
-              .setEncoding('utf8')
-              .on('end', () => {
-                res.statusCode < 400
-                  ? resolve()
-                  : reject(new Error(`request returned ${res.statusCode}`));
-              });
-          } catch (e) {
-            reject(e);
-          }
-        })
-          .on('error', reject)
-          .end()
-      );
-    }
+    await new Promise((resolve, reject) =>
+      request(url.toString(), res => {
+        try {
+          res
+            .on('data', () => {})
+            .on('error', reject)
+            .setEncoding('utf8')
+            .on('end', () => {
+              res.statusCode < 400
+                ? resolve()
+                : reject(new Error(`request returned ${res.statusCode}`));
+            });
+        } catch (e) {
+          reject(e);
+        }
+      })
+        .on('error', reject)
+        .end()
+    );
 
     this.log(RunnerMessage.OPEN_PAGE, { url });
   }
@@ -127,21 +123,4 @@ export class MockTestRunner {
       results,
     };
   }
-}
-
-/**
- * Summarize cli options as mock options for creating a test runner.
- * @param {object} options
- * @param {boolean} options.mock
- * @param {'request' | 'skip'} options.mockOpenPage
- * @returns {AriaATCIRunner.MockOptions}
- */
-export function runnerMockOptions({ mock, mockOpenPage }) {
-  if (mock === undefined && mockOpenPage) {
-    mock = true;
-  }
-  if (mock) {
-    return { openPage: mockOpenPage ? mockOpenPage : 'request' };
-  }
-  return undefined;
 }

@@ -16,7 +16,7 @@ import { createATDriver } from './at-driver.js';
  * @param {URL} options.baseUrl
  * @param {AriaATCIHost.Log} options.log
  * @param {Promise<void>} options.abortSignal
- * @param {AriaATCIRunner.MockOptions} [options.mock]
+ * @param {boolean} [options.mock]
  * @param {AriaATCIRunner.Browser} [options.webDriverBrowser]
  * @param {AriaATCIShared.timesOption} options.timesOption
  * @param {{toString: function(): string}} options.webDriverUrl
@@ -26,7 +26,7 @@ export async function createRunner(options) {
   const { abortSignal, log, timesOption } = options;
 
   if (options.mock) {
-    return new MockTestRunner({ mock: options.mock, ...options });
+    return new MockTestRunner(options);
   }
   await new Promise(resolve => setTimeout(resolve, 1000));
 

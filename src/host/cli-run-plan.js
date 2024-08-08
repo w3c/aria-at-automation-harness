@@ -95,10 +95,6 @@ export const builder = (args = yargs) =>
         type: 'boolean',
         hidden: true,
       },
-      'runner-mock-open-page': {
-        choices: ['request', 'skip'],
-        hidden: true,
-      },
       'callback-url': {
         describe: 'URL to POST test results to as they complete',
       },

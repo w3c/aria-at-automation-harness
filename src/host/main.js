@@ -4,7 +4,6 @@
  * @module host
  */
 
-import { EventEmitter } from 'events';
 import { createRunner } from '../runner/create-test-runner.js';
 
 import { HostMessage } from './messages.js';
@@ -16,7 +15,6 @@ import {
 } from './plan-object.js';
 import { getTimesOption } from '../shared/times-option.js';
 import { RUNNER_TEMPLATES } from '../runner/messages.js';
-import { runnerMockOptions } from '../runner/mock-test-runner.js';
 
 /**
  * @param {AriaATCIHost.Log} log
@@ -42,7 +40,6 @@ const logUnsuccessfulHTTP = async (log, response) => {
  * @param {Record<string, string>} [options.callbackHeader]
  * @param {typeof fetch} options.fetch
  * @param {boolean} options.runnerMock
- * @param {'request' | 'skip'} options.runnerMockOpenPage
  * @param {AriaATCIShared.BaseURL}  options.webDriverUrl
  * @param {AriaATCIRunner.Browser} options.webDriverBrowser
  * @param {AriaATCIShared.BaseURL} options.atDriverUrl
@@ -56,7 +53,6 @@ export async function hostMain(options) {
     callbackUrl,
     callbackHeader,
     runnerMock,
-    runnerMockOpenPage,
     webDriverUrl,
     webDriverBrowser,
     atDriverUrl,
@@ -85,10 +81,7 @@ export async function hostMain(options) {
       abortSignal,
       timesOption,
       baseUrl: new URL(serverDirectory.baseUrl.toString()),
-      mock: runnerMockOptions({
-        mock: runnerMock,
-        mockOpenPage: runnerMockOpenPage,
-      }),
+      mock: runnerMock,
       webDriverUrl,
       webDriverBrowser,
       atDriverUrl,
