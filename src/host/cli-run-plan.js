@@ -7,15 +7,13 @@ import { Readable } from 'stream';
 import fetch, { Response } from 'node-fetch';
 
 import yargs from 'yargs';
-import { pickAgentCliOptions } from '../agent/cli.js';
-import { AgentMessage } from '../agent/messages.js';
+import { RunnerMessage } from '../runner/messages.js';
 
-import { AgentController as Agent } from './agent.js';
 import { hostMain } from './main.js';
 import { HostMessage, createHostLogger } from './messages.js';
 import { plansFrom } from './plan-from.js';
 import { HostServer } from './server.js';
-import { getTimesOption, timesOptionsConfig } from '../shared/times-option.js';
+import { timesOptionsConfig } from '../shared/times-option.js';
 
 export const command = 'run-plan [plan-files..]';
 
@@ -77,66 +75,24 @@ export const builder = (args = yargs) =>
         default: 'fork',
         hidden: true,
       },
-      'agent-web-driver-url': {
+      'web-driver-url': {
         coerce(arg) {
           return new URL(arg);
         },
         default: 'http://localhost:4444',
       },
-      'agent-web-driver-browser': {
+      'web-driver-browser': {
         choices: ['chrome', 'firefox', 'safari'],
         default: 'firefox',
       },
-      'agent-at-driver-url': {
+      'at-driver-url': {
         coerce(arg) {
           return new URL(arg);
         },
         default: 'http://localhost:4382',
       },
-      'agent-protocol': {
-        choices: ['fork', 'developer'],
-        default: 'fork',
-        hidden: true,
-      },
-      'agent-quiet': {
-        conflicts: ['agent-debug', 'agent-verbose'],
-        describe: 'Disable all logging',
-        hidden: true,
-      },
-      'agent-debug': {
-        conflicts: ['agent-quiet', 'agent-verbose'],
-        describe: 'Enable all logging',
-        hidden: true,
-      },
-      'agent-verbose': {
-        coerce(arg) {
-          if (!arg) {
-            return;
-          }
-          const messageValues = Object.values(AgentMessage);
-          const verbosity = arg.split(',');
-          for (const name of verbosity) {
-            if (!messageValues.includes(name)) {
-              throw new Error(
-                `--verbose must be a comma separated list including: ${Object.values(
-                  AgentMessage
-                ).join(', ')}`
-              );
-            }
-          }
-          return verbosity;
-        },
-        conflicts: ['agent-debug', 'agent-quiet'],
-        describe: 'Enable a subset of logging messages',
-        nargs: 1,
-        hidden: true,
-      },
-      'agent-mock': {
+      'runner-mock': {
         type: 'boolean',
-        hidden: true,
-      },
-      'agent-mock-open-page': {
-        choices: ['request', 'skip'],
         hidden: true,
       },
       'callback-url': {
@@ -170,7 +126,7 @@ async function verboseMiddleware(argv) {
 
   let verbosity;
   if (debug) {
-    verbosity = Object.values(HostMessage);
+    verbosity = Object.values({ ...HostMessage, ...RunnerMessage });
   } else if (quiet) {
     verbosity = [];
   } else {
@@ -183,6 +139,8 @@ async function verboseMiddleware(argv) {
           HostMessage.SERVER_LISTENING,
           HostMessage.ADD_SERVER_DIRECTORY,
           HostMessage.REMOVE_SERVER_DIRECTORY,
+          HostMessage.UNCAUGHT_ERROR,
+          RunnerMessage.OPEN_PAGE,
         ];
   }
 
@@ -195,13 +153,12 @@ function mainMiddleware(argv) {
   mainLoggerMiddleware(argv);
   mainTestPlanMiddleware(argv);
   mainServerMiddleware(argv);
-  mainAgentMiddleware(argv);
   mainResultMiddleware(argv);
 }
 
 function mainFetchMiddleware(argv) {
   if (!argv.fetch) {
-    if (!argv.agentMock) {
+    if (!argv.runnerMock) {
       argv.fetch = fetch;
     } else {
       argv.fetch = (url, ...params) =>
@@ -228,6 +185,7 @@ function mainLoggerMiddleware(argv) {
 
   const logger = createHostLogger();
   argv.log = logger.log;
+  argv.logger = logger;
 
   logger.emitter.on('message', ({ data: { type }, text }) => {
     if (verbosity.includes(type)) {
@@ -258,39 +216,6 @@ function mainServerMiddleware(argv) {
   const { log } = argv;
 
   argv.server = new HostServer({ log, baseUrl: { hostname: argv.referenceHostname } });
-}
-
-function mainAgentMiddleware(argv) {
-  const {
-    log,
-    agentProtocol: protocol,
-    agentDebug,
-    agentQuiet,
-    agentVerbose,
-    agentWebDriverUrl,
-    agentWebDriverBrowser,
-    agentAtDriverUrl,
-    agentMock,
-    agentMockOpenPage,
-  } = argv;
-
-  const timesOption = getTimesOption(argv);
-
-  argv.agent = new Agent({
-    log,
-    protocol,
-    config: pickAgentCliOptions({
-      debug: agentDebug,
-      quiet: agentQuiet,
-      verbose: agentVerbose,
-      webDriverUrl: agentWebDriverUrl,
-      webDriverBrowser: agentWebDriverBrowser,
-      atDriverUrl: agentAtDriverUrl,
-      mock: agentMock,
-      mockOpenPage: agentMockOpenPage,
-      timesOption: timesOption,
-    }),
-  });
 }
 
 function mainResultMiddleware(argv) {

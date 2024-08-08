@@ -1,7 +1,7 @@
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/file-record.js" />
 /// <reference path="../shared/types.js" />
-/// <reference path="../agent/types.js" />
+/// <reference path="../runner/types.js" />
 
 /**
  * @namespace AriaATCIHost
@@ -15,17 +15,20 @@
  * | 'planRead'
  * | 'serverListening'
  * | 'stopServer'
+ * | 'stopDrivers'
  * | 'addServerDirectory'
  * | 'removeServerDirectory'
  * | 'serverLog'
- * | 'startAgent'
- * | 'agentProtocol'
- * | 'stopAgent'
- * | 'agentLog'
- * | 'agentCrashed'
  * | 'startTest'
  * | 'reportingError'
  * | 'testError'
+ * | 'atDriverComms'
+ * | 'openPage'
+ * | 'pressKeys'
+ * | 'speechEvent'
+ * | 'invalidKeys'
+ * | 'noRunTestSetup'
+ * | 'capabilities'
  * } AriaATCIHost.HostLogType
  */
 
@@ -34,7 +37,9 @@
  */
 
 /**
- * @typedef {AriaATCIAgent.Log} AriaATCIHost.AgentLog
+ * @typedef AriaATCIHost.Logger
+ * @property {AriaATCIHost.Log} log
+ * @property {import("events").EventEmitter} emitter
  */
 
 /**
@@ -69,14 +74,6 @@
  * @typedef AriaATCIHost.ReferenceFileServerSlice
  * @property {string} id
  * @property {AriaATCIShared.BaseURL} baseUrl
- */
-
-/**
- * @typedef AriaATCIHost.Agent
- * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run
- * @property {function(): AsyncGenerator<AriaATCIData.Log>} logs
- * @property {function(AriaATCIAgent.CliOptions): Promise<void>} start
- * @property {function(): Promise<void>} stop
  */
 
 /**

@@ -2,7 +2,7 @@
 
 This directory implements the systems used by the `bin/host.js` command line tool.
 
-The `bin/host.js` tool has two commands. The `run-plan` command operates a server and `bin/agent.js` instance to run test plans and the `read-plan` command reads files from disk and packages them for the `run-plan` command.
+The `bin/host.js` tool has two commands. The `run-plan` command operates a server to run test plans and the `read-plan` command reads files from disk and packages them for the `run-plan` command.
 
 A short invocation of the `run-plan` command can be made with a list of files or file globs that make up a test plan. A test plan should contain tests for a single assistive technology to be tested. If for example all the reference files and test files are in two directories this command could be executed.
 
@@ -15,10 +15,10 @@ Removing reference from 'http://localhost:52147/gtmoyv'.
 Stopping...
 ```
 
-Developing `bin/host.js` you may want to use the mock test runner in `bin/agent.js`. Calling `host.js` with `--agent-mock` will enable the mock test runner.
+Developing `bin/host.js` you may want to use the mock test runner. Calling `host.js` with `--runner-mock` will enable the mock test runner.
 
 ```sh
-$ bin/host.js run-plan --agent-mock reference/** at/** >result.json
+$ bin/host.js run-plan --runner-mock reference/** at/** >result.json
 ...
 ```
 
@@ -26,53 +26,16 @@ The mock test runner will be removed in the near future and replaced with the ab
 
 ## "main" command
 
-The `host` loads test plans, serves their files from a http server, runs each test through an `agent` instance, and reports the collected results for each test plan.
+The `host` loads test plans, serves their files from a http server, runs each test, and reports the collected results for each test plan.
 
 1. Start a server listening on a port
 1. Read a test plan from disk or input stream
 1. Add test plan files to a subdirectory on the server
-1. Start an `agent` instance
-1. Run each test in the test plan through the `agent` instance
-1. Stop the `agent` instance
+1. Run each test in the test plan
 1. Emit the results of the test in a json format
 1. If reading plans from stream, repeat from step 2
 1. Stop the server
 1. Gracefully exit
-
-```
-$ bin/host.js run-plan --help --show-hidden
-host.js run-plan [plan-files..]
-
-Run test plans
-
-Positionals:
-  plan-files  Files in a test plan                         [array] [default: []]
-
-Options:
-  --help                      Show help                                [boolean]
-  --version                   Show version number                      [boolean]
-  --quiet                     Disable all logging
-  --debug                     Enable all logging
-  --verbose                   Enable a subset of logging messages
-  --tests-match               Files matching pattern in a test plan will be test
-                              ed          [string] [default: "{,**/}test*.json"]
-  --reference-hostname                                    [default: "localhost"]
-  --plan-workingdir           Directory "plan-files" are relative to
-                                                                  [default: "."]
-  --plan-protocol               [choices: "fork", "developer"] [default: "fork"]
-  --agent-web-driver-url                      [default: "http://localhost:4444"]
-  --agent-web-driver-browser [choices: "chrome", "firefox"] [default: "firefox"]
-  --agent-at-driver-url                       [default: "http://localhost:4382"]
-  --agent-protocol              [choices: "fork", "developer"] [default: "fork"]
-  --agent-quiet               Disable all logging
-  --agent-debug               Enable all logging
-  --agent-verbose             Enable a subset of logging messages
-  --agent-mock                                                         [boolean]
-  --agent-mock-open-page                            [choices: "request", "skip"]
-  --callback-url              URL to POST test results to as they complete
-  --callback-header           Header to send with callback request
-  --show-hidden               Show hidden options                      [boolean]
-```
 
 ### Loading a test plan
 
@@ -80,10 +43,6 @@ Options:
 interface) with `src/host/plan-from.js`. For convenience the `run-plan` command
 takes arguments prefixed with `plan` that map to arguments that can be passed to
 `read-plan`, to read a plan.
-
-### `bin/agent.js` communication
-
-The host while managing an agent instance can operate it through the `bin/agent.js` tool or `src/agent/main.js` developer interface.
 
 ### `--verbose` options
 
@@ -116,5 +75,3 @@ Options:
   --version     Show version number                                    [boolean]
   --workingdir  Directory to read files from             [string] [default: "."]
 ```
-
-Currently this command must be executed by a parent node process as a node fork child process.

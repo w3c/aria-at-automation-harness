@@ -7,49 +7,45 @@
  */
 
 import { request } from 'http';
-import { AgentMessage } from './messages.js';
+import { RunnerMessage } from './messages.js';
 import { validateKeysFromCommand } from './driver-test-runner.js';
 
 /**
- * @implements {AriaATCIAgent.TestRunner}
+ * @implements {AriaATCIRunner.TestRunner}
  */
 export class MockTestRunner {
   /**
    * @param {object} options
-   * @param {AriaATCIShared.BaseURL} options.baseUrl
-   * @param {AriaATCIAgent.Log} options.log
-   * @param {AriaATCIAgent.MockOptions} options.mock
+   * @param {URL} options.baseUrl
+   * @param {AriaATCIHost.Log} options.log
    */
-  constructor({ baseUrl, log, mock: config }) {
+  constructor({ baseUrl, log }) {
     this.baseUrl = baseUrl;
     this.log = log;
-    this.config = config;
   }
 
   async openPage(url) {
-    if (this.config.openPage === 'request') {
-      await new Promise((resolve, reject) =>
-        request(url.toString(), res => {
-          try {
-            res
-              .on('data', () => {})
-              .on('error', reject)
-              .setEncoding('utf8')
-              .on('end', () => {
-                res.statusCode < 400
-                  ? resolve()
-                  : reject(new Error(`request returned ${res.statusCode}`));
-              });
-          } catch (e) {
-            reject(e);
-          }
-        })
-          .on('error', reject)
-          .end()
-      );
-    }
+    await new Promise((resolve, reject) =>
+      request(url.toString(), res => {
+        try {
+          res
+            .on('data', () => {})
+            .on('error', reject)
+            .setEncoding('utf8')
+            .on('end', () => {
+              res.statusCode < 400
+                ? resolve()
+                : reject(new Error(`request returned ${res.statusCode}`));
+            });
+        } catch (e) {
+          reject(e);
+        }
+      })
+        .on('error', reject)
+        .end()
+    );
 
-    this.log(AgentMessage.OPEN_PAGE, { url });
+    this.log(RunnerMessage.OPEN_PAGE, { url });
   }
 
   /**
@@ -64,11 +60,10 @@ export class MockTestRunner {
    * @param {AriaATCIData.CollectedTest} task
    */
   async run(task) {
-    const base = `${this.baseUrl.protocol}//${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
     await this.openPage(
       new URL(
         `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${task.target.referencePage}`,
-        base
+        this.baseUrl.toString()
       )
     );
 
@@ -95,7 +90,7 @@ export class MockTestRunner {
           });
         }
       } else {
-        await this.log(AgentMessage.INVALID_KEYS, { command, errors });
+        await this.log(RunnerMessage.INVALID_KEYS, { command, errors });
 
         commandsOutput.push({
           command: command.id,
