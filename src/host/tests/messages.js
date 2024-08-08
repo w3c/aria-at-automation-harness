@@ -3,7 +3,7 @@ import test from 'ava';
 import { HostMessage, createHostLogger } from '../messages.js';
 
 test('log', async t => {
-  t.plan(16);
+  t.plan(11);
   const { log, emitter } = createHostLogger();
   const logAndResolveMessage = async (type, more) => {
     const message = await new Promise(resolve => {
@@ -59,10 +59,5 @@ test('log', async t => {
   t.snapshot(
     await logAndResolveMessage(HostMessage.SERVER_LOG, { text: `Served file 'test.json'.` })
   );
-  t.snapshot(await logAndResolveMessage(HostMessage.START_AGENT));
-  t.snapshot(await logAndResolveMessage(HostMessage.AGENT_PROTOCOL, { protocol: 'fork' }));
-  t.snapshot(await logAndResolveMessage(HostMessage.STOP_AGENT));
-  t.snapshot(await logAndResolveMessage(HostMessage.AGENT_LOG, { text: 'Starting test.' }));
-  t.snapshot(await logAndResolveMessage(HostMessage.AGENT_CRASHED));
   t.snapshot(await logAndResolveMessage(HostMessage.START_TEST));
 });

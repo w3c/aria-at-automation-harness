@@ -29,18 +29,6 @@ export const HostMessage = {
   REMOVE_SERVER_DIRECTORY: 'removeServerDirectory',
   /** @type {'serverLog'} */
   SERVER_LOG: 'serverLog',
-  /** @type {'startAgent'} */
-  START_AGENT: 'startAgent',
-  /** @type {'agentProtocol'} */
-  AGENT_PROTOCOL: 'agentProtocol',
-  /** @type {'stopAgent'} */
-  STOP_AGENT: 'stopAgent',
-  /** @type {'stopRunner'} */
-  STOP_RUNNER: 'stopRunner',
-  /** @type {'agentLog'} */
-  AGENT_LOG: 'agentLog',
-  /** @type {'agentCrashed'} */
-  AGENT_CRASHED: 'agentCrashed',
   /** @type {'startTest'} */
   START_TEST: 'startTest',
   /** @type {'reportingError'} */
@@ -61,11 +49,6 @@ export const HOST_TEMPLATES = {
   [HostMessage.ADD_SERVER_DIRECTORY]: ({ url }) => `Reference available on '${url}'.`,
   [HostMessage.REMOVE_SERVER_DIRECTORY]: ({ url }) => `Removing reference from '${url}'.`,
   [HostMessage.SERVER_LOG]: ({ text }) => `[Server]: ${text}`,
-  [HostMessage.START_AGENT]: () => `Starting test agent.`,
-  [HostMessage.AGENT_PROTOCOL]: ({ protocol }) => `Agent running with protocol '${protocol}'.`,
-  [HostMessage.STOP_AGENT]: () => `Stopping test agent.`,
-  [HostMessage.AGENT_LOG]: ({ text }) => `[Agent]: ${text}`,
-  [HostMessage.AGENT_CRASHED]: () => `Agent crashed.`,
   [HostMessage.START_TEST]: () => `Starting test.`,
   [HostMessage.TEST_ERROR]: ({ error }) => `Test Error ${error}`,
   [HostMessage.REPORTING_ERROR]: ({ status, body }) =>
