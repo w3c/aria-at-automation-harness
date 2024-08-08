@@ -71,11 +71,14 @@ export async function hostMain(options) {
 
     const timesOption = getTimesOption(options);
 
-    let stopDrivers = any => log(HostMessage.STOP_DRIVERS);
-
+    let stopDrivers = any => {};
     const abortSignal = new Promise(resolve => {
-      stopDrivers = resolve;
+      stopDrivers = () => {
+        log(HostMessage.STOP_DRIVERS);
+        resolve();
+      };
     });
+
     const runner = await createRunner({
       log,
       abortSignal,
