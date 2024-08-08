@@ -15,10 +15,10 @@ Removing reference from 'http://localhost:52147/gtmoyv'.
 Stopping...
 ```
 
-Developing `bin/host.js` you may want to use the mock test runner. Calling `host.js` with `--agent-mock` will enable the mock test runner.
+Developing `bin/host.js` you may want to use the mock test runner. Calling `host.js` with `--runner-mock` will enable the mock test runner.
 
 ```sh
-$ bin/host.js run-plan --agent-mock reference/** at/** >result.json
+$ bin/host.js run-plan --runner-mock reference/** at/** >result.json
 ...
 ```
 
