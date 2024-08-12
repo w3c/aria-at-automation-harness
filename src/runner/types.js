@@ -1,7 +1,7 @@
 /// <reference path="../data/types.js" />
 /// <reference path="../shared/types.js" />
 
-/** @namespace AriaATCIAgent */
+/** @namespace AriaATCIRunner */
 
 /**
  * @typedef {'start'
@@ -15,47 +15,41 @@
  * | 'noRunTestSetup'
  * | 'atDriverComms'
  * | 'capabilities'
- * } AriaATCIAgent.Message
+ * } AriaATCIRunner.Message
  */
 
 /**
- * @typedef {AriaATCIShared.Log<AriaATCIAgent.Message>} AriaATCIAgent.Log
+ * @typedef {AriaATCIShared.Log<AriaATCIRunner.Message>} AriaATCIRunner.Log
  */
 
 /**
- * @typedef {AsyncIterable<AriaATCIData.Test>} AriaATCIAgent.TestIterable
+ * @typedef {AsyncIterable<AriaATCIData.Test>} AriaATCIRunner.TestIterable
  */
 
 /**
- * @typedef AriaATCIAgent.TestRunner
+ * @typedef AriaATCIRunner.TestRunner
  * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run run a test
  */
 
 /**
- * @callback AriaATCIAgent.ReportResult
+ * @callback AriaATCIRunner.ReportResult
  * @param {AriaATCIData.TestResult} result
  * @returns {Promise<void>}
  */
 
 /**
- * @typedef AriaATCIAgent.MockOptions
- * @property {'request' | 'skip'} [openPage]
+ * @typedef {'chrome' | 'firefox' | 'safari'} AriaATCIRunner.Browser
  */
 
 /**
- * @typedef {'chrome' | 'firefox' | 'safari'} AriaATCIAgent.Browser
- */
-
-/**
- * @typedef AriaATCIAgent.CliOptions
+ * @typedef AriaATCIRunner.CliOptions
  * @property {boolean} [debug]
  * @property {boolean} [quiet]
- * @property {AriaATCIAgent.Message[]} [verbose]
+ * @property {AriaATCIRunner.Message[]} [verbose]
  * @property {AriaATCIShared.BaseURL} [referenceBaseUrl]
  * @property {boolean} [mock]
- * @property {'request' | 'skip'} [mockOpenPage]
  * @property {AriaATCIShared.BaseURL} [webDriverUrl]
- * @property {AriaATCIAgent.Browser} [webDriverBrowser]
+ * @property {AriaATCIRunner.Browser} [webDriverBrowser]
  * @property {AriaATCIShared.BaseURL} [atDriverUrl]
  * @property {AriaATCIShared.timesOption} [timesOption]
  */

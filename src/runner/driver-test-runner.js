@@ -5,7 +5,7 @@
 import { startJob } from '../shared/job.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
-import { AgentMessage } from './messages.js';
+import { RunnerMessage } from './messages.js';
 
 /**
  * @module agent
@@ -14,8 +14,8 @@ import { AgentMessage } from './messages.js';
 export class DriverTestRunner {
   /**
    * @param {object} options
-   * @param {AriaATCIShared.BaseURL} options.baseUrl
-   * @param {AriaATCIAgent.Log} options.log
+   * @param {URL} options.baseUrl
+   * @param {AriaATCIHost.Log} options.log
    * @param {BrowserDriver} options.browserDriver
    * @param {ATDriver} options.atDriver
    * @param {AriaATCIShared.timesOption} options.timesOption
@@ -41,7 +41,7 @@ export class DriverTestRunner {
    * @param {string} options.referencePage
    */
   async openPage({ url, referencePage }) {
-    await this.log(AgentMessage.OPEN_PAGE, { url });
+    await this.log(RunnerMessage.OPEN_PAGE, { url });
     await this.browserDriver.navigate(url.toString());
 
     await this.browserDriver.documentReady();
@@ -52,20 +52,20 @@ export class DriverTestRunner {
         this.timesOption.testSetup
       );
     } catch ({}) {
-      await this.log(AgentMessage.NO_RUN_TEST_SETUP, { referencePage });
+      await this.log(RunnerMessage.NO_RUN_TEST_SETUP, { referencePage });
     }
   }
 
   /**
-   * @param {import('./at-driver').ATKeySequence} sequence
+   * @param {import('./at-driver.js').ATKeySequence} sequence
    */
   async sendKeys(sequence) {
-    await this.log(AgentMessage.PRESS_KEYS, { keys: sequence });
+    await this.log(RunnerMessage.PRESS_KEYS, { keys: sequence });
     await this.atDriver.sendKeys(sequence);
   }
 
   /**
-   * @param {import('./at-driver').ATKeySequence} sequence
+   * @param {import('./at-driver.js').ATKeySequence} sequence
    * @param {string} desiredResponse
    */
   async pressKeysToToggleSetting(sequence, desiredResponse) {
@@ -181,11 +181,11 @@ export class DriverTestRunner {
    */
   async run(test) {
     const capabilities = await this.collectedCapabilities;
-    await this.log(AgentMessage.CAPABILITIES, { capabilities });
+    await this.log(RunnerMessage.CAPABILITIES, { capabilities });
 
-    await this.log(AgentMessage.START_TEST, { id: test.info.testId, title: test.info.task });
+    await this.log(RunnerMessage.START_TEST, { id: test.info.testId, title: test.info.task });
 
-    await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
+    await this.log(RunnerMessage.OPEN_PAGE, { url: 'about:blank' });
     await this.browserDriver.navigate('about:blank');
 
     const commandsOutput = [];
@@ -215,7 +215,7 @@ export class DriverTestRunner {
         );
 
         await this._collectSpeech(this.timesOption.afterNav, async () => {
-          await this.log(AgentMessage.OPEN_PAGE, { url: 'about:blank' });
+          await this.log(RunnerMessage.OPEN_PAGE, { url: 'about:blank' });
           await this.browserDriver.navigate('about:blank');
         });
 
@@ -232,7 +232,7 @@ export class DriverTestRunner {
           });
         }
       } else {
-        await this.log(AgentMessage.INVALID_KEYS, { command, errors });
+        await this.log(RunnerMessage.INVALID_KEYS, { command, errors });
 
         commandsOutput.push({
           command: command.id,
@@ -270,7 +270,7 @@ export class DriverTestRunner {
     const speechJob = startJob(async signal => {
       for await (const speech of signal.cancelable(this.atDriver.speeches())) {
         spoken.push(speech);
-        this.log(AgentMessage.SPEECH_EVENT, { spokenText: speech });
+        this.log(RunnerMessage.SPEECH_EVENT, { spokenText: speech });
       }
     });
 
@@ -288,10 +288,8 @@ export class DriverTestRunner {
   }
 
   _appendBaseUrl(pathname) {
-    // protocol ends with a ':' and pathname starts with a '/'
-    const base = `${this.baseUrl.protocol}//${this.baseUrl.hostname}:${this.baseUrl.port}${this.baseUrl.pathname}`;
     const newPath = `${this.baseUrl.pathname ? `${this.baseUrl.pathname}/` : ''}${pathname}`;
-    return new URL(newPath, base);
+    return new URL(newPath, this.baseUrl.toString());
   }
 }
 

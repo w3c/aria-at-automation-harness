@@ -4,7 +4,7 @@
  * @module host
  */
 
-import { startJob } from '../shared/job.js';
+import { createRunner } from '../runner/create-test-runner.js';
 
 import { HostMessage } from './messages.js';
 import {
@@ -13,6 +13,8 @@ import {
   addTestLogToTestPlan,
   addTestResultToTestPlan,
 } from './plan-object.js';
+import { getTimesOption } from '../shared/times-option.js';
+import { RUNNER_TEMPLATES } from '../runner/messages.js';
 
 /**
  * @param {AriaATCIHost.Log} log
@@ -29,32 +31,34 @@ const logUnsuccessfulHTTP = async (log, response) => {
 
 /**
  * @param {object} options
- * @param {AriaATCIHost.Log} options.log
+ * @param {AriaATCIHost.Logger} options.logger
  * @param {AsyncIterable<AriaATCIHost.TestPlan>} options.plans
  * @param {AriaATCIHost.ReferenceFileServer} options.server
- * @param {AriaATCIHost.Agent} options.agent
+ * @param {AriaATCIRunner.TestRunner} options.runner
  * @param {AriaATCIHost.EmitPlanResults} options.emitPlanResults
  * @param {string} [options.callbackUrl]
  * @param {Record<string, string>} [options.callbackHeader]
  * @param {typeof fetch} options.fetch
+ * @param {boolean} options.runnerMock
+ * @param {AriaATCIShared.BaseURL}  options.webDriverUrl
+ * @param {AriaATCIRunner.Browser} options.webDriverBrowser
+ * @param {AriaATCIShared.BaseURL} options.atDriverUrl
  */
-export async function hostMain({
-  log,
-  plans,
-  server,
-  agent,
-  emitPlanResults,
-  callbackUrl,
-  callbackHeader,
-  fetch,
-}) {
+export async function hostMain(options) {
+  const {
+    logger,
+    plans,
+    server,
+    emitPlanResults,
+    callbackUrl,
+    callbackHeader,
+    runnerMock,
+    webDriverUrl,
+    webDriverBrowser,
+    atDriverUrl,
+  } = options;
+  const { log } = logger;
   log(HostMessage.START);
-
-  const hostLogJob = startJob(async function (signal) {
-    for await (const agentLog of signal.cancelable(agent.logs())) {
-      log(HostMessage.AGENT_LOG, agentLog);
-    }
-  });
 
   await server.ready;
   log(HostMessage.SERVER_LISTENING, { url: server.baseUrl });
@@ -65,8 +69,26 @@ export async function hostMain({
     log(HostMessage.ADD_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
     setServerOptionsInTestPlan(plan, { baseUrl: serverDirectory.baseUrl });
 
-    log(HostMessage.START_AGENT);
-    await agent.start({ referenceBaseUrl: serverDirectory.baseUrl });
+    const timesOption = getTimesOption(options);
+
+    let stopDrivers = any => {};
+    const abortSignal = new Promise(resolve => {
+      stopDrivers = () => {
+        log(HostMessage.STOP_DRIVERS);
+        resolve();
+      };
+    });
+
+    const runner = await createRunner({
+      log,
+      abortSignal,
+      timesOption,
+      baseUrl: new URL(serverDirectory.baseUrl.toString()),
+      mock: runnerMock,
+      webDriverUrl,
+      webDriverBrowser,
+      atDriverUrl,
+    });
 
     let lastCallbackRequest = Promise.resolve();
 
@@ -82,23 +104,17 @@ export async function hostMain({
         body.presentationNumber ?? body.testCsvRow
       );
       lastCallbackRequest = lastCallbackRequest.then(() =>
-        fetch(perTestUrl, {
-          method: 'post',
-          body: JSON.stringify(body),
-          headers,
-        }).then(logUnsuccessfulHTTP.bind(null, log))
+        options
+          .fetch(perTestUrl, {
+            method: 'post',
+            body: JSON.stringify(body),
+            headers,
+          })
+          .then(logUnsuccessfulHTTP.bind(null, log))
       );
     };
 
     for (const test of plan.tests) {
-      log(HostMessage.START_TEST);
-      const testLogJob = startJob(async function (signal) {
-        for await (const testLog of signal.cancelable(agent.logs())) {
-          plan = addLogToTestPlan(plan, testLog);
-          plan = addTestLogToTestPlan(plan, test);
-        }
-      });
-
       const file = plan.files.find(({ name }) => name === test.filepath);
       const testSource = JSON.parse(textDecoder.decode(file.bufferData));
 
@@ -106,10 +122,19 @@ export async function hostMain({
 
       const callbackBody = presentationNumber ? { presentationNumber } : { testCsvRow };
 
+      log(HostMessage.START_TEST, { id: testSource.info.testId, title: testSource.info.title });
+      const addLogtoPlan = message => {
+        if (Object.keys(RUNNER_TEMPLATES).includes(message.data.type)) {
+          plan = addLogToTestPlan(plan, message);
+          plan = addTestLogToTestPlan(plan, test);
+        }
+      };
+      logger.emitter.on('message', addLogtoPlan);
+
       try {
         postCallbackWhenEnabled({ ...callbackBody, status: 'RUNNING' });
 
-        const result = await agent.run(testSource);
+        const result = await runner.run(testSource);
 
         const { capabilities, commands } = result;
 
@@ -128,20 +153,19 @@ export async function hostMain({
         await lastCallbackRequest;
         throw exception;
       } finally {
-        await testLogJob.cancel();
+        logger.emitter.off('message', addLogtoPlan);
       }
     }
 
     server.removeFiles(serverDirectory);
     log(HostMessage.REMOVE_SERVER_DIRECTORY, { url: serverDirectory.baseUrl });
 
-    log(HostMessage.STOP_AGENT);
     await lastCallbackRequest;
-    await agent.stop();
+
+    stopDrivers();
+
     await emitPlanResults(plan);
   }
-
-  await hostLogJob.cancel();
 
   log(HostMessage.STOP_SERVER);
   await server.close();

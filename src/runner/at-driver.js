@@ -1,7 +1,7 @@
 import ws from 'ws';
 
 import { iterateEmitter } from '../shared/iterate-emitter.js';
-import { AgentMessage } from './messages.js';
+import { RunnerMessage } from './messages.js';
 
 /**
  * @param {object} options
@@ -10,7 +10,7 @@ import { AgentMessage } from './messages.js';
  * @param {string} [options.url.pathname]
  * @param {number | string} [options.url.port]
  * @param {Promise<void>} [options.abortSignal]
- * @param {AriaATCIAgent.Log} [options.log]
+ * @param {AriaATCIHost.Log} [options.log]
  * @returns {Promise<ATDriver>}
  */
 export async function createATDriver({
@@ -20,7 +20,7 @@ export async function createATDriver({
 } = {}) {
   if (!abortSignal) process.exit(1);
   const url = `ws://${hostname}:${port}${pathname}`;
-  log(AgentMessage.AT_DRIVER_COMMS, { direction: 'connect', message: url });
+  log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'connect', message: url });
   const socket = new ws(url);
   const driver = new ATDriver({ socket, log });
   await driver.ready;
@@ -47,7 +47,7 @@ export class ATDriver {
     this.closed = new Promise(resolve =>
       socket.once('close', () => {
         this.hasClosed = true;
-        this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'closed' });
+        this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'closed' });
         resolve();
       })
     );
@@ -60,7 +60,7 @@ export class ATDriver {
   }
 
   async quit() {
-    this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'close' });
+    this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'close' });
     this.socket.close();
     await this.closed;
   }
@@ -69,7 +69,7 @@ export class ATDriver {
     if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
       const message = rawMessage.toString();
-      this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
+      this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
       yield JSON.parse(message);
     }
   }
@@ -77,7 +77,7 @@ export class ATDriver {
   async _send(command) {
     const id = this._nextId++;
     const rawMessage = JSON.stringify({ id, ...command });
-    this.log(AgentMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
+    this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'outbound', message: rawMessage });
     await new Promise((resolve, reject) => {
       this.socket.send(rawMessage, error => {
         if (error) reject(error);

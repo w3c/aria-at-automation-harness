@@ -3,14 +3,13 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 import test from 'ava';
-import { HostMessage } from '../messages.js';
 
 test('plan1', async t => {
   t.snapshot(
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan1',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
     ])
   );
@@ -21,7 +20,7 @@ test('plan2', async t => {
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan2',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
     ])
   );
@@ -32,7 +31,7 @@ test('plan3', async t => {
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan3',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
     ])
   );
@@ -43,7 +42,7 @@ test('plan3 with callback no url param', async t => {
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan3',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
       '--callback-url=http://callback.url/',
       '--callback-header=test:header:multiple:colon',
@@ -56,7 +55,7 @@ test('plan3 with callback', async t => {
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan3',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
       '--callback-url=http://callback.url/:testRowNumber',
       '--callback-header=test:header:multiple:colon',
@@ -69,7 +68,7 @@ test('plan3 with callback request which fails', async t => {
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan3',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
       '--callback-url=http://example.com/?TEST-STATUS=418',
       '--callback-header=x:y',
@@ -82,7 +81,7 @@ test('plan3 with callback request which fails with a faulty response body', asyn
     await spawnRunPlan([
       '--plan-workingdir=fixtures/host-bin/plan3',
       '"**"',
-      '--agent-mock',
+      '--runner-mock',
       '--debug',
       '--callback-url="http://example.com/?TEST-STATUS=418&TEST-BAD-BODY"',
       '--callback-header=x:y',

@@ -32,6 +32,7 @@
     "test": "npm run test:types && npm run test:unit",
     "test:types": "tsc",
     "test:unit": "ava",
+    "test:update": "ava --update-snapshots",
     "postinstall": "husky install"
   },
   "lint-staged": {
