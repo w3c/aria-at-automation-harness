@@ -101,7 +101,7 @@ export async function hostMain(options) {
       };
       const perTestUrl = callbackUrl.replace(
         ':testRowNumber',
-        body.presentationNumber ?? body.testCsvRow
+        body ? body.presentationNumber ?? body.testCsvRow : ''
       );
       lastCallbackRequest = lastCallbackRequest.then(() =>
         options
@@ -113,6 +113,8 @@ export async function hostMain(options) {
           .then(logUnsuccessfulHTTP.bind(null, log))
       );
     };
+
+    postCallbackWhenEnabled({ status: 'PLAN_RUNNING' });
 
     for (const test of plan.tests) {
       const file = plan.files.find(({ name }) => name === test.filepath);
@@ -165,6 +167,7 @@ export async function hostMain(options) {
     stopDrivers();
 
     await emitPlanResults(plan);
+    postCallbackWhenEnabled({ status: 'PLAN_COMPLETED' });
   }
 
   log(HostMessage.STOP_SERVER);
