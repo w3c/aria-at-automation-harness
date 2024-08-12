@@ -101,7 +101,7 @@ export async function hostMain(options) {
       };
       const perTestUrl = callbackUrl.replace(
         ':testRowNumber',
-        body ? body.presentationNumber ?? body.testCsvRow : ''
+        body?.presentationNumber ?? body?.testCsvRow ?? ''
       );
       lastCallbackRequest = lastCallbackRequest.then(() =>
         options
