@@ -8,13 +8,17 @@
     "aria-at-harness-host": "./bin/host.js"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@types/node": "^20.8.10",
     "@types/text-encoding": "^0.0.38",
     "ava": "^4.1.0",
+    "eslint": "^9.9.0",
+    "globals": "^15.9.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.2.3",
     "prettier": "^2.4.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.1.0"
   },
   "dependencies": {
     "express": "^4.17.1",
@@ -29,8 +33,9 @@
   },
   "homepage": "https://github.com/bocoup/aria-at-harness",
   "scripts": {
-    "test": "npm run test:types && npm run test:unit",
+    "test": "npm run test:types && npm run test:lint && npm run test:unit",
     "test:types": "tsc",
+    "test:lint": "npx eslint src/host",
     "test:unit": "ava",
     "test:update": "ava --update-snapshots",
     "postinstall": "husky install"
