@@ -14,7 +14,6 @@ import * as arrayUtil from '../shared/array-util.js';
 export function blankTestPlan(name) {
   return {
     name,
-    source: 'unknown',
     serverOptions: {
       baseUrl: {
         protocol: 'unknown',
