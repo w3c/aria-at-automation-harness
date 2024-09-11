@@ -70,11 +70,6 @@ export const builder = (args = yargs) =>
         describe: 'Directory "plan-files" are relative to',
         default: '.',
       },
-      'plan-protocol': {
-        choices: ['fork', 'developer'],
-        default: 'fork',
-        hidden: true,
-      },
       'web-driver-url': {
         coerce(arg) {
           return new URL(arg);
@@ -195,19 +190,17 @@ function mainLoggerMiddleware(argv) {
 }
 
 function mainTestPlanMiddleware(argv) {
-  const { log, testsMatch: testPattern, planProtocol, planWorkingdir, planFiles } = argv;
+  const { log, testsMatch: testPattern, planWorkingdir, planFiles } = argv;
 
   if (!planFiles || planFiles.length === 0) {
-    throw new Error(
-      `'--plan-protocol ${planProtocol}' requires 'plan-files' argument to not be empty`
-    );
+    throw new Error(`'plan-files' argument can not be empty`);
   }
 
   const planInput = {
     workingdir: planWorkingdir,
     files: planFiles,
   };
-  const planOptions = { log, testPattern, protocol: planProtocol };
+  const planOptions = { log, testPattern };
 
   argv.plans = plansFrom(planInput, planOptions);
 }

@@ -63,15 +63,11 @@ async function planFromFiles({ workingdir, files }) {
  * @param {string} target.workingdir
  * @param {string[]} target.files
  * @param {object} [options]
- * @param {'fork' | 'developer'} [options.protocol]
  * @param {string} [options.testPattern]
  * @param {AriaATCIHost.Log} [options.log]
  * @returns {AsyncGenerator<AriaATCIHost.TestPlan>}
  */
-export async function* plansFrom(
-  { workingdir, files },
-  { log = () => {}, protocol, testPattern } = {}
-) {
+export async function* plansFrom({ workingdir, files }, { log = () => {}, testPattern } = {}) {
   const plan = await planFromFiles({ workingdir, files });
   const testPlan = planSelectTests(plan, { pattern: testPattern });
   log(HostMessage.PLAN_READ, testPlan);
