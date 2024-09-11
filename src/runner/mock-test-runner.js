@@ -49,14 +49,6 @@ export class MockTestRunner {
   }
 
   /**
-   * @param {AriaATCIData.CollectedTest["commands"][number]} command
-   * @param {AriaATCIData.CollectedTest["assertions"][number]} assertion
-   */
-  async testAssertion(command, assertion) {
-    return true;
-  }
-
-  /**
    * @param {AriaATCIData.CollectedTest} task
    */
   async run(task) {
@@ -68,45 +60,30 @@ export class MockTestRunner {
     );
 
     const commandsOutput = [];
-    const results = [];
 
     for (const command of task.commands) {
       const { value: validCommand, errors } = validateKeysFromCommand(command);
+      const assertions = task.assertions.map(assertion => {
+        return {
+          expectation: assertion.expectation || assertion.assertionStatement,
+          verdict: null,
+        };
+      });
       if (validCommand) {
         const mockOutput = `mocked output for ${command.id}`;
         commandsOutput.push({
           command: validCommand.id,
-          output: mockOutput,
+          response: mockOutput,
+          assertions,
         });
-
-        for (const assertion of task.assertions) {
-          const expectationText = assertion.expectation || assertion.assertionStatement;
-
-          results.push({
-            command: validCommand.id,
-            expectation: expectationText,
-            pass: await this.testAssertion(validCommand, assertion),
-            output: `mocked output for ${expectationText}`,
-          });
-        }
       } else {
         await this.log(RunnerMessage.INVALID_KEYS, { command, errors });
 
         commandsOutput.push({
           command: command.id,
           errors,
+          assertions,
         });
-
-        for (const assertion of task.assertions) {
-          const expectationText = assertion.expectation || assertion.assertionStatement;
-
-          results.push({
-            command: command.id,
-            expectation: expectationText,
-            output: `mocked output for ${expectationText}`,
-            pass: false,
-          });
-        }
       }
     }
 
@@ -120,7 +97,6 @@ export class MockTestRunner {
         platformName: 'mock',
       },
       commands: commandsOutput,
-      results,
     };
   }
 }
