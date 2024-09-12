@@ -28,7 +28,7 @@
 
 /**
  * @typedef AriaATCIRunner.TestRunner
- * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResult>} run run a test
+ * @property {function(AriaATCIData.Test): Promise<AriaATCIData.TestResultOutput>} run run a test
  */
 
 /**

@@ -88,7 +88,6 @@ export class MockTestRunner {
     }
 
     return {
-      testId: task.info.testId,
       capabilities: {
         browserName: 'mock',
         browserVersion: '1.0',
