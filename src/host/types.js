@@ -45,10 +45,10 @@
 /**
  * @typedef AriaATCIHost.TestPlan
  * @property {string} name
- * @property {'fork' | 'developer' | 'unknown'} source
  * @property {object} serverOptions
  * @property {AriaATCIShared.BaseURL} serverOptions.baseUrl
  * @property {object[]} tests
+ * @property {string} tests[].id
  * @property {string} tests[].filepath
  * @property {number[]} tests[].log
  * @property {Array} tests[].results

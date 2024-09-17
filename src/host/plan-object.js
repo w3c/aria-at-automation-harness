@@ -14,7 +14,6 @@ import * as arrayUtil from '../shared/array-util.js';
 export function blankTestPlan(name) {
   return {
     name,
-    source: 'unknown',
     serverOptions: {
       baseUrl: {
         protocol: 'unknown',
@@ -59,7 +58,7 @@ export function addTestToTestPlan(testPlan, filepath) {
     testPlan.files.find(file => file.name === filepath),
     () => `File ${filepath} does not exist in test plan.`
   );
-  return { ...testPlan, tests: [...testPlan.tests, { filepath, log: [], results: [] }] };
+  return { ...testPlan, tests: [...testPlan.tests, { filepath, id: '', log: [], results: [] }] };
 }
 
 /**
@@ -95,9 +94,14 @@ export function addTestLogToTestPlan(testPlan, { filepath: testFilepath }) {
  */
 export function addTestResultToTestPlan(testPlan, testFilepath, result) {
   const test = testPlan.tests.find(({ filepath }) => filepath === testFilepath);
+  const { testId, presentationNumber, ...resultOutput } = result;
   return {
     ...testPlan,
-    tests: arrayUtil.replace(testPlan.tests, test, { ...test, results: [...test.results, result] }),
+    tests: arrayUtil.replace(testPlan.tests, test, {
+      ...test,
+      id: testId,
+      results: [...test.results, resultOutput],
+    }),
   };
 }
 

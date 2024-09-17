@@ -5,14 +5,10 @@
  * @module host
  */
 
-import * as child_process from 'child_process';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 import { compileGlob } from '../shared/file-glob.js';
 import { createHost } from '../shared/file-record.js';
-import { iterateEmitter } from '../shared/iterate-emitter.js';
-import { processExited, collectProcessPipe } from '../shared/process-util.js';
 
 import { HostMessage } from './messages.js';
 import { blankTestPlan, addFileToTestPlan, addTestToTestPlan } from './plan-object.js';
@@ -47,60 +43,16 @@ function planSelectTests(plan, { pattern = '{,**/}test*' }) {
   return plan;
 }
 
-async function planFromCommandFork({ workingdir, files }) {
-  const fork = child_process.fork(
-    path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../bin/host.js'),
-    ['read-plan', '--protocol', 'fork', ...files],
-    {
-      cwd: workingdir,
-      stdio: 'pipe',
-      serialization: 'advanced',
-    }
-  );
-
-  const stdoutJob = collectProcessPipe(fork.stdout);
-  const stderrJob = collectProcessPipe(fork.stderr);
-  const exited = processExited(fork);
-  try {
-    for await (const message of iterateEmitter(fork, 'message', 'exit', 'error')) {
-      if (message.type === 'record') {
-        await stdoutJob.cancel();
-        await stderrJob.cancel();
-        return { ...planFromRecord(message.data), source: 'fork' };
-      }
-    }
-    throw new Error(
-      `did not receive record
-stdout:
-${await stdoutJob.cancel()}
-stderr:
-${await stderrJob.cancel()}`
-    );
-  } finally {
-    await exited;
-  }
-}
-
-planFromCommandFork.protocolName = 'fork';
-
-async function planFromDeveloperInterface({ workingdir, files }) {
+async function planFrom({ workingdir, files }) {
   const host = createHost();
   const glob = files.length === 1 ? files[0] : `{${files.join(',')}}`;
   const record = await host.read(workingdir, { glob });
-  return { ...planFromRecord(record), source: 'developer' };
+  return { ...planFromRecord(record) };
 }
 
-planFromDeveloperInterface.protocolName = 'developer';
-
-const PLAN_PROTOCOL = {
-  fork: planFromCommandFork,
-  developer: planFromDeveloperInterface,
-};
-
-async function planFromFiles({ workingdir, files }, { protocol = 'fork' }) {
+async function planFromFiles({ workingdir, files }) {
   try {
-    const activeProtocol = PLAN_PROTOCOL[protocol];
-    return await activeProtocol({ workingdir, files });
+    return await planFrom({ workingdir, files });
   } catch (error) {
     throw Object.assign(new Error('could not load files'), { error });
   }
@@ -111,16 +63,12 @@ async function planFromFiles({ workingdir, files }, { protocol = 'fork' }) {
  * @param {string} target.workingdir
  * @param {string[]} target.files
  * @param {object} [options]
- * @param {'fork' | 'developer'} [options.protocol]
  * @param {string} [options.testPattern]
  * @param {AriaATCIHost.Log} [options.log]
  * @returns {AsyncGenerator<AriaATCIHost.TestPlan>}
  */
-export async function* plansFrom(
-  { workingdir, files },
-  { log = () => {}, protocol, testPattern } = {}
-) {
-  const plan = await planFromFiles({ workingdir, files }, { protocol });
+export async function* plansFrom({ workingdir, files }, { log = () => {}, testPattern } = {}) {
+  const plan = await planFromFiles({ workingdir, files });
   const testPlan = planSelectTests(plan, { pattern: testPattern });
   log(HostMessage.PLAN_READ, testPlan);
   yield testPlan;
