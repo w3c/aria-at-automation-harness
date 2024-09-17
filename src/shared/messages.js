@@ -1,4 +1,4 @@
-/// <reference path="./types.js" />
+/// <reference path="./types.d.ts" />
 
 /**
  * @module shared

@@ -8,7 +8,7 @@ import createSafariAppleScriptDriver from './create-safari-apple-script-driver.j
  * @param {Promise<void>} options.abortSignal
  * @param {AriaATCIShared.timesOption} options.timesOption
  *
- * @returns {Promise<BrowserDriver>}
+ * @returns {Promise<AriaATCIRunner.BrowserDriver>}
  */
 export async function createBrowserDriver({ url, browser = 'firefox', abortSignal, timesOption }) {
   const driver =

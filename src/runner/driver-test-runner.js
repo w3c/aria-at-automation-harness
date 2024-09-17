@@ -1,6 +1,6 @@
 /// <reference path="../data/types.js" />
-/// <reference path="../shared/types.js" />
-/// <reference path="types.js" />
+/// <reference path="../shared/types.d.ts" />
+/// <reference path="types.d.ts" />
 
 import { startJob } from '../shared/job.js';
 
@@ -15,10 +15,10 @@ export class DriverTestRunner {
   /**
    * @param {object} options
    * @param {URL} options.baseUrl
-   * @param {AriaATCIHost.Log} options.log
-   * @param {BrowserDriver} options.browserDriver
+   * @param {AriaATCIRunner.Log} options.log
+   * @param {AriaATCIRunner.Browser} options.browserDriver
    * @param {ATDriver} options.atDriver
-   * @param {AriaATCIShared.timesOption} options.timesOption
+   * @param {AriaATCIShared.TimesOption} options.timesOption
    */
   constructor({ baseUrl, log, browserDriver, atDriver, timesOption }) {
     this.baseUrl = baseUrl;

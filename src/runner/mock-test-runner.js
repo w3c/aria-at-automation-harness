@@ -1,6 +1,6 @@
 /// <reference path="../data/types.js" />
-/// <reference path="../shared/types.js" />
-/// <reference path="types.js" />
+/// <reference path="../shared/types.d.ts" />
+/// <reference path="types.d.ts" />
 
 /**
  * @module agent
