@@ -1,4 +1,4 @@
-export namespace AriaATCIShared {
+declare namespace AriaATCIShared {
   export type Log<Type extends string> = (type: Type, more?: any) => void;
 
   export interface BaseURL {

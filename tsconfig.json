@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
     "checkJs": true,
+    "allowJs": true,
     "noEmit": true,
     "target": "ES6",
     "module": "es2020",
+    "types": ["node"],
     "moduleResolution": "node",
     "lib": ["es2022"]
   },

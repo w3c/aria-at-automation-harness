@@ -1,5 +1,3 @@
-import { AriaATCIShared } from '../shared/types';
-
 declare namespace AriaATCIRunner {
   type Message =
     | 'start'

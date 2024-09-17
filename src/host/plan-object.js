@@ -1,5 +1,4 @@
 /// <reference path="../shared/file-record.js" />
-/// <reference path="types.js" />
 
 /**
  * @module host

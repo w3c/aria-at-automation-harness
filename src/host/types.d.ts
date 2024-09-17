@@ -1,6 +1,3 @@
-import { EventEmitter } from 'events';
-import { AriaATCIShared } from '../shared/types';
-
 declare namespace AriaATCIHost {
   export type HostLogType =
     | 'start'
@@ -29,7 +26,7 @@ declare namespace AriaATCIHost {
 
   export interface Logger {
     log: Log;
-    emitter: EventEmitter;
+    emitter: typeof import('events').EventEmitter;
   }
 
   export interface TestPlan {
@@ -66,5 +63,3 @@ declare namespace AriaATCIHost {
 
   export type EmitPlanResults = (plan: TestPlan) => Promise<void> | void;
 }
-
-export = AriaATCIHost;

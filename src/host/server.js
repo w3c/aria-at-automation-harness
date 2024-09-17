@@ -1,4 +1,5 @@
-/// <reference path="types.js" />
+/// <reference path="./types.d.ts" />
+/// <reference types="./types" />
 
 /**
  * @module host

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 import test from 'ava';
 
-import * as fileRecord from '../file-record.js';
+import * as fileRecord from '../file-record.js/index.js';
 
 test('isDirectory', t => {
   t.plan(6);

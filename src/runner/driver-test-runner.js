@@ -16,7 +16,7 @@ export class DriverTestRunner {
    * @param {object} options
    * @param {URL} options.baseUrl
    * @param {AriaATCIRunner.Log} options.log
-   * @param {AriaATCIRunner.Browser} options.browserDriver
+   * @param {AriaATCIRunner.BrowserDriver} options.browserDriver
    * @param {ATDriver} options.atDriver
    * @param {AriaATCIShared.TimesOption} options.timesOption
    */

@@ -1,5 +1,3 @@
-/// <reference path="types.js" />
-
 /**
  * @module host
  */
