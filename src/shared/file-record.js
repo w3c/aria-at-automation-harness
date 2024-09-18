@@ -1,5 +1,4 @@
 // @ts-nocheck
-/// <reference path="./file-record-types.js" />
 
 /**
  * @module shared

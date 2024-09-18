@@ -1,5 +1,4 @@
 // @ts-nocheck
-/// <reference path="./types.d.ts" />
 
 /**
  * @module shared

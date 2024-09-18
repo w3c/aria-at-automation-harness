@@ -1,6 +1,3 @@
-/// <reference path="../shared/types.d.ts" />
-/// <reference path="types.d.ts" />
-
 /**
  * @module runner
  */

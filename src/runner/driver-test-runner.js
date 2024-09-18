@@ -1,7 +1,3 @@
-/// <reference path="../data/types.js" />
-/// <reference path="../shared/types.d.ts" />
-/// <reference path="types.d.ts" />
-
 import { startJob } from '../shared/job.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
