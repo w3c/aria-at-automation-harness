@@ -6,7 +6,7 @@ import createSafariAppleScriptDriver from './create-safari-apple-script-driver.j
  * @param {{toString: function(): string}} options.url
  * @param {AriaATCIRunner.Browser} [options.browser]
  * @param {Promise<void>} options.abortSignal
- * @param {AriaATCIShared.timesOption} options.timesOption
+ * @param {AriaATCIShared.TimesOption} options.timesOption
  *
  * @returns {Promise<AriaATCIRunner.BrowserDriver>}
  */

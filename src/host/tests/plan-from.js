@@ -1,5 +1,3 @@
-/// <reference path="../types.js"/>
-
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 

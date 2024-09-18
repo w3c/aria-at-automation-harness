@@ -31,11 +31,11 @@ declare namespace AriaATCIHost {
 
   export interface TestPlan {
     name: string;
-    source: 'fork' | 'developer' | 'unknown';
     serverOptions: {
       baseUrl: AriaATCIShared.BaseURL;
     };
     tests: Array<{
+      id: string;
       filepath: string;
       log: number[];
       results: any[];

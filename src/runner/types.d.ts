@@ -17,7 +17,7 @@ declare namespace AriaATCIRunner {
   type TestIterable = AsyncIterable<AriaATCIData.Test>;
 
   interface TestRunner {
-    run(test: AriaATCIData.Test): Promise<AriaATCIData.TestResult>;
+    run(test: AriaATCIData.Test): Promise<AriaATCIData.TestResultOutput>;
   }
 
   type ReportResult = (result: AriaATCIData.TestResult) => Promise<void>;
