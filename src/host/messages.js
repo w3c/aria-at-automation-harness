@@ -41,8 +41,8 @@ export const HOST_TEMPLATES = {
   [HostMessage.START]: () => `Starting...`,
   [HostMessage.UNCAUGHT_ERROR]: ({ error }) => `Uncaught error: ${error.message}`,
   [HostMessage.WILL_STOP]: () => `Stopping...`,
-  [HostMessage.PLAN_READ]: ({ name, source, tests, files }) =>
-    `Plan '${name}' with ${tests.length} tests and ${files.length} files read from source '${source}'.`,
+  [HostMessage.PLAN_READ]: ({ name, tests, files }) =>
+    `Plan '${name}' with ${tests.length} tests and ${files.length} files read.`,
   [HostMessage.START_SERVER]: () => `Starting reference server.`,
   [HostMessage.SERVER_LISTENING]: ({ url }) => `Reference server listening on '${url}'.`,
   [HostMessage.STOP_SERVER]: () => `Stopping reference server.`,

@@ -41,7 +41,6 @@ test('plansFrom', async t => {
               },
               {
                 testPattern,
-                protocol,
                 log,
               }
             )) {

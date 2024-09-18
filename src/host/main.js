@@ -140,7 +140,7 @@ export async function hostMain(options) {
           ...callbackBody,
           capabilities,
           status: 'COMPLETED',
-          responses: commands.map(({ output }) => output),
+          responses: commands.map(({ response }) => response),
         });
 
         plan = addTestResultToTestPlan(plan, test.filepath, result);

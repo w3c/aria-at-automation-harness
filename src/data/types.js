@@ -70,22 +70,36 @@
  * @property {string} name name of the test plan, defaults to 'unknown'
  * @property {AriaATCIData.Log[]} log debug messages emitted during execution of test plan
  * @property {object[]} tests
+ * @property {string} tests[].id id of a test in a test plan
  * @property {string} tests[].filepath filepath of file describing the test in the test plan
  * @property {AriaATCIData.Log[]} tests[].log subset of log emitted during this single test
- * @property {AriaATCIData.TestResult[]} tests[].results
+ * @property {AriaATCIData.TestResultOutput[]} tests[].results
  */
 
 /**
  * Result from a single test in a test plan.
  * @typedef AriaATCIData.TestResult
- * @property {number} testId numeric id of a test in a test plan
+ * @property {string} testId id of a test in a test plan
+ * @property {number} presentationNumber numeric id of a test in a test plan
  * @property {object[]} commands input commands and the speech emitted
  * @property {string} commands[].command id of input command sent to system
- * @property {string} [commands[].output] speech emitted
+ * @property {string} [commands[].response] speech emitted
  * @property {string[]} [commands[].errors] errors that occured while during command
+ * @property {object[]} commands[].assertions
+ * @property {string} commands[].assertions[].expectation
+ * @property {"pass"|"fail"|null} commands[].assertions[].verdict
  * @property {Record<string, string>} capabilities Information about the system under test
- * @property {object[]} results permutation of input commands and assertions passing or not passing
- * @property {string} results[].command id of input command sent to system
- * @property {string} results[].expectation description of expected assertion
- * @property {boolean} results[].pass did command pass or not pass expectation
+ */
+
+/**
+ * Result from a single test in a test plan.
+ * @typedef AriaATCIData.TestResultOutput
+ * @property {object[]} commands input commands and the speech emitted
+ * @property {string} commands[].command id of input command sent to system
+ * @property {string} [commands[].response] speech emitted
+ * @property {string[]} [commands[].errors] errors that occured while during command
+ * @property {object[]} commands[].assertions
+ * @property {string} commands[].assertions[].expectation
+ * @property {"pass"|"fail"|null} commands[].assertions[].verdict
+ * @property {Record<string, string>} capabilities Information about the system under test
  */

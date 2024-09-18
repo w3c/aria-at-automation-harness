@@ -189,11 +189,15 @@ export class DriverTestRunner {
     await this.browserDriver.navigate('about:blank');
 
     const commandsOutput = [];
-    const results = [];
 
     for (const command of test.commands) {
       const { value: validCommand, errors } = validateKeysFromCommand(command);
-
+      const assertions = test.assertions.map(assertion => {
+        return {
+          expectation: assertion.expectation || assertion.assertionStatement,
+          verdict: null,
+        };
+      });
       if (validCommand) {
         await this._collectSpeech(this.timesOption.afterNav, () =>
           this.openPage({
@@ -221,31 +225,17 @@ export class DriverTestRunner {
 
         commandsOutput.push({
           command: command.id,
-          output: spokenOutput.join('\n'),
+          response: spokenOutput.join('\n'),
+          assertions,
         });
-
-        for (const assertion of test.assertions) {
-          results.push({
-            command: command.id,
-            expectation: assertion.expectation || assertion.assertionStatement,
-            pass: true,
-          });
-        }
       } else {
         await this.log(RunnerMessage.INVALID_KEYS, { command, errors });
 
         commandsOutput.push({
           command: command.id,
           errors,
+          assertions,
         });
-
-        for (const assertion of test.assertions) {
-          results.push({
-            command: command.id,
-            expectation: assertion.expectation,
-            pass: false,
-          });
-        }
       }
     }
 
@@ -256,7 +246,6 @@ export class DriverTestRunner {
       presentationNumber,
       capabilities,
       commands: commandsOutput,
-      results,
     };
   }
 
