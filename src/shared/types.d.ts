@@ -59,3 +59,39 @@ declare namespace AriaATCIShared {
     docReady: number;
   }
 }
+
+declare namespace FileRecord {
+  export interface Host {
+    read(root: string, options?: { glob?: string }): Promise<Record>;
+    collapse(record: Record): NamedRecord[];
+  }
+
+  export interface Record {
+    /**
+     * an array of NamedRecords or null if it should be removed
+     */
+    entries?: NamedRecord[] | null;
+    /**
+     * a Uint8Array or null if it should be removed
+     */
+    bufferData?: Uint8Array | null;
+  }
+
+  export interface NamedRecord {
+    name: string;
+    /**
+     * an array of NamedRecords or null if it should be removed
+     */
+    entries?: NamedRecord[] | null;
+    /**
+     * a Uint8Array or null if it should be removed
+     */
+    bufferData?: Uint8Array | null;
+  }
+
+  export type Functor = (
+    record: Record,
+    path: string[],
+    ancestors: Record[]
+  ) => PromiseLike<Record> | Record;
+}
