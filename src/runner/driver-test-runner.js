@@ -51,7 +51,7 @@ export class DriverTestRunner {
         '.button-run-test-setup',
         this.timesOption.testSetup
       );
-    } catch ({}) {
+    } catch {
       await this.log(RunnerMessage.NO_RUN_TEST_SETUP, { referencePage });
     }
   }
