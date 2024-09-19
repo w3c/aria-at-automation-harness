@@ -14,8 +14,8 @@ export default [
     },
     rules: {
       ...eslintConfigEslint.rules,
-      'no-empty': 'off',
-      // TODO: Remove this once TypeScript conversion happens
+      // TODO: Remove these exceptions once TypeScript conversion happens
+      'no-empty': 'warn',
       'no-unused-vars': 'warn',
     },
   },
