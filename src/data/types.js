@@ -41,7 +41,7 @@
  * @property {string} commands[].keypresses[].keystroke single human-readable key or key chord press
  * @property {string} [commands[].extraInstruction] human-readable additional instruction to follow
  * @property {string} [commands[].settings] this property only exists on v2 tests
- * @property {string} [commands[].additionalSettings] this property only exists on v2 tests
+ * @property {string[]} [commands[].additionalSettings] this property only exists on v2 tests
  * @property {object[]} assertions[]
  * @property {1 | 2} assertions[].priority
  * @property {string} [assertions[].expectation] assertion statement string, this property only exists on v1 tests

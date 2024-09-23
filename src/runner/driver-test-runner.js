@@ -92,7 +92,7 @@ export class DriverTestRunner {
    *
    * @param {string} settings - "browseMode" "focusMode" for NVDA, "pcCursor" "virtualCursor"
    *                 for JAWS., "defaultMode" for others.
-   * @param {string} additionalSettings - e.g. "speechRateIncrease" and "commentAnnouncementOn" for JAWS
+   * @param {string[]} additionalSettings - e.g. "speechRateIncrease" and "commentAnnouncementOn" for JAWS
    */
   async ensureSettings(settings, additionalSettings) {
     const { atName } = await this.collectedCapabilities;
