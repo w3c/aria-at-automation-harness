@@ -92,8 +92,9 @@ export class DriverTestRunner {
    *
    * @param {string} settings - "browseMode" "focusMode" for NVDA, "pcCursor" "virtualCursor"
    *                 for JAWS., "defaultMode" for others.
+   * @param {string} additionalSettings - e.g. "speechRateIncrease" and "commentAnnouncementOn" for JAWS
    */
-  async ensureSettings(settings) {
+  async ensureSettings(settings, additionalSettings) {
     const { atName } = await this.collectedCapabilities;
     if (atName == 'NVDA') {
       const desiredResponse = { browsemode: 'Browse mode', focusmode: 'Focus mode' }[
@@ -123,6 +124,12 @@ export class DriverTestRunner {
           },
         });
       }
+      for (const additionalSetting of additionalSettings) {
+        switch (additionalSetting) {
+          default:
+            throw new Error(`Unrecognized addditional setting for NVDA: ${additionalSetting}`);
+        }
+      }
     } else if (atName == 'VoiceOver') {
       if (settings === 'quickNavOn' || settings === 'arrowQuickKeyNavOn') {
         await this.pressKeysToToggleSetting(
@@ -147,6 +154,12 @@ export class DriverTestRunner {
       } else if (settings !== 'defaultMode') {
         throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
       }
+      for (const additionalSetting of additionalSettings) {
+        switch (additionalSetting) {
+          default:
+            throw new Error(`Unrecognized addditional setting for VoiceOver: ${additionalSetting}`);
+        }
+      }
       return;
     } else if (!atName) {
       return;
@@ -162,7 +175,7 @@ export class DriverTestRunner {
   async ensureMode(mode) {
     const { atName } = await this.collectedCapabilities;
     if (atName === 'NVDA') {
-      await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
+      await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode', []);
       return;
     } else if (atName === 'VoiceOver') {
       return;
@@ -204,7 +217,7 @@ export class DriverTestRunner {
 
         if (command.settings) {
           // Ensure AT is in proper mode for tests.  V2 tests define "settings" per command.
-          await this.ensureSettings(command.settings);
+          await this.ensureSettings(command.settings, command.additionalSettings);
         } else if (test.target?.mode) {
           // V1 tests define a "mode" of "reading" or "interaction" on the test.target
           await this.ensureMode(test.target.mode);
