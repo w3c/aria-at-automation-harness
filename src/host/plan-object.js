@@ -91,7 +91,7 @@ export function addTestLogToTestPlan(testPlan, { filepath: testFilepath }) {
  */
 export function addTestResultToTestPlan(testPlan, testFilepath, result) {
   const test = testPlan.tests.find(({ filepath }) => filepath === testFilepath);
-  const { testId, presentationNumber, ...resultOutput } = result;
+  const { testId, ...resultOutput } = result;
   return {
     ...testPlan,
     tests: arrayUtil.replace(testPlan.tests, test, {

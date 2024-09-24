@@ -13,6 +13,7 @@
     "@types/text-encoding": "^0.0.38",
     "ava": "^4.1.0",
     "eslint": "^9.9.0",
+    "eslint-config-eslint": "^11.0.0",
     "globals": "^15.9.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.2.3",
