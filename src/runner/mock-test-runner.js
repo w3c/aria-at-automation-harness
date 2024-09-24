@@ -1,7 +1,3 @@
-/// <reference path="../data/types.js" />
-/// <reference path="../shared/types.js" />
-/// <reference path="types.js" />
-
 /**
  * @module agent
  */

@@ -41,7 +41,7 @@ const evalJavaScript = source => {
 };
 
 /**
- * @param {AriaATCIShared.timesOption} timesOption
+ * @param {AriaATCIShared.TimesOption} timesOption
  */
 export default async timesOption => {
   await execScript(`tell application "Safari"

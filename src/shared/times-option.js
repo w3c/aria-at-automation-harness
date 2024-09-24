@@ -1,11 +1,9 @@
-/// <reference path="./types.js" />
-
 /**
  * @module shared
  */
 
 /**
- * @type AriaATCIShared.timesOption
+ * @type AriaATCIShared.TimesOption
  */
 const timesDefaults = {
   afterNav: 1000,
@@ -16,8 +14,8 @@ const timesDefaults = {
 };
 
 /**
- * Create a yargs description for the specified timesOption.
- * @param {keyof AriaATCIShared.timesOption} optionName Key from timesOption
+ * Create a yargs description for the specified TimesOption.
+ * @param {keyof AriaATCIShared.TimesOption} optionName Key from TimesOption
  * @param {string} argName The text used for the argument (without leading --)
  * @param {string} describe Description to be used in --show-help
  */
@@ -42,7 +40,7 @@ function addOptionConfig(optionName, argName, describe) {
 }
 
 /**
- * @type Map<keyof AriaATCIShared.timesOption, string>
+ * @type Map<keyof AriaATCIShared.TimesOption, string>
  */
 const timesOptionsArgNameMap = new Map();
 
@@ -74,7 +72,7 @@ addOptionConfig('docReady', 'time-doc-ready', 'Timeout used waiting for document
 
 /**
  * Convert the times dictionary to an array of strings to pass back to args.
- * @param {AriaATCIShared.timesOption} opts
+ * @param {AriaATCIShared.TimesOption} opts
  * @returns {string[]}
  */
 export function timesArgs(opts) {
@@ -85,7 +83,7 @@ export function timesArgs(opts) {
     if (value == timesDefaults[key]) continue;
     // casting in jsdoc syntax is complicated - the extra () around key are
     // required to make the type annotation work.
-    const argName = timesOptionsArgNameMap.get(/** @type keyof AriaATCIShared.timesOption */ (key));
+    const argName = timesOptionsArgNameMap.get(/** @type keyof AriaATCIShared.TimesOption */ (key));
     args.push('--' + argName);
     args.push(String(value));
   }
@@ -93,14 +91,14 @@ export function timesArgs(opts) {
 }
 
 /**
- * Convert the arguments parse result into a timesOption object.
+ * Convert the arguments parse result into a TimesOption object.
  * @param {any} args The parsed arguments
- * @returns {AriaATCIShared.timesOption}
+ * @returns {AriaATCIShared.TimesOption}
  */
 export function getTimesOption(args) {
   const result = { ...timesDefaults };
   for (const key in result) {
-    const mapped = timesOptionsArgNameMap.get(/** @type keyof AriaATCIShared.timesOption */ (key));
+    const mapped = timesOptionsArgNameMap.get(/** @type keyof AriaATCIShared.TimesOption */ (key));
     if (mapped) {
       if (args[mapped]) result[key] = args[mapped];
     }

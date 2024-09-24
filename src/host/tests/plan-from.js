@@ -1,5 +1,3 @@
-/// <reference path="../types.js"/>
-
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -114,6 +112,7 @@ function isTextFile(filePath) {
 function normalizeTextRecordEOL(file, { textEncoder, textDecoder } = textCoders()) {
   return {
     ...file,
+    // @ts-expect-error - TextEncoder and TextDecoder are not typed as classes.
     bufferData: textEncoder.encode(textDecoder.decode(file.bufferData).replace(/\r\n/g, '\n')),
   };
 }
@@ -122,5 +121,6 @@ function normalizeTextRecordEOL(file, { textEncoder, textDecoder } = textCoders(
  * @returns {{textEncoder: TextEncoder, textDecoder: TextDecoder}}
  */
 function textCoders() {
+  // @ts-expect-error - TextEncoder and TextDecoder are not typed as classes.
   return { textEncoder: new TextEncoder(), textDecoder: new TextDecoder() };
 }

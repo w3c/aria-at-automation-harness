@@ -1,7 +1,7 @@
 import { Builder } from 'selenium-webdriver';
 import { until, By } from 'selenium-webdriver';
 
-/** @returns {Promise<BrowserDriver>} */
+/** @returns {Promise<AriaATCIRunner.BrowserDriver>} */
 export default async (browser, serverUrl) => {
   const driver = await new Builder().forBrowser(browser).usingServer(serverUrl).build();
 

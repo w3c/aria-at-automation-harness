@@ -1,5 +1,3 @@
-/// <reference path="types.js" />
-
 /**
  * @module host
  */
@@ -129,6 +127,7 @@ export async function hostMain(options) {
           plan = addTestLogToTestPlan(plan, test);
         }
       };
+      /** @ts-expect-error EventEmitter is not correctly typed */
       logger.emitter.on('message', addLogtoPlan);
 
       try {
@@ -153,6 +152,7 @@ export async function hostMain(options) {
         await lastCallbackRequest;
         throw exception;
       } finally {
+        /** @ts-expect-error EventEmitter is not correctly typed */
         logger.emitter.off('message', addLogtoPlan);
       }
     }

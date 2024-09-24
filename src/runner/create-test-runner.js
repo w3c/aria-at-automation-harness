@@ -1,6 +1,3 @@
-/// <reference path="../shared/types.js" />
-/// <reference path="types.js" />
-
 /**
  * @module agent
  */
@@ -18,7 +15,7 @@ import { createATDriver } from './at-driver.js';
  * @param {Promise<void>} options.abortSignal
  * @param {boolean} [options.mock]
  * @param {AriaATCIRunner.Browser} [options.webDriverBrowser]
- * @param {AriaATCIShared.timesOption} options.timesOption
+ * @param {AriaATCIShared.TimesOption} options.timesOption
  * @param {{toString: function(): string}} options.webDriverUrl
  * @returns {Promise<AriaATCIRunner.TestRunner>}
  */

@@ -1,7 +1,3 @@
-/// <reference path="../data/types.js" />
-/// <reference path="../shared/types.js" />
-/// <reference path="types.js" />
-
 import { startJob } from '../shared/job.js';
 
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
@@ -15,10 +11,10 @@ export class DriverTestRunner {
   /**
    * @param {object} options
    * @param {URL} options.baseUrl
-   * @param {AriaATCIHost.Log} options.log
-   * @param {BrowserDriver} options.browserDriver
+   * @param {AriaATCIRunner.Log} options.log
+   * @param {AriaATCIRunner.BrowserDriver} options.browserDriver
    * @param {ATDriver} options.atDriver
-   * @param {AriaATCIShared.timesOption} options.timesOption
+   * @param {AriaATCIShared.TimesOption} options.timesOption
    */
   constructor({ baseUrl, log, browserDriver, atDriver, timesOption }) {
     this.baseUrl = baseUrl;
