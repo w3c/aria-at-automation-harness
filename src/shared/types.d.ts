@@ -28,6 +28,9 @@ declare namespace AriaATCIShared {
    * A binding for some parallelized work.
    */
   export interface JobBinding<T> {
+    /**
+     * Finish the iterable if the job is canceled
+     */
     cancelable: (iterable: AsyncIterable<T>) => AsyncIterable<T>;
   }
 
