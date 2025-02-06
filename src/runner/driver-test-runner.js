@@ -90,19 +90,15 @@ export class DriverTestRunner {
   /**
    * Used for v2 tests to ensure proper settings.
    *
-   * @param {string} settings - "browseMode" "focusMode" for NVDA, "pcCursor" "virtualCursor"
-   *                 for JAWS., "defaultMode" for others.
+   * @param {string} settings - space seperated list of settings. "browseMode", "focusMode" for NVDA,
+                                "quickNavOn", "defaultMode", etc for VoiceOver.
    */
   async ensureSettings(settings) {
     const { atName } = await this.collectedCapabilities;
-    if (atName == 'NVDA') {
-      const desiredResponse = { browsemode: 'Browse mode', focusmode: 'Focus mode' }[
-        settings.toLowerCase()
-      ];
-      if (!desiredResponse) {
-        throw new Error(`Unknown command settings for NVDA "${settings}"`);
-      }
+    // break up the space-separated settings into an array so we can iterate over it
+    const settingsArray = settings.split(' ');
 
+    if (atName == 'NVDA') {
       // disable the "beeps" when switching focus/browse mode, forces it to speak the mode after switching
       await this.atDriver._send({
         method: 'nvda:settings.setSettings',
@@ -110,10 +106,24 @@ export class DriverTestRunner {
       });
 
       try {
-        await this.pressKeysToToggleSetting(
-          ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
-          desiredResponse
-        );
+        for (const setting of settingsArray) {
+          switch (setting.toLowerCase()) {
+            case 'browsemode':
+              await this.pressKeysToToggleSetting(
+                ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
+                'Browse mode'
+              );
+              break;
+            case 'focusmode':
+              await this.pressKeysToToggleSetting(
+                ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
+                'Focus mode'
+              );
+              break;
+            default:
+              throw new Error(`Unknown command settings for NVDA "${setting}"`);
+          }
+        }
       } finally {
         // turn the "beeps" back on so mode switches won't be spoken (default setting)
         await this.atDriver._send({
@@ -124,28 +134,44 @@ export class DriverTestRunner {
         });
       }
     } else if (atName == 'VoiceOver') {
-      if (settings === 'quickNavOn' || settings === 'arrowQuickKeyNavOn') {
-        await this.pressKeysToToggleSetting(
-          ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
-          'quick nav on'
-        );
-      } else if (settings === 'quickNavOff' || settings === 'arrowQuickKeyNavOff') {
-        await this.pressKeysToToggleSetting(
-          ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
-          'quick nav off'
-        );
-      } else if (settings === 'singleQuickKeyNavOn') {
-        await this.pressKeysToToggleSetting(
-          ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
-          'single-key quick nav on'
-        );
-      } else if (settings === 'singleQuickKeyNavOff') {
-        await this.pressKeysToToggleSetting(
-          ATKey.sequence(ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))),
-          'single-key quick nav off'
-        );
-      } else if (settings !== 'defaultMode') {
-        throw new Error(`Unrecognized setting for VoiceOver: ${settings}`);
+      for (const setting of settingsArray) {
+        switch (setting) {
+          case 'quickNavOn':
+          case 'arrowQuickKeyNavOn':
+            await this.pressKeysToToggleSetting(
+              ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
+              'quick nav on'
+            );
+            break;
+          case 'quickNavOff':
+          case 'arrowQuickKeyNavOff':
+            await this.pressKeysToToggleSetting(
+              ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
+              'quick nav off'
+            );
+            break;
+          case 'singleQuickKeyNavOn':
+            await this.pressKeysToToggleSetting(
+              ATKey.sequence(
+                ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))
+              ),
+              'single-key quick nav on'
+            );
+            break;
+          case 'singleQuickKeyNavOff':
+            await this.pressKeysToToggleSetting(
+              ATKey.sequence(
+                ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))
+              ),
+              'single-key quick nav off'
+            );
+            break;
+          case 'defaultMode':
+            // nothing to do here
+            break;
+          default:
+            throw new Error(`Unrecognized setting for VoiceOver: ${setting}`);
+        }
       }
       return;
     } else if (!atName) {
