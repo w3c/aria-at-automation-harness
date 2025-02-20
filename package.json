@@ -38,7 +38,7 @@
     "test:lint": "eslint src",
     "test:unit": "ava",
     "test:update": "ava --update-snapshots",
-    "postinstall": "husky install"
+    "prepare": "husky install"
   },
   "lint-staged": {
     "*.{js,css,md}": "prettier --write"
