@@ -66,7 +66,12 @@ export class DriverTestRunner {
    */
   async pressKeysToToggleSetting(sequence, desiredResponse) {
     let unknownCollected = '';
-    let unexpectedAllowance = 2;
+    // Although the settings currently supported only have two states, it is
+    // possible that the harness receives a non-empty response before the
+    // system is correctly responding to settings-related commands (see the
+    // explanation of `silenceAllowance`, below). Tolerate one additional
+    // unexpected response to accommodate this condition.
+    let unexpectedAllowance = 3;
     // The browser has been observed to be unavailable for keyboard interaction
     // for many seconds following the resolution of the "new session" WebDriver
     // command (and even the subsequent "document ready" event from the active
