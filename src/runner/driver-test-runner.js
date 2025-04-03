@@ -66,11 +66,35 @@ export class DriverTestRunner {
    */
   async pressKeysToToggleSetting(sequence, desiredResponse) {
     let unknownCollected = '';
-    // there are 2 modes, so we will try pressing mode switch up to twice
-    for (let triesRemain = 2; triesRemain > 0; triesRemain--) {
+    // Although the settings currently supported only have two states, it is
+    // possible that the harness receives a non-empty response before the
+    // system is correctly responding to settings-related commands (see the
+    // explanation of `silenceAllowance`, below). Tolerate one additional
+    // unexpected response to accommodate this condition.
+    let unexpectedAllowance = 3;
+    // The browser has been observed to be unavailable for keyboard interaction
+    // for many seconds following the resolution of the "new session" WebDriver
+    // command (and even the subsequent "document ready" event from the active
+    // browsing context). In this state, some screen readers may ignore commands
+    // to modify some settings. (Specifically, this situation has been observed
+    // with NVDA's "mode switch" command when using the Chrome browser.)
+    //
+    // Handle this situation gracefully by tolerating silence from the command
+    // for a large number of trials.
+    let silenceAllowance = 20;
+
+    while (silenceAllowance > 0 && unexpectedAllowance > 0) {
       const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
         this.sendKeys(sequence)
       );
+
+      if (speechResponse.length === 0) {
+        silenceAllowance--;
+      } else {
+        unexpectedAllowance--;
+        silenceAllowance = 1;
+      }
+
       while (speechResponse.length) {
         const lastMessage = speechResponse.shift().trim();
         if (lastMessage.toLowerCase() === desiredResponse.toLowerCase()) {
