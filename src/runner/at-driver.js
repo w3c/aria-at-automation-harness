@@ -32,6 +32,10 @@ export class ATDriver {
   constructor({ socket, log }) {
     this.socket = socket;
     this.log = log;
+    socket.on('message', rawMessage => {
+      const message = rawMessage.toString();
+      this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
+    });
     const connected = new Promise((resolve, reject) => {
       socket.once('open', () => resolve());
       socket.once('error', err => reject(err));
@@ -69,7 +73,6 @@ export class ATDriver {
     if (this.hasClosed) throw new Error('AT-Driver connection unexpectedly closed');
     for await (const rawMessage of iterateEmitter(this.socket, 'message', 'close', 'error')) {
       const message = rawMessage.toString();
-      this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
       yield JSON.parse(message);
     }
   }
