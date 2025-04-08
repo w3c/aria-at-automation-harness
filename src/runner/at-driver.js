@@ -103,8 +103,8 @@ export class ATDriver {
     // to press it, waiting for that keypress to finish, then pressing the next.
     for (const chord of ATKey.sequence(...keys)) {
       await this._send({
-        method: 'interaction.pressKeys',
-        params: { keys: chord.toAtDriverKeyCodes() },
+        method: 'interaction.userIntent',
+        params: { name: 'pressKeys', keys: chord.toAtDriverKeyCodes() },
       });
     }
   }
