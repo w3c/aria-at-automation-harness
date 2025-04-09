@@ -32,14 +32,19 @@ export class ATDriver {
   constructor({ socket, log }) {
     this.socket = socket;
     this.log = log;
-    socket.on('message', rawMessage => {
+
+    const logMessage = rawMessage => {
       const message = rawMessage.toString();
       this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'inbound', message });
-    });
+    };
+
+    socket.on('message', logMessage);
+
     const connected = new Promise((resolve, reject) => {
       socket.once('open', () => resolve());
       socket.once('error', err => reject(err));
     });
+
     this.ready = connected.then(() =>
       this._send({ method: 'session.new', params: { capabilities: {} } }).then(
         ({ result: { capabilities } }) => {
@@ -51,6 +56,7 @@ export class ATDriver {
     this.closed = new Promise(resolve =>
       socket.once('close', () => {
         this.hasClosed = true;
+        socket.off('message', logMessage);
         this.log(RunnerMessage.AT_DRIVER_COMMS, { direction: 'closed' });
         resolve();
       })
