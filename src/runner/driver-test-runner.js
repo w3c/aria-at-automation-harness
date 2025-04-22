@@ -198,6 +198,19 @@ export class DriverTestRunner {
         }
       }
       return;
+    } else if (atName == 'JAWS') {
+      for (const setting of settingsArray) {
+        if (/^(virtualCursor|pcCursor)$/.test(setting)) {
+          await this.atDriver._send({
+            method: 'settings.setSettings',
+            params: {
+              settings: [{ name: setting, value: true }],
+            },
+          });
+        } else {
+          throw new Error(`Unknown command setting for JAWS "${setting}"`);
+        }
+      }
     } else if (!atName) {
       return;
     } else {
