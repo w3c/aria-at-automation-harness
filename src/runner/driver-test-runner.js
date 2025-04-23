@@ -5,8 +5,8 @@ import { RunnerMessage } from './messages.js';
 
 const ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE = new Map(
   Object.entries({
-    virtualCursor: 'VC',
-    pcCursor: 'VPC',
+    virtualCursor: 'VPC',
+    pcCursor: 'PC',
   })
 );
 
