@@ -3,6 +3,13 @@ import { startJob } from '../shared/job.js';
 import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
 import { RunnerMessage } from './messages.js';
 
+const ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE = new Map(
+  Object.entries({
+    virtualCursor: 'VC',
+    pcCursor: 'VPC',
+  })
+);
+
 /**
  * @module agent
  */
@@ -157,6 +164,21 @@ export class DriverTestRunner {
           },
         });
       }
+    } else if (atName == 'JAWS') {
+      for (const setting of settingsArray) {
+        const value = ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE.get(setting);
+
+        if (!value) {
+          throw new Error(`Unknown command setting for JAWS "${setting}"`);
+        }
+
+        await this.atDriver._send({
+          method: 'settings.setSettings',
+          params: {
+            settings: [{ name: 'cursor', value }],
+          },
+        });
+      }
     } else if (atName == 'VoiceOver') {
       for (const setting of settingsArray) {
         switch (setting) {
@@ -198,19 +220,6 @@ export class DriverTestRunner {
         }
       }
       return;
-    } else if (atName == 'JAWS') {
-      for (const setting of settingsArray) {
-        if (/^(virtualCursor|pcCursor)$/.test(setting)) {
-          await this.atDriver._send({
-            method: 'settings.setSettings',
-            params: {
-              settings: [{ name: setting, value: true }],
-            },
-          });
-        } else {
-          throw new Error(`Unknown command setting for JAWS "${setting}"`);
-        }
-      }
     } else if (!atName) {
       return;
     } else {
@@ -226,6 +235,9 @@ export class DriverTestRunner {
     const { atName } = await this.collectedCapabilities;
     if (atName === 'NVDA') {
       await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'browseMode' : 'focusMode');
+      return;
+    } else if (atName === 'JAWS') {
+      await this.ensureSettings(mode.toLowerCase() === 'reading' ? 'virtualCursor' : 'pcCursor');
       return;
     } else if (atName === 'VoiceOver') {
       return;
