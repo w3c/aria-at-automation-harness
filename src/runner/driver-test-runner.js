@@ -1,11 +1,31 @@
 import { startJob } from '../shared/job.js';
 
-import { ATDriver, ATKey, webDriverCodePoints } from './at-driver.js';
+import { ATKey, webDriverCodePoints } from './at-driver.js';
 import { RunnerMessage } from './messages.js';
 
 /**
- * @module agent
+ * @module runner
  */
+
+export const NVDASettingResponses = {
+  browseMode: ['Browse mode'],
+  focusMode: ['Focus mode'],
+};
+
+export const VOSettingResponses = {
+  quickNavOn: ['Quick nav on', 'All quick nav on'],
+  quickNavOff: ['Quick nav off', 'All quick nav off'],
+  singleKeyQuickNavOn: ['single-key quick nav on'],
+  singleKeyQuickNavOff: ['single-key quick nav off'],
+};
+
+/**
+ * @param {string} lastMessage
+ * @param {string[]} desiredResponses
+ */
+export function isDesiredSettingResponse(lastMessage, desiredResponses) {
+  return desiredResponses.map(r => r.toLowerCase()).includes(lastMessage.toLowerCase());
+}
 
 export class DriverTestRunner {
   /**
@@ -13,7 +33,7 @@ export class DriverTestRunner {
    * @param {URL} options.baseUrl
    * @param {AriaATCIRunner.Log} options.log
    * @param {AriaATCIRunner.BrowserDriver} options.browserDriver
-   * @param {ATDriver} options.atDriver
+   * @param {import('./at-driver.js').ATDriver} options.atDriver
    * @param {AriaATCIShared.TimesOption} options.timesOption
    */
   constructor({ baseUrl, log, browserDriver, atDriver, timesOption }) {
@@ -62,9 +82,9 @@ export class DriverTestRunner {
 
   /**
    * @param {import('./at-driver.js').ATKeySequence} sequence
-   * @param {string} desiredResponse
+   * @param {string[]} desiredResponses
    */
-  async pressKeysToToggleSetting(sequence, desiredResponse) {
+  async pressKeysToToggleSetting(sequence, desiredResponses) {
     let unknownCollected = '';
     // Although the settings currently supported only have two states, it is
     // possible that the harness receives a non-empty response before the
@@ -97,8 +117,7 @@ export class DriverTestRunner {
 
       while (speechResponse.length) {
         const lastMessage = speechResponse.shift().trim();
-        if (lastMessage.toLowerCase() === desiredResponse.toLowerCase()) {
-          // our mode is correct, we are done
+        if (isDesiredSettingResponse(lastMessage, desiredResponses)) {
           return;
         }
 
@@ -107,7 +126,7 @@ export class DriverTestRunner {
       }
     }
     throw new Error(
-      `Unable to apply setting. Expected: "${desiredResponse}" Got: "${unknownCollected}"`
+      `Unable to apply setting. Expected: One of "${desiredResponses}" Got: "${unknownCollected}"`
     );
   }
 
@@ -135,13 +154,13 @@ export class DriverTestRunner {
             case 'browsemode':
               await this.pressKeysToToggleSetting(
                 ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
-                'Browse mode'
+                NVDASettingResponses.browseMode
               );
               break;
             case 'focusmode':
               await this.pressKeysToToggleSetting(
                 ATKey.sequence(ATKey.chord(ATKey.key('insert'), ATKey.key('space'))),
-                'Focus mode'
+                NVDASettingResponses.focusMode
               );
               break;
             default:
@@ -164,14 +183,14 @@ export class DriverTestRunner {
           case 'arrowQuickKeyNavOn':
             await this.pressKeysToToggleSetting(
               ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
-              'quick nav on'
+              VOSettingResponses.quickNavOn
             );
             break;
           case 'quickNavOff':
           case 'arrowQuickKeyNavOff':
             await this.pressKeysToToggleSetting(
               ATKey.sequence(ATKey.chord(ATKey.key('left'), ATKey.key('right'))),
-              'quick nav off'
+              VOSettingResponses.quickNavOn
             );
             break;
           case 'singleQuickKeyNavOn':
@@ -179,7 +198,7 @@ export class DriverTestRunner {
               ATKey.sequence(
                 ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))
               ),
-              'single-key quick nav on'
+              VOSettingResponses.singleKeyQuickNavOn
             );
             break;
           case 'singleQuickKeyNavOff':
@@ -187,7 +206,7 @@ export class DriverTestRunner {
               ATKey.sequence(
                 ATKey.chord(ATKey.key('control'), ATKey.key('option'), ATKey.key('q'))
               ),
-              'single-key quick nav off'
+              VOSettingResponses.singleKeyQuickOff
             );
             break;
           case 'defaultMode':
