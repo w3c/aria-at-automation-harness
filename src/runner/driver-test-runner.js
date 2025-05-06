@@ -12,6 +12,7 @@ export const NVDASettingResponses = {
   focusMode: ['Focus mode'],
 };
 
+// Supports known setting responses up to macOS 15.4.1
 export const VOSettingResponses = {
   quickNavOn: ['Quick nav on', 'All quick nav on'],
   quickNavOff: ['Quick nav off', 'All quick nav off'],
