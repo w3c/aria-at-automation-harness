@@ -1,5 +1,5 @@
 {
-  "name": "aria-at-automation-harness",
+  "name": "@bocoup/aria-at-automation-harness",
   "version": "1.0.0",
   "type": "module",
   "bin": {
