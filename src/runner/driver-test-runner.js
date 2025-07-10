@@ -27,6 +27,11 @@ export const VOSettingResponses = {
   singleKeyQuickNavOff: ['single-key quick nav off'],
 };
 
+export const JAWSSettingResponses = {
+  virtualCursor: ['use virtual PC cursor on'],
+  pcCursor: ['use virtual PC cursor off'],
+};
+
 /**
  * @param {string} lastMessage
  * @param {string[]} desiredResponses
@@ -191,13 +196,27 @@ export class DriverTestRunner {
         if (!value) {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
+        let unknownCollected = '';
+        const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
+          this.atDriver._send({
+            method: 'settings.setSettings',
+            params: {
+              settings: [{ name: 'cursor', value }],
+            },
+          })
+        );
+        while (speechResponse.length) {
+          const lastMessage = speechResponse.shift().trim();
+          if (isDesiredSettingResponse(lastMessage, JAWSSettingResponses[setting])) {
+            return;
+          }
 
-        await this.atDriver._send({
-          method: 'settings.setSettings',
-          params: {
-            settings: [{ name: 'cursor', value }],
-          },
-        });
+          if (unknownCollected.length) unknownCollected += '\n';
+          unknownCollected += lastMessage;
+        }
+        throw new Error(
+          `Unable to apply setting. Expected one of "${JAWSSettingResponses[setting]}" got "${unknownCollected}"`
+        );
       }
     } else if (atName == 'VoiceOver') {
       for (const setting of settingsArray) {
