@@ -27,6 +27,11 @@ export const VOSettingResponses = {
   singleKeyQuickNavOff: ['single-key quick nav off'],
 };
 
+export const JAWSSettingResponses = {
+  virtualCursor: ['use virtual PC cursor on'],
+  pcCursor: ['use virtual PC cursor off'],
+};
+
 /**
  * @param {string} lastMessage
  * @param {string[]} desiredResponses
@@ -192,12 +197,43 @@ export class DriverTestRunner {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
 
+        // intentionally set the wrong mode first
         await this.atDriver._send({
           method: 'settings.setSettings',
           params: {
-            settings: [{ name: 'cursor', value }],
+            settings: [
+              {
+                name: 'cursor',
+                value: ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE.get(
+                  setting == 'virtualCursor' ? 'pcCursor' : 'virtualCursor'
+                ),
+              },
+            ],
           },
         });
+
+        // if we weren't change mode and wait for the vocalization of the setting change
+        let unknownCollected = '';
+        const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
+          this.atDriver._send({
+            method: 'settings.setSettings',
+            params: {
+              settings: [{ name: 'cursor', value }],
+            },
+          })
+        );
+        while (speechResponse.length) {
+          const lastMessage = speechResponse.shift().trim();
+          if (isDesiredSettingResponse(lastMessage, JAWSSettingResponses[setting])) {
+            return;
+          }
+
+          if (unknownCollected.length) unknownCollected += '\n';
+          unknownCollected += lastMessage;
+        }
+        throw new Error(
+          `Unable to apply setting. Expected one of "${JAWSSettingResponses[setting]}" got "${unknownCollected}"`
+        );
       }
     } else if (atName == 'VoiceOver') {
       for (const setting of settingsArray) {
