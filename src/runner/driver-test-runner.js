@@ -196,6 +196,20 @@ export class DriverTestRunner {
         if (!value) {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
+        // check if we are already in the correct mode
+        const getSettingsResponse = await this.atDriver._send({
+          method: 'settings.getSettings',
+          params: {
+            settings: [{ name: 'cursor' }],
+          },
+        });
+        console.log(`Settings Response ${getSettingsResponse}`);
+        const {
+          result: { settings },
+        } = getSettingsResponse;
+        if (settings.any(s => s.name == 'cursor' && s.value === value)) return;
+
+        // if we weren't change mode and wait for the vocalization of the setting change
         let unknownCollected = '';
         const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
           this.atDriver._send({
