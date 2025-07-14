@@ -366,8 +366,14 @@ export class DriverTestRunner {
    */
   async _collectSpeech(debounceDelay, asyncOperation) {
     let spoken = [];
+    const isJAWS = (await this.collectedCapabilities).atName == 'JAWS';
+
     const speechJob = startJob(async signal => {
-      for await (const speech of signal.cancelable(this.atDriver.speeches())) {
+      for await (let speech of signal.cancelable(this.atDriver.speeches())) {
+        if (isJAWS) {
+          // temporary workaround to double-escaped string literals.
+          speech = JSON.parse(`"${speech}"`);
+        }
         spoken.push(speech);
         this.log(RunnerMessage.SPEECH_EVENT, { spokenText: speech });
       }
