@@ -225,7 +225,6 @@ export class DriverTestRunner {
           },
         });
 
-        // if we weren't change mode and wait for the vocalization of the setting change
         let unknownCollected = '';
         const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
           this.atDriver._send({
