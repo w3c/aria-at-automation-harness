@@ -196,6 +196,23 @@ export class DriverTestRunner {
         if (!value) {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
+
+        // intentionally set the wrong mode first
+        await this.atDriver._send({
+          method: 'settings.setSettings',
+          params: {
+            settings: [
+              {
+                name: 'cursor',
+                value: ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE.get(
+                  setting == 'virtualCursor' ? 'pcCursor' : 'virtualCursor'
+                ),
+              },
+            ],
+          },
+        });
+
+        // if we weren't change mode and wait for the vocalization of the setting change
         let unknownCollected = '';
         const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
           this.atDriver._send({
