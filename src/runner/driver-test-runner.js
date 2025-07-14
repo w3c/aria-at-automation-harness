@@ -353,6 +353,7 @@ export class DriverTestRunner {
       for await (let speech of signal.cancelable(this.atDriver.speeches())) {
         if (isJAWS) {
           // temporary workaround to double-escaped string literals.
+          // see https://github.com/w3c/aria-at-automation-harness/issues/90
           speech = JSON.parse(`"${speech}"`);
         }
         spoken.push(speech);
