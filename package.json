@@ -1,6 +1,6 @@
 {
   "name": "@bocoup/aria-at-automation-harness",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "bin": {
     "aria-at-harness-agent": "./bin/agent.js",
