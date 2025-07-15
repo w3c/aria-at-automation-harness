@@ -27,6 +27,11 @@ export const VOSettingResponses = {
   singleKeyQuickNavOff: ['single-key quick nav off'],
 };
 
+export const JAWSSettingResponses = {
+  virtualCursor: ['use virtual PC cursor on'],
+  pcCursor: ['use virtual PC cursor off'],
+};
+
 /**
  * @param {string} lastMessage
  * @param {string[]} desiredResponses
@@ -192,12 +197,55 @@ export class DriverTestRunner {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
 
+        // Two "setSettings" commands are needed to safely bring JAWS to a
+        // known state. This is because JAWS does not vocalize a response to
+        // set a setting which is already in effect. This presents a problem
+        // for the harness because it must consume all state-related
+        // vocalizations so that they do not leak into the output collected by
+        // whatever test is to follow. By setting the *undesired* value
+        // followed by the desired value, the harness can deterministically
+        // consume all such vocalizations.
+        //
+        // When JAWS supports the "getSettings" command, this logic should be
+        // simplified to first check the current state and only issue a
+        // "setSettings" command (for the desired value) when necessary.
+        //
+        // https://github.com/w3c/aria-at-automation-harness/issues/91
         await this.atDriver._send({
           method: 'settings.setSettings',
           params: {
-            settings: [{ name: 'cursor', value }],
+            settings: [
+              {
+                name: 'cursor',
+                value: ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE.get(
+                  setting == 'virtualCursor' ? 'pcCursor' : 'virtualCursor'
+                ),
+              },
+            ],
           },
         });
+
+        let unknownCollected = '';
+        const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
+          this.atDriver._send({
+            method: 'settings.setSettings',
+            params: {
+              settings: [{ name: 'cursor', value }],
+            },
+          })
+        );
+        while (speechResponse.length) {
+          const lastMessage = speechResponse.shift().trim();
+          if (isDesiredSettingResponse(lastMessage, JAWSSettingResponses[setting])) {
+            return;
+          }
+
+          if (unknownCollected.length) unknownCollected += '\n';
+          unknownCollected += lastMessage;
+        }
+        throw new Error(
+          `Unable to apply setting. Expected one of "${JAWSSettingResponses[setting]}" got "${unknownCollected}"`
+        );
       }
     } else if (atName == 'VoiceOver') {
       for (const setting of settingsArray) {
