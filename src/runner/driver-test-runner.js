@@ -197,34 +197,18 @@ export class DriverTestRunner {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
 
-        // Two "setSettings" commands are needed to safely bring JAWS to a
-        // known state. This is because JAWS does not vocalize a response to
-        // set a setting which is already in effect. This presents a problem
-        // for the harness because it must consume all state-related
-        // vocalizations so that they do not leak into the output collected by
-        // whatever test is to follow. By setting the *undesired* value
-        // followed by the desired value, the harness can deterministically
-        // consume all such vocalizations.
-        //
-        // When JAWS supports the "getSettings" command, this logic should be
-        // simplified to first check the current state and only issue a
-        // "setSettings" command (for the desired value) when necessary.
-        //
-        // https://github.com/w3c/aria-at-automation-harness/issues/91
-        await this.atDriver._send({
-          method: 'settings.setSettings',
+        // check if we are already in the correct mode
+        const {
+          result: { settings },
+        } = await this.atDriver._send({
+          method: 'settings.getSettings',
           params: {
-            settings: [
-              {
-                name: 'cursor',
-                value: ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE.get(
-                  setting == 'virtualCursor' ? 'pcCursor' : 'virtualCursor'
-                ),
-              },
-            ],
+            settings: [{ name: 'cursor' }],
           },
         });
+        if (settings.some(s => s.name == 'cursor' && s.value === value)) return;
 
+        // set the setting and collect the mode switch utterance if we are in the incorrect mode.
         let unknownCollected = '';
         const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
           this.atDriver._send({
@@ -395,15 +379,8 @@ export class DriverTestRunner {
    */
   async _collectSpeech(debounceDelay, asyncOperation) {
     let spoken = [];
-    const isJAWS = (await this.collectedCapabilities).atName == 'JAWS';
-
     const speechJob = startJob(async signal => {
-      for await (let speech of signal.cancelable(this.atDriver.speeches())) {
-        if (isJAWS) {
-          // temporary workaround to double-escaped string literals.
-          // see https://github.com/w3c/aria-at-automation-harness/issues/90
-          speech = JSON.parse(`"${speech}"`);
-        }
+      for await (const speech of signal.cancelable(this.atDriver.speeches())) {
         spoken.push(speech);
         this.log(RunnerMessage.SPEECH_EVENT, { spokenText: speech });
       }
