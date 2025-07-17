@@ -198,17 +198,15 @@ export class DriverTestRunner {
         }
 
         // check if we are already in the correct mode
-        const getSettingsResponse = await this.atDriver._send({
+        const {
+          result: { settings },
+        } = await this.atDriver._send({
           method: 'settings.getSettings',
           params: {
             settings: [{ name: 'cursor' }],
           },
         });
-        console.log(`Settings Response ${getSettingsResponse}`);
-        const {
-          result: { settings },
-        } = getSettingsResponse;
-        if (settings.any(s => s.name == 'cursor' && s.value === value)) return;
+        if (settings.some(s => s.name == 'cursor' && s.value === value)) return;
 
         // set the setting and collect the mode switch utterance if we are in the incorrect mode.
         let unknownCollected = '';
