@@ -197,34 +197,20 @@ export class DriverTestRunner {
           throw new Error(`Unknown command setting for JAWS "${setting}"`);
         }
 
-        // Two "setSettings" commands are needed to safely bring JAWS to a
-        // known state. This is because JAWS does not vocalize a response to
-        // set a setting which is already in effect. This presents a problem
-        // for the harness because it must consume all state-related
-        // vocalizations so that they do not leak into the output collected by
-        // whatever test is to follow. By setting the *undesired* value
-        // followed by the desired value, the harness can deterministically
-        // consume all such vocalizations.
-        //
-        // When JAWS supports the "getSettings" command, this logic should be
-        // simplified to first check the current state and only issue a
-        // "setSettings" command (for the desired value) when necessary.
-        //
-        // https://github.com/w3c/aria-at-automation-harness/issues/91
-        await this.atDriver._send({
-          method: 'settings.setSettings',
+        // check if we are already in the correct mode
+        const getSettingsResponse = await this.atDriver._send({
+          method: 'settings.getSettings',
           params: {
-            settings: [
-              {
-                name: 'cursor',
-                value: ARIA_AT_TO_JAWS_CURSOR_SETTING_VALUE.get(
-                  setting == 'virtualCursor' ? 'pcCursor' : 'virtualCursor'
-                ),
-              },
-            ],
+            settings: [{ name: 'cursor' }],
           },
         });
+        console.log(`Settings Response ${getSettingsResponse}`);
+        const {
+          result: { settings },
+        } = getSettingsResponse;
+        if (settings.any(s => s.name == 'cursor' && s.value === value)) return;
 
+        // set the setting and collect the mode switch utterance if we are in the incorrect mode.
         let unknownCollected = '';
         const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
           this.atDriver._send({
