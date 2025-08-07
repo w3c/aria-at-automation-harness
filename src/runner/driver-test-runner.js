@@ -156,10 +156,9 @@ export class DriverTestRunner {
 
     if (atName == 'NVDA') {
       // disable the "beeps" when switching focus/browse mode, forces it to speak the mode after switching
-      await this.atDriver._send({
-        method: 'nvda:settings.setSettings',
-        params: { settings: [{ name: 'virtualBuffers.passThroughAudioIndication', value: false }] },
-      });
+      await this.atDriver.setSettings([
+        { name: 'virtualBuffers.passThroughAudioIndication', value: false },
+      ]);
 
       try {
         for (const setting of settingsArray) {
@@ -182,12 +181,9 @@ export class DriverTestRunner {
         }
       } finally {
         // turn the "beeps" back on so mode switches won't be spoken (default setting)
-        await this.atDriver._send({
-          method: 'nvda:settings.setSettings',
-          params: {
-            settings: [{ name: 'virtualBuffers.passThroughAudioIndication', value: true }],
-          },
-        });
+        await this.atDriver.setSettings([
+          { name: 'virtualBuffers.passThroughAudioIndication', value: true },
+        ]);
       }
     } else if (atName == 'JAWS') {
       for (const setting of settingsArray) {
@@ -211,12 +207,7 @@ export class DriverTestRunner {
         // set the setting and collect the mode switch utterance if we are in the incorrect mode.
         let unknownCollected = '';
         const speechResponse = await this._collectSpeech(this.timesOption.modeSwitch, () =>
-          this.atDriver._send({
-            method: 'settings.setSettings',
-            params: {
-              settings: [{ name: 'cursor', value }],
-            },
-          })
+          this.atDriver.setSettings([{ name: 'cursor', value }])
         );
         while (speechResponse.length) {
           const lastMessage = speechResponse.shift().trim();
