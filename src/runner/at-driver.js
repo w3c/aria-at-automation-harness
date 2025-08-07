@@ -32,8 +32,8 @@ export async function createATDriver({
   const socket = new ws(url);
   const driver = new ATDriver({ socket, log });
   await driver.ready;
-  const settings = globalSettings[this._capabilities.atName];
-  if (settings) await this.setSettings(settings);
+  const settings = globalSettings[(await driver.getCapabilities()).atName];
+  if (settings) await driver.setSettings(settings);
   abortSignal.then(() => driver.quit());
   return driver;
 }
