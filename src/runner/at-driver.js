@@ -4,7 +4,7 @@ import { iterateEmitter } from '../shared/iterate-emitter.js';
 import { RunnerMessage } from './messages.js';
 
 const globalSettings = {
-  jaws: [
+  JAWS: [
     { name: 'jcf:default:HTML:SayAllOnDocumentLoad', value: '0' },
     { name: 'jcf:default:options:TypingEcho', value: '0' },
     { name: 'jcf:default:options:DisplayStartupWizard', value: '0' },
