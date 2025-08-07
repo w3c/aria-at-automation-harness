@@ -36,13 +36,13 @@ export async function createATDriver({
   if (settings)
     await driver._send({
       method: 'settings.getSettings',
-      params: { settings: settings.map(({ name }) => name) },
+      params: { settings: settings.map(({ name }) => ({ name })) },
     });
   if (settings) await driver.setSettings(settings);
   if (settings)
     await driver._send({
       method: 'settings.getSettings',
-      params: { settings: settings.map(({ name }) => name) },
+      params: { settings: settings.map(({ name }) => ({ name })) },
     });
   abortSignal.then(() => driver.quit());
   return driver;
