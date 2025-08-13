@@ -3,6 +3,14 @@ import ws from 'ws';
 import { iterateEmitter } from '../shared/iterate-emitter.js';
 import { RunnerMessage } from './messages.js';
 
+const globalSettings = {
+  JAWS: [
+    { name: 'jcf:default:HTML:SayAllOnDocumentLoad', value: '0' },
+    { name: 'jcf:default:options:TypingEcho', value: '0' },
+    { name: 'jcf:default:options:DisplayStartupWizard', value: '0' },
+  ],
+};
+
 /**
  * @param {object} options
  * @param {object} [options.url]
@@ -24,6 +32,8 @@ export async function createATDriver({
   const socket = new ws(url);
   const driver = new ATDriver({ socket, log });
   await driver.ready;
+  const settings = globalSettings[(await driver.getCapabilities()).atName];
+  if (settings) await driver.setSettings(settings);
   abortSignal.then(() => driver.quit());
   return driver;
 }
@@ -64,6 +74,9 @@ export class ATDriver {
     this._nextId = 0;
   }
 
+  /**
+   * @returns {Promise<{atName: string, atVersion:string, platformName: string}>}
+   */
   async getCapabilities() {
     await this.ready;
     return this._capabilities;
@@ -127,6 +140,16 @@ export class ATDriver {
         yield message.params.data;
       }
     }
+  }
+
+  /**
+   *
+   * @param {[{name: string, value: string | boolean}]} settings
+   */
+  async setSettings(settings) {
+    const { atName } = await this.getCapabilities();
+    const method = atName == 'nvda' ? 'nvda:settings.setSettings' : 'settings.setSettings';
+    return this._send({ method, params: { settings } });
   }
 }
 
