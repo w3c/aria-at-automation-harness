@@ -157,11 +157,9 @@ export class ATDriver {
    * @param {[{name: string, value: string | boolean}]} settings
    */
   async setSettings(settings) {
-    if (settings?.length) {
-      const { atName } = await this.getCapabilities();
-      const method = atName == 'nvda' ? 'nvda:settings.setSettings' : 'settings.setSettings';
-      return this._send({ method, params: { settings } });
-    }
+    const { atName } = await this.getCapabilities();
+    const method = atName == 'nvda' ? 'nvda:settings.setSettings' : 'settings.setSettings';
+    return this._send({ method, params: { settings } });
   }
 }
 
