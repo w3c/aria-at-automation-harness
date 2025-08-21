@@ -2,6 +2,7 @@
  * @module shared
  */
 
+let emitterCount = 0;
 /**
  * @param {import("events").EventEmitter} emitter
  * @param {string} nextEvent

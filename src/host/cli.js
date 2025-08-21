@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers';
 
 import * as readPlanCommand from './cli-read-plan.js';
 import * as runPlanCommand from './cli-run-plan.js';
+import * as manualTestCommand from './cli-manual-test.js';
 
 /**
  * @param {object} options
@@ -26,7 +27,8 @@ export async function createParser({ signals, send, stdin, stdout, stderr }) {
       argv.stderr = stderr;
     })
     .command(runPlanCommand)
-    .command(readPlanCommand);
+    .command(readPlanCommand)
+    .command(manualTestCommand);
 }
 
 /**
