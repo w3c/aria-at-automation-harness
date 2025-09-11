@@ -184,7 +184,7 @@ function mainLoggerMiddleware(argv) {
 
   logger.emitter.on('message', ({ data: { type }, text }) => {
     if (verbosity.includes(type)) {
-      stderr.write(`${text}\n`);
+      stderr.write(`[${new Date().toISOString()}] ${text}\n`);
     }
   });
 }
