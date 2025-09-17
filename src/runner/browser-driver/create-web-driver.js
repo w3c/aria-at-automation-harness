@@ -3,9 +3,7 @@ import { until, By } from 'selenium-webdriver';
 
 /** @returns {Promise<AriaATCIRunner.BrowserDriver>} */
 export default async (browser, serverUrl) => {
-  let useBrowser = browser;
-  if (browser == 'edge') useBrowser = 'MicrosoftEdge';
-  const driver = await new Builder().forBrowser(useBrowser).usingServer(serverUrl).build();
+  const driver = await new Builder().forBrowser(browser).usingServer(serverUrl).build();
 
   return {
     async navigate(url) {
