@@ -7,13 +7,12 @@ import { Readable } from 'stream';
 import fetch, { Response } from 'node-fetch';
 
 import yargs from 'yargs';
-import { RunnerMessage } from '../runner/messages.js';
 
 import { hostMain } from './main.js';
-import { HostMessage, createHostLogger } from './messages.js';
-import { plansFrom } from './plan-from.js';
+import { HostMessage } from './messages.js';
 import { HostServer } from './server.js';
 import { timesOptionsConfig } from '../shared/times-option.js';
+import * as cliMiddleware from './cli-middleware/index.js';
 
 export const command = 'run-plan [plan-files..]';
 
@@ -111,42 +110,16 @@ export const builder = (args = yargs) =>
       ...timesOptionsConfig,
     })
     .showHidden('show-hidden')
-    .middleware(verboseMiddleware)
+    .middleware(cliMiddleware.verbose)
     .middleware(mainMiddleware);
 
 export const handler = argv => hostMain(argv);
 
-async function verboseMiddleware(argv) {
-  const { debug, quiet, verbose } = argv;
-
-  let verbosity;
-  if (debug) {
-    verbosity = Object.values({ ...HostMessage, ...RunnerMessage });
-  } else if (quiet) {
-    verbosity = [];
-  } else {
-    verbosity = Array.isArray(verbose)
-      ? verbose
-      : [
-          HostMessage.START,
-          HostMessage.UNCAUGHT_ERROR,
-          HostMessage.WILL_STOP,
-          HostMessage.SERVER_LISTENING,
-          HostMessage.ADD_SERVER_DIRECTORY,
-          HostMessage.REMOVE_SERVER_DIRECTORY,
-          HostMessage.UNCAUGHT_ERROR,
-          RunnerMessage.OPEN_PAGE,
-        ];
-  }
-
-  argv.verbosity = verbosity;
-}
-
 function mainMiddleware(argv) {
   argv.planWorkingdir = path.resolve(argv.planWorkingdir);
   mainFetchMiddleware(argv);
-  mainLoggerMiddleware(argv);
-  mainTestPlanMiddleware(argv);
+  cliMiddleware.mainLogger(argv);
+  cliMiddleware.testPlan(argv);
   mainServerMiddleware(argv);
   mainResultMiddleware(argv);
 }
@@ -173,36 +146,6 @@ function mainFetchMiddleware(argv) {
         });
     }
   }
-}
-
-function mainLoggerMiddleware(argv) {
-  const { stderr, verbosity } = argv;
-
-  const logger = createHostLogger();
-  argv.log = logger.log;
-  argv.logger = logger;
-
-  logger.emitter.on('message', ({ data: { type }, text }) => {
-    if (verbosity.includes(type)) {
-      stderr.write(`${text}\n`);
-    }
-  });
-}
-
-function mainTestPlanMiddleware(argv) {
-  const { log, testsMatch: testPattern, planWorkingdir, planFiles } = argv;
-
-  if (!planFiles || planFiles.length === 0) {
-    throw new Error(`'plan-files' argument can not be empty`);
-  }
-
-  const planInput = {
-    workingdir: planWorkingdir,
-    files: planFiles,
-  };
-  const planOptions = { log, testPattern };
-
-  argv.plans = plansFrom(planInput, planOptions);
 }
 
 function mainServerMiddleware(argv) {

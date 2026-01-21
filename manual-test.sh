@@ -1,0 +1,2 @@
+#!/bin/bash
+/System/Library/CoreServices/VoiceOver.app/Contents/MacOS/VoiceOverStarter && sleep 5 && node aria-at-automation-harness/bin/host.js manual-test --plan-workingdir aria-at/build/tests/rating-radio-group --at-driver-url ws://127.0.0.1:3031/session --reference-hostname 127.0.0.1 --web-driver-browser safari '{reference/**,test-02*-voiceover_macos.*}' --callback-url https://eor0siynbfklco9.m.pipedream.net --quiet
